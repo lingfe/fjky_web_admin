@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增医院</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../css/hospital.css">
+</head>
+
+<body>
+    <form class="layui-form" action="">
+        <div class="layui-form-item lay_item">
+            <label class="layui-form-label label_title">医院名称：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="hos_name" name="hos_name" lay-verify="required" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+            <label class="layui-form-label label_title">医院等级：</label>
+            <div class="layui-input-inline lay_line">
+                <select id="hos_level" name="hos_level" lay-verify="required" class="select_wd120" style="width: 100px;">
+                    <option> </option>
+                    <option value="三甲">三甲</option>
+                    <option value="三乙">三乙</option>
+                    <option value="三丙">三丙</option>
+                    <option value="二甲">二甲</option>
+                    <option value="二乙">二乙</option>
+                    <option value="二丙">二丙</option>
+                    <option value="一甲">一甲</option>
+                    <option value="一乙">一乙</option>
+                    <option value="一丙">一丙</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item lay_item" style="margin-top:0px;border-top: 0px;">
+            <label class="layui-form-label label_title">联系电话：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="hos_phone" name="hos_phone" lay-verify="required|number" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+            <label class="layui-form-label label_title">医院地址：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="hos_address" lay-verify="required" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-inline" style="margin-top: 30px">
+            <label class="title">医院简介:</label>
+            <div class="layui-input-block  lay_block">
+                <textarea id="hos_introduce" name="hos_introduce" placeholder="请输入医院简介" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-inline" style="margin-top: 30px">
+            <label class="title">挂号规则:</label>
+            <div class="layui-input-block lay_block">
+                <textarea id="hos_rules" name="hos_rules" placeholder="请输入医院挂号规则" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-row" style="margin-top: 40px;">
+            <div class="layui-col-xs-offset9">
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="margin-left: 166px;">
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        //加载layui指定组件
+
+        layui.use(['form', 'table', 'jquery', 'laydate'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/app/hospital/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "hos_name": $("#hos_name").val(), // 医院名称
+                        "hos_level": $("#hos_level").val(), // 医院等级
+                        "hos_phone": $("#hos_phone").val(), // 医院电话
+                        "hos_address": $("#hos_address").val(), // 医院地址
+                        "hos_introduce": $("#hos_introduce").val(), // 医院简介
+                        "hos_rules": $("#hos_rules").val(), // 挂号规则
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            })
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

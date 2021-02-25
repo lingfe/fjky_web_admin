@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 引入 echarts.js -->
+
+	</head>
+
+	<body>
+
+		<div id="table1" style="height: 376px;width: 550px;"></div>
+
+		<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+		<script src="../../../../../js/jquery.min.js"></script>
+		<script src="../../../../bcxt/login/login.js"></script>
+		<script type="text/javascript">
+			var result = null;
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/institution/insAgeRangeProportionData.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					result = data.data.data;
+					console.log(data.data.data);
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+			console.log('result:', result);
+		</script>
+		<script type="text/javascript">
+			var uploadedDataURL = '../../../../../images/gnrk_img/title.png';
+			var my_echarts = echarts.init(document.getElementById('table1'));
+			var trafficWay = [result];
+
+			let title = '总人数';
+			let bgColor = '#fff';
+			let fontColor = "#333";
+			let titleColor = '#666';
+			let scale = 1;
+			let echartData = result;
+			let unit = '人';
+			let formatNumber = function(num) {
+				let reg = /(?=(\B)(\d{3})+$)/g;
+				return num.toString().replace(reg, ',');
+			}
+			let total = echartData.reduce((a, b) => {
+				return a + b.value * 1
+			}, 0);
+			option = {
+				title: [{
+					text: '{name|' + title + '}\n{val|' + formatNumber(total) + '}',
+					top: '43%',
+					x: '31%',
+					textStyle: {
+						rich: {
+							name: {
+								fontSize: 14,
+								fontWeight: 'normal',
+								color: '#666666',
+								padding: [10, 0]
+							},
+							val: {
+								fontSize: 32,
+								fontWeight: 'bold',
+								color: '#333333',
+								padding: [0, -3]
+							}
+						}
+					}
+				}, {
+					text: '已登记老人年龄比例分布图',
+					textStyle: {
+						fontSize: 20,
+						fontWeight: 'normal',
+						color: '#2C55FF',
+					},
+					y: '12px',
+					x: '40px'
+				}],
+				graphic: [{
+					z: 4,
+					type: 'image',
+					id: 'logo',
+					left: '6%',
+					top: '4.2%',
+					z: -10,
+					bounding: 'raw',
+					rotation: 0, //旋转
+					origin: [64.5, 32.5], //中心点
+					scale: [1.0, 1.0], //缩放
+					style: {
+						image: uploadedDataURL,
+						// width: 129,
+						// height: 65,
+						opacity: 1
+					}
+				}],
+				backgroundColor: bgColor,
+				color: ['#FFC674', '#6CCEFF', '#8AA1FF', '#E1ACFF', '#FF7575', '#dc143c'],
+				tooltip: {
+					trigger: 'item'
+				},
+				
+				legend: {
+					orient: 'vertical',
+					icon: 'rect',
+					x: '70%',
+					y: 'center',
+					itemWidth: 14 * scale,
+					itemHeight: 14 * scale,
+					align: 'left',
+					textStyle: {
+						rich: {
+							name: {
+								fontSize: 12 * scale
+							},
+							value: {
+								fontSize: 16 * scale,
+								padding: [0, 5, 0, 15]
+							},
+							unit: {
+								fontSize: 12 * scale
+							}
+						}
+					},
+					formatter: function(name) {
+						let res = echartData.filter(v => v.name === name);
+						res = res[0] || {};
+						let unit = res.unit || '';
+						return '{name|' + name + '}  {value|' + res.value + ' 人}{unit|' + unit + '}'
+					}
+					// data: legendName
+				},
+				series: [{
+					type: 'pie',
+					radius: ['40%', '60%'],
+					center: ['35%', '55%'],
+					data: echartData,
+					labelLine: {
+						normal: {
+							length: 20,
+							length2: 20
+						}
+					},
+					label: {
+						normal: {
+							formatter: params => {
+								return(
+									"{value|" +
+									params.value +
+									"}"
+								);
+							},
+							rich: {
+								value: {
+									fontSize: 16 * scale,
+									lineHeight: 16 * scale
+								},
+								unit: {
+									fontSize: 12 * scale,
+									lineHeight: 12 * scale,
+									padding: [0, 0, 2 * scale, 0]
+								}
+							}
+						}
+					},
+				}]
+			};
+			my_echarts.setOption(option);
+		</script>
+	</body>
+
+</html>

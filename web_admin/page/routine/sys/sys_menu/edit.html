@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>编辑菜单</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<form class="layui-form" style="width:96%;margin:0;margin-top:20px;">
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label for="" class="layui-form-label">菜单图标</label>
+				<div class="layui-input-block">
+					<input type="text" id="iconPicker" name="icon" lay-filter="iconPicker" class="hide">
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">状态</label>
+				<div class="layui-input-block" id="state">
+					<input type="radio" name="state" title="正常" value="0"   lay-filter="iconPicker" class="layui-input">
+					<input type="radio" name="state" title="不可分配" value="1" lay-filter="iconPicker" class="layui-input">
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+						<!-- uuid标识 -->
+						<input id="uuid" type="text" hidden='true'/>
+						<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存编辑</button>
+					</div>
+				</div>
+			</div>
+		</form>
+		<!-- 表单 end -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//定义layui指定组件
+			layui.use(['iconPickerFa', 'form', 'layer'], function () {
+				//定义layui组件变量
+				var iconPickerFa = layui.iconPickerFa;
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+				
+				//请求通行证
+				var token = Storage.get("token");
+
+				//加载图标
+				iconPickerFa.render({
+					// 选择器，推荐使用input
+					elem: '#iconPicker',
+					// fa 图标接口
+					url: "../../../../lib/font-awesome-4.7.0/less/variables.less",
+					// 是否开启搜索：true/false，默认true
+					search: true,
+					// 是否开启分页：true/false，默认true
+					page: true,
+					// 每页显示数量，默认12
+					limit: 12,
+					// 点击回调
+					click: function (data) {
+						console.log(data);
+						$("#iconPicker").val("fa "+data.icon);
+					},
+					// 渲染成功后的回调
+					success: function (d) {
+						console.log(d);
+					}
+				});
+
+				//监听提交
+				form.on('submit(saveBtn)', function (data) {
+					$.ajax({
+						url: '/sys_fkcy/menu/updateWhereId.action',
+						context: document.body, //{'Content-Type':'application/json;charset=utf8','token':Storage.get("token")}
+						headers: header,
+						type: "POST",
+						data: {
+							"uuid": $("#uuid").val(),
+							"icon": $("#iconPicker").val(),
+							"state": $("#state input:checked").val()
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function (data) {
+							if (data.state == 200) {
+								layer.msg(data.msg, {
+									icon: 6,//成功的表情
+									time: 1000 //1秒关闭（如果不配置，默认是3秒）
+								}, function () {
+									window.parent.location.reload();
+								});
+							} else {
+								layer.msg(data.msg, {
+									icon: 5,//失败的表情
+									time: 1000
+								});
+								return;
+							}
+						}
+					});
+					return false;
+				});
+
+			});
+			
+			//layui父窗体调用
+			function child(data) {
+				var $ = layui.$;
+				$("#iconPicker").val(data.icon);
+				$("#uuid").val(data.uuid);
+			}
+		</script>
+	</body>
+</html>

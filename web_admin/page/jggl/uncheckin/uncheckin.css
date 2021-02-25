@@ -1,0 +1,44 @@
+.inputTest {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    border: 1px solid #ECECEC;
+    border-radius: 4px;
+    margin-right: 10px;
+    width: 300px;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+.dengjiTest{
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+    color: #1594FF; 
+}
+.delTest{
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+    color: #FF290D;
+}
+.kehuguinfo_jzbl_lb{
+	height: 560px;
+	padding-top: 50px;
+	font-size: 18px;
+}
+.kehuguinfo_jzbl_lt{
+	padding-left: 90px;
+	font-size: 14px;
+	
+}

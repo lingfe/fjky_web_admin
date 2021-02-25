@@ -1,0 +1,239 @@
+<!--
+创建者:lingfe
+v1.0- 角色列表
+v1.1.0- 
+	lingfe-2021.01.20:
+
+字符说明: C=创建/A=添加/D=删除/U=修改/
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>角色管理</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 内容 start -->
+		<div class="layuimini-container">
+			<div class="layuimini-main">
+				<!-- tab数据列表 -->
+				<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+			</div>
+		</div>
+		<!-- 内容 end -->
+		
+		<!-- 表格头操作 -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon-add-1"></i>添加角色</button>
+				<button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>批量删除</button>
+			</div>
+		</script>
+		
+		<!-- 操作列  -->
+		<script type="text/html" id="currentTableBar">
+			<a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+			<a class="layui-btn layui-btn-xs layui-btn-xs data-count-add" lay-event="auth"><i class="layui-icon layui-icon-auz"></i>授权</a>
+		</script>
+		
+		<!-- 默认角色标记 -->
+		<script type="text/html" id="id_role_name">
+			{{#if (d.yw_id.indexOf(d.id)!=-1 ) { }}
+				<div class='layui-btn layui-btn-xs layui-btn-danger'>默认</div>
+				<div class='layui-btn layui-btn-xs'>{{d.role_name}}</div>
+			{{# }else { }}
+				{{ d.role_name }}
+			{{# } }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'table'], function () {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					form = layui.form,
+					table = layui.table;
+				
+				//数据列表
+				table.render({
+					elem: '#currentTableId',
+					url: '/sys_fkcy/role/getPage', //数据接口
+					toolbar: '#toolbarDemo',
+					cellMinWidth : 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+					headers:header, //如果无需自定义请求参数，可不加该参数
+					cols: [[
+						{ type: "checkbox" },
+						{ field: 'id', width: 120, title: '角色ID标识', align: "center", },
+						{ field: 'role_name', minWidth: 150, title: '角色名称', align: "left",toolbar:'#id_role_name' },
+						{ field: 'role_explain',  title: '角色描述', align: "left" },
+						{ title: '操作', minWidth: 150,width: 250, toolbar: '#currentTableBar', align: "center" }
+					]],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 //规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex',//当前页，默认page，
+						limitName: 'pageNum',//页容量，默认limit
+					},
+					parseData: function (res) {
+						return {
+							"code": res.state, //解析接口状态
+							"msg": res.msg, //解析提示文本
+							"count": res.data.numCount,
+							"data": res.data.data //解析数据列表
+						}
+					},
+					limits: [5,10, 15, 20, 25, 50, 100],
+					limit: 20,
+					size: 'lg',
+					page: true,
+					skin: 'rows'
+				});
+
+				//toolbar监听事件
+				table.on('toolbar(currentTableFilter)', function (obj) {
+					// 监听添加操作
+					if (obj.event === 'add') {  
+						var index = layer.open({
+							title: '添加角色',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['360px', '270px'],
+							content: './sys_role_add.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								//自适应弹框
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+					// 监听批量删除操作
+					} else if (obj.event === 'delete') {  
+						var checkStatus = table.checkStatus('currentTableId')
+							, data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认删除所选的信息吗?注意:该操作不可恢复!', { title: "批量删除提示", icon: 3 }, function (index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url: '/sys_fkcy/role/deleteWhereId.action?id=' + data[i].id,
+										type: 'post',
+										headers: header,
+										success: function (data) {
+											if (data.state == 200) {
+												layer.msg(data.msg, {
+													icon: 6,//成功的表情
+													time: 1000 //1秒关闭（如果不配置，默认是3秒）
+												}, function () {
+													obj.del();
+													layer.close;
+												});
+											} else {
+												layer.msg(data.msg, { icon: 5 });//失败的表情
+												return;
+											}
+										},
+									});
+								}
+							});
+						} else {
+							layer.msg("请先选择您要删除的数据", {
+								icon: 5
+							});//失败的表情
+							return;
+						}
+					}
+				});
+
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function (obj) {
+					console.log(obj)
+				});
+
+				//监听操作栏事件
+				table.on('tool(currentTableFilter)', function (obj) {
+					var data = obj.data;
+					//监听编辑操作
+					if (obj.event === 'edit') {
+						var index = layer.open({
+							title: '编辑角色',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['360px', 'auto'],
+							content: './sys_role_edit.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+								//自适应弹框
+								layer.iframeAuto(index);
+							}
+						});
+						return false;
+					//监听删除操作
+					} else if (obj.event === 'delete') {
+						layer.confirm('确认删除吗？', { title: "删除提示", icon: 3 }, function (index) {
+							$.ajax({
+								url: '/sys_fkcy/role/deleteWhereId.action?id=' + data.id,
+								type: 'post',
+								headers: header,
+								success: function (data) {
+									if (data.state != 200) {
+										layer.msg(data.msg, { icon: 5 });//失败的表情
+										return;
+									} else {
+										layer.msg(data.msg, {
+											icon: 6,//成功的表情
+											time: 1000 //1秒关闭（如果不配置，默认是3秒）
+										}, function () {
+											obj.del();
+										});
+									}
+								},
+								complete: function () {
+									layer.close(this.layerIndex);
+								},
+							});
+							layer.close(index);
+						});
+					//监听授权操作
+					} else if (obj.event === 'auth') {
+						var index = layer.open({
+							area: ['500px', '100%'],
+							title: '授权',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							content: './giveAuth.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							}
+						});
+						return false;
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增奖惩信息</title>
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css">
+
+</head>
+
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">员工名称：</label>
+                <div class="layui-input-inline">
+                    <input id="staff_name" type="text" lay-verify="required" name="staff_name" onclick="open_child()" lay-verify="required" placeholder="请选择人员" value="" class="layui-input"></div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">奖惩金额：</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="rap_money" lay-verify="required|number" name="rap_money" placeholder="请输入奖惩金额" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">奖惩类型：</label>
+                <div class="layui-input-inline">
+                    <select id="rap_type" name="rap_type" lay-verify="required" class="select_wd120">
+                        <option value="奖励" selected>奖励</option>
+                        <option value="惩罚">惩罚</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">奖惩原因：</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="rap_reason" lay-verify="required" name="rap_reason" placeholder="请输入奖惩原因" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">奖惩时间：</label>
+                <div class="layui-input-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="rap_datetime" lay-verify="required" placeholder="yyyy-MM-dd HH:mm:ss">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">操作人员：</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="rap_reason" name="rap_reason" disabled placeholder="当前账号" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-inline">
+            <label class="layui-form-label">备注：</label>
+            <div class="layui-input-block">
+                <textarea id="rap_remark" style="width: 515px;" name="rap_remark" placeholder="请输入备注信息" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 隐藏参数 -->
+        <input id="staff_id" type="text" style="display: none" readonly="" value=''>
+        <!-- 操作行 -->
+        <div class="layui-form-item" style="float:right;margin-top: 10px;">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">添加</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        //加载layui指定组件
+
+        layui.use(['form', 'table', 'jquery', 'laydate'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                laydate = layui.laydate;
+            table = layui.table;
+
+            //日期时间范围选择
+            laydate.render({
+                elem: '#rap_datetime',
+                type: 'datetime',
+                trigger: 'click',
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/rap/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "yw_id": $("#yw_id").val(), // 员工id                       
+                        "staff_id": $("#staff_id").val(), // 员工id
+                        "staff_name": $("#staff_name").val(), // 员工姓名
+                        "rap_money": $("#rap_money").val(), // 奖惩金额
+                        "rap_datetime": $("#rap_datetime").val(), // 奖惩时间
+                        "rap_type": $("#rap_type").val(), // 奖惩类型
+                        "rap_reason": $("#rap_reason").val(), // 奖惩原因
+                        "rap_remark": $("#rap_remark").val(), // 备注
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            })
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+        });
+        // 获取选择项目页面传来的值
+        function getDataFromSon(data) {
+            var $ = layui.$;
+            $("#staff_id").val(data.id);
+            $("#staff_name").val(data.ename);
+            $("#id_card").val(data.id_card);
+            $("#phone").val(data.phone);
+        }
+        // 人员选择框
+        function open_child() {
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '请选择人员',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './choosePer.html'
+                });
+
+            })
+        }
+    </script>
+</body>
+
+</html>

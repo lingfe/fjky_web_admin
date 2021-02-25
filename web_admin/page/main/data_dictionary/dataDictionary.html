@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>数据字典</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+
+    <!-- 内容 -->
+    <div class="layui-row layui-col-space15">
+
+        <!-- 数据字典树信息--left -->
+        <div class="layui-col-md3">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div id="dataDic" class="demo-tree-more" style="overflow:auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据字典信息--right -->
+        <div class="layui-col-md9">
+            <div class="layui-card" style="min-height: 200px;">
+                <div class="layui-card-header">数据字典
+                    <span id="key_cname"
+                        style="text-align: center;font-size: 16px;color: #FF5722;margin-left: 30%;"></span> </div>
+                <div class="layuimini-main" style="padding-bottom: 5px;">
+
+                    <!-- tab数据列表 -->
+                    <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+                    <!-- 获取id -->
+                    <input id="cant_id" type="text" style="display: none" readonly="" value=''>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 头部 start -->
+    <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon"></i>添加 </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>多项删除 </button>
+            </div>
+        </script>
+    <!-- 头部 end -->
+
+    <!-- 操作 start -->
+    <script type="text/html" id="currentTableBar">
+        <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    </script>
+    <!-- 操作 end -->
+
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js" charset="utf-8"></script>
+    <script>
+        
+        // 加载组件
+        layui.use(['form', 'table', 'tree', 'treetable'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var tree = layui.tree;
+            var treetable = layui.treetable;
+
+            //获取数据字典信息
+            getSelect();
+            function getSelect() {
+                $.ajax({
+                    url: '/sys_fkcy/dictionary/getAll.action',
+                    headers: header,
+                    type: 'post',
+                    success: function (res) {
+                        if (res.state == 401) {
+                            window.location.href = '../../bcxt/login/login.html';
+                        } else {
+                            rendertree(res.data);
+                        }
+                    },
+                    complete: function () {
+                        layer.close(this.layerIndex);
+                    },
+                });
+
+                // 获取树
+                var rendertree = function (data) {
+
+                    tree.render({
+                        elem: '#dataDic'
+                        , data: data
+                        , checkChirld: false
+                        , spreadable: false //设置是否全展开，默认不展开
+                        , showLine: true  //是否开启连接线
+                        , showCheckbox: false  //是否显示复选框
+                        , isJump: false //是否允许点击节点时弹出新窗口跳转
+                        , click: function (obj) {
+                            $.dataId = obj.data.id;  //获取当前点击的节点数据
+                            $("#key_cname").html("key名称：" + obj.data.title);
+                            var where = { pid: obj.data.id };
+                            reTable(where);
+                        }
+                    });
+                }
+            }
+            reTable();
+
+            //数据列表
+            function reTable(where) {
+                table.render({
+                    elem: '#currentTableId',
+                    url: '/sys_fkcy/dictionary/getPage.action', //数据接口
+                    toolbar: '#toolbarDemo',
+                    cellMinWidth: 135,
+                    headers: header,
+                    defaultToolbar: ['filter', 'exports', 'print', {
+                        title: '提示',
+                        layEvent: 'LAYTABLE_TIPS',
+                        icon: 'layui-icon-tips'
+                    }],
+                    where: where,
+                    cols: [[
+                        { type: "checkbox", width: 50 },
+                        { field: 'id', width: 135, title: 'id', align: "center", sort: true },
+                        { field: 'key_name', width: 150, align: "center", title: 'key中文名', sort: true },
+                        { field: 'key_cname', width: 150, title: 'key英文名', align: "center" },
+                        { field: 'pid', minWidth: 135, align: "center", title: '上级id', sort: true },
+                        { field: 'state', width: 80, title: '状态', align: "center" },
+                        { field: 'value', width: 180, title: '值', align: "center" },
+                        { title: '操作', minWidth: 160, toolbar: '#currentTableBar', align: "center", fixed: 'right' }
+                    ]],
+                    response: {
+                        statusName: 'code', //规定返回的状态码字段为code
+                        statusCode: 200 //规定成功的状态码味200
+                    },
+                    request: {
+                        pageName: 'pageIndex',//当前页，默认page，
+                        limitName: 'pageNum',//页容量，默认limit
+                    },
+                    parseData: function (res) {
+                        return {
+                            "code": res.state, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "count": res.data.numCount,
+                            "data": res.data.data //解析数据列表
+                        }
+                    },
+                    limits: [10, 15, 20, 25, 50, 100],
+                    limit: 15,
+                    page: true,
+                    skin: 'line'
+                });
+            }
+
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                var dataId = $.dataId;
+                if (obj.event === 'add') {  // 监听添加操作
+                    if (dataId != null) {
+                        var index = layer.open({
+                            title: '添加数据字典',
+                            type: 2,
+                            shade: 0.2,
+                            maxmin: true,
+                            shadeClose: true,
+                            area: ['500px', '400px'],
+                            content: './add.html',
+                            success: function (layero, index) {//弹出层打开后的回调函数
+                                var iframe = window['layui-layer-iframe' + index];
+                                iframe.child(dataId);
+                                layer.iframeAuto(index);
+                                layer.style(index, {
+                                    // 重新居中的样式
+                                    top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                                })
+                            }
+                        });
+                    }
+                    else {
+                        layer.msg("请先选择数据字典！", { icon: 5 });//失败的表情
+                        return;
+                    }
+                } else if (obj.event === 'delete') {  // 监听删除操作
+                    var checkStatus = table.checkStatus('currentTableId')
+                        , data = checkStatus.data;
+                    if (!data.length) {
+                        layer.msg('请选择要删除的项！！', {
+                            icon: 5,//成功的表情
+                            time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                        })
+                        return;
+                    }
+                    layer.confirm('确认删除所选的全部内容吗？注意:(本操作不可恢复!)', { title: "提示", icon: 3 }, function (index) {
+                        for (var i = 0; i < data.length; i++) {
+                            $.ajax({
+                                url: '/sys_fkcy/dictionary/deleteWhereId.action?id=' + data[i].id,
+                                type: 'post',
+                                headers: header,
+                                success: function (data) {
+                                    if (data.state != 200) {
+                                        layer.msg(data.msg, { icon: 5 });//失败的表情
+                                        return;
+                                    } else {
+                                        layer.msg(data.msg, {
+                                            icon: 6,//成功的表情
+                                            time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                        }, function () {
+                                            window.location.reload();
+                                        });
+                                    }
+                                },
+                                complete: function () {
+                                    layer.close(this.layerIndex);
+                                },
+                            });
+                        }
+                    });
+                }
+            });
+
+            //监听表格复选框选择
+            table.on('checkbox(currentTableFilter)', function (obj) {
+                console.log(obj)
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    // layer.alert('正在开发中!...');return false;
+                    var index = layer.open({
+                        title: '编辑数据字典',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['40%', '300px'],
+                        content: './edit.html',
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', { title: "提示", icon: 3 }, function (index) {
+                        obj.del();
+                        $.ajax({
+                            url: '/sys_fkcy/dictionary/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state != 200) {
+                                    layer.msg(data.msg, { icon: 5 });//失败的表情
+                                    return;
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 6,//成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                        // location.reload();
+                                    });
+                                }
+                            },
+                            complete: function () {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

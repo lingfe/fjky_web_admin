@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>床位设置</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+</head>
+<style>
+    img {
+        display: inline-block;
+    }
+    
+    .check {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .check_btn {
+        width: 90px;
+        height: 25px;
+        border-radius: 3px;
+        color: #1594FF;
+        border-color: #1594FF!important;
+        line-height: 25px;
+    }
+    
+    .check_info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-wrap: nowrap;
+        padding-left: 10px;
+    }
+    
+    .check_info div {
+        height: 31.5px;
+        font-size: 12px;
+    }
+    /* 瀑布流布局 */
+    
+    .box {
+        height: auto;
+        margin-bottom: 15px;
+        break-inside: avoid;
+        /* -moz-page-break-inside: avoid; */
+        -webkit-column-break-inside: avoid;
+    }
+    
+    .box-wrapper {
+        -moz-column-count: 3;
+        /* Firefox */
+        -webkit-column-count: 3;
+        /* Safari 和 Chrome */
+        column-count: 3;
+        -moz-column-gap: 1em;
+        -webkit-column-gap: 1em;
+        column-gap: 1em;
+    }
+    
+    .layui-this {
+        color: #ffffff!important;
+        background-color: #1E9FFF!important;
+    }
+    
+    .room {
+        text-align: center;
+        line-height: 40px;
+        background-color: #e6e6e6;
+    }
+    
+    fieldset {
+        border: 0px!important;
+        margin: 0px!important;
+    }
+    
+    fieldset legend {
+        margin-left: -25px!important;
+        font-size: 16px!important;
+        color: #9D9D9D;
+        margin-top: 5px;
+    }
+    
+    .row {
+        display: inline-block!important;
+    }
+    
+    .bor {
+        height: 170px;
+        border-bottom: 1px solid #e6e6e6;
+    }
+    
+    .bor:nth-child(2n+1) {
+        border-right: 1px solid #e6e6e6;
+    }
+</style>
+
+<body>
+    <!-- 内容 start -->
+    <div class="layuimini-container" style="border:none;">
+        <div class="layuimini-main">
+            <!-- 楼栋信息 树 -->
+            <div class="layui-col-md2" style="overflow: scroll;margin-top: 10px;">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div id="bedAll" class="demo-tree-more"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 楼栋信息  -->
+            <div class="layui-tab layui-tab-card layui-col-md10" id="bed_div"></div>
+        </div>
+    </div>
+    <!-- 内容 end -->
+
+    <!-- 遍历床位 -->
+    <script id="bed_data" type="text/html">
+        <!-- 楼栋选项卡 end -->
+        <ul class="layui-tab-title">
+            {{# layui.each(d.bed_list, function(index, item){ }}
+            <li lay-id="{{item.id}}" class="{{ index == 0?'layui-this':''}}">{{item.floor_tung_name}}</li>
+            {{# }); }}
+        </ul>
+        <!-- 楼栋选项卡 end -->
+
+        <!-- 楼栋内容 start -->
+        <div class="layui-tab-content">
+            {{# layui.each(d.bed_list, function(index, item){ }}
+            <!-- 楼栋内容元素 start -->
+            <div class="layui-tab-item {{ index == 0?'layui-show':''}}">
+                <div class="layui-tab title">{{item.data_tonji}}</div>
+                <!-- 层 start -->
+                <div class="layui-tab" lay-filter="demo2">
+                    <!-- 层选项卡 start -->
+                    <ul class="layui-tab-title">
+                        {{# layui.each(item.cheng_list, function(index, item2){ }}
+                        <li lay-id="{{item2.cheng}}" class="{{ index == 0?'layui-this':''}}">{{item2.floor_layer}}</li>
+                        {{# }); }}
+                    </ul>
+                    <!-- 层选项卡 end -->
+
+                    <!-- 层内容 start -->
+                    <div class="layui-tab-content" style="padding-bottom:30px;">
+                        {{# layui.each(item.cheng_list, function(index, item2){ }}
+                        <!-- 层内容元素 start -->
+                        <div class="layui-tab-item {{ index == 0?'layui-show':''}}">
+                            <div class="layui-fluid" style="margin-top:20px">
+                                <div class="box-wrapper">
+                                    {{# layui.each(item2.jian_list, function(index, item3){ }}
+                                    <!-- 间 start -->
+                                    <div class="box {{ index == 0?'mg_to':''}}">
+                                        <!-- 床位号 start -->
+                                        <div class="layui-row " style="border:1px solid #DCDCDC;">
+                                            {{# layui.each(item3.cwh_list, function(index4, item4){ }}
+                                            <!-- 床位号内容 start -->
+                                            <div class="layui-col-md6 bor">
+                                                <!-- 床位号内容元素 start -->
+                                                {{# if(index4 % 2 != 0){ }}
+                                                <fieldset class="layui-elem-field layui-field-title" style="padding:20px;border-left:1px solid #999;">
+                                                    {{# }else{ }}
+                                                    <fieldset class="layui-elem-field layui-field-title" style="padding:20px;">
+                                                        {{# } }}
+                                                        <!-- item4.bed_number -->
+                                                        <legend>{{index4+1}}号床</legend>
+                                                        {{# if(item4.ess_info !=null && item4.ess_info !=undefined){ }}
+                                                        <!-- 块(已入住) start -->
+                                                        <div class="layui-col-md12 ">
+                                                            {{# if(item4.ess_info.img !=null && item4.ess_info.img !=undefined){ }}
+                                                            <img class="layui-col-md6" alt="图片加载失败!" onclick='edit({{JSON.stringify(item4.ess_info)}})' height="90px" src="{{ item4.ess_info.img }}" /> {{# }else{ }}
+                                                            <img class="layui-col-md6" onclick='edit({{JSON.stringify(item4.ess_info)}})' height="90px" src="http://chuantu.xyz/t6/741/1610006104x1033348159.png" /> {{# } }}
+                                                            <div class="layui-col-md6 layui-row check_info">
+                                                                <div class="layui-col-md12">{{item4.ess_info.full_name}}</div>
+                                                                <div class="layui-col-md12">{{item4.ess_info.age}}</div>
+                                                                <div class="layui-col-md12">{{item4.ess_info.phone}}</div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 块(已入住) end -->
+                                                        {{# }else{ }}
+                                                        <!-- 块 start -->
+                                                        <div class="layui-col-md12 check">
+                                                            <!-- 头像 -->
+                                                            <img class="layui-col-md7" height="70px" src="https://gd-filems.dancf.com/mps/mcm79j/mcm79j/90991b20-d295-4edf-9c7d-112dc727e1fa.png">
+                                                            <!-- 操作 start -->
+                                                            <div class="layui-col-md8" style="text-align:center">
+                                                                <div class="layui-inline">
+                                                                    <a href="javascript:;" class="layui-btn layui-btn-primary check_btn" onclick="open_child()">入住登记</a>
+                                                                </div>
+                                                            </div>
+                                                            <!-- 操作 end -->
+                                                        </div>
+                                                        <!-- 块 end -->
+                                                        {{# } }}
+                                                    </fieldset>
+                                                    <!-- 床位号内容元素 end -->
+                                            </div>
+                                            <!-- 床位号内容 end -->
+                                            {{# }); }}
+                                            <div class="layui-col-md12 room">{{item3.room_number}}</div>
+                                        </div>
+                                        <!-- 床位号 end -->
+                                    </div>
+                                    <!-- 间 end -->
+                                    {{# }); }}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 层内容元素 end -->
+                        {{# }); }}
+                    </div>
+                    <!-- 层内容 end -->
+                </div>
+                <!-- 层 end -->
+            </div>
+            <!-- 楼栋内容元素 end -->
+            {{# }); }}
+        </div>
+        <!-- 楼栋内容 end -->
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui组件
+        layui.use(['element', 'laytpl', "tree", 'treetable', ], function() {
+            var $ = layui.jquery;
+            var element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+            var laytpl = layui.laytpl;
+            var tree = layui.tree;
+            var treetable = layui.treetable;
+
+            //得到床位信息-树结构
+            getData1();
+
+            function getData1() {
+                // // 渲染表格
+                $.ajax({
+                    url: '/sys_fkcy/bed_info/getAll.action',
+                    headers: header,
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.state == 401) {
+                            window.location.href = '../../bcxt/login/login.html';
+                        } else {
+                            renderTable(res.data);
+                        }
+
+                    }
+                });
+
+                // 获取树
+                var renderTable = function(data) {
+                    tree.render({
+                        elem: '#bedAll',
+                        text: {
+                            defaultNodeName: '未命名' //节点默认名称
+                                ,
+                            none: '无数据' //数据为空时的提示文本
+                        },
+                        data: data,
+                        isopen: true //加载完毕后的展开状态，默认值：true
+                            ,
+                        checkChirld: false,
+                        showLine: true //是否开启连接线
+                            ,
+                        url: '/sys_fkcy/bed_info/getAll.action',
+                        showCheckbox: false //是否显示复选框
+                            ,
+                        id: 'demoId1',
+                        isJump: false //是否允许点击节点时弹出新窗口跳转
+                            ,
+                        click: function(obj) {
+                            //节点高亮
+                            var nodes = document.getElementsByClassName("layui-tree-txt");
+                            for (var i = 0; i < nodes.length; i++) {
+                                if (nodes[i].innerHTML === obj.data.title)
+                                    nodes[i].style.color = "#1594FF";
+                                else
+                                    nodes[i].style.color = "#555";
+                            }
+                            var dataId = obj.data.id; //获取当前点击的节点数据
+                            var dataPid = obj.data.pid;
+                            $.data = obj.data;
+                            // 点击节点为号时
+                            if (obj.data.data_type == '号') {
+                                //数据列表
+                                table.render({
+                                    elem: '#currentTableId',
+                                    url: '/sys_fkcy/bed_info/getWherePid.action?pid=' + dataPid, //数据接口
+                                    toolbar: '#toolbarDemo',
+                                    cellMinWidth: 100,
+                                    headers: header,
+                                    defaultToolbar: ['filter', 'exports', 'print', {
+                                        title: '提示',
+                                        layEvent: 'LAYTABLE_TIPS',
+                                        icon: 'layui-icon-tips'
+                                    }],
+                                    cols: [
+                                        [{
+                                                type: "checkbox",
+                                                width: 50
+                                            }, {
+                                                field: 'floor_tung_name',
+                                                title: '楼栋名称',
+                                                align: "center"
+                                            }, {
+                                                field: 'floor_layer',
+                                                title: '楼层名称',
+                                                align: "center"
+                                            }, {
+                                                field: 'room_number',
+                                                title: '房间号',
+                                                align: "center"
+                                            }, {
+                                                field: 'bed_number',
+                                                title: '床位号',
+                                                align: "center"
+                                            }, {
+                                                field: 'data_type',
+                                                title: '数据类型',
+                                                align: "center"
+                                            }, {
+                                                field: 'nursing_type',
+                                                title: '床位类型',
+                                                align: "center"
+                                            }, {
+                                                title: '操作',
+                                                minWidth: 200,
+                                                toolbar: '#currentTableBar',
+                                                align: "center",
+                                                fixed: "right"
+                                            }
+
+                                        ]
+                                    ],
+                                    initSort: {
+                                        field: 'floor_layer', //排序字段，对应 cols 设定的各字段名
+                                        type: 'asc', //排序方式  asc: 升序、desc: 降序、null: 默认排序
+                                    },
+                                    response: {
+                                        statusName: 'code', //规定返回的状态码字段为code
+                                        statusCode: 200 //规定成功的状态码味200
+                                    },
+                                    parseData: function(result) {
+                                        return {
+                                            "count": result.count + 1,
+                                            "code": result.state, //解析接口状态
+                                            "msg": result.msg, //解析提示文本
+                                            "data": result.data //解析数据列表
+                                        }
+                                    },
+                                    limits: [10, 15, 20, 25, 50, 100],
+                                    limit: 15,
+                                    page: true,
+                                    skin: 'line'
+                                });
+
+                            } else {
+                                //数据列表
+                                table.render({
+                                    elem: '#currentTableId',
+                                    url: '/sys_fkcy/bed_info/getWherePid.action?pid=' + dataId, //数据接口
+                                    toolbar: '#toolbarDemo',
+                                    cellMinWidth: 100,
+                                    headers: header,
+                                    defaultToolbar: ['filter', 'exports', 'print', {
+                                        title: '提示',
+                                        layEvent: 'LAYTABLE_TIPS',
+                                        icon: 'layui-icon-tips'
+                                    }],
+                                    cols: [
+                                        [{
+                                                type: "checkbox",
+                                                width: 50
+                                            }, {
+                                                field: 'floor_tung_name',
+                                                title: '楼栋名称',
+                                                align: "center"
+                                            }, {
+                                                field: 'floor_layer',
+                                                title: '楼层名称',
+                                                toolbar: '#to_ceng',
+                                                align: "center",
+                                            }, {
+                                                field: 'room_number',
+                                                title: '房间号',
+                                                toolbar: '#jian',
+                                                align: "center"
+                                            }, {
+                                                field: 'bed_number',
+                                                title: '床位号',
+                                                toolbar: '#hao',
+                                                align: "center"
+                                            }, {
+                                                field: 'data_type',
+                                                title: '数据类型',
+                                                align: "center"
+                                            }, {
+                                                field: 'nursing_type',
+                                                title: '床位类型',
+                                                toolbar: '#bed_type',
+                                                align: "center"
+                                            }, {
+                                                title: '操作',
+                                                minWidth: 200,
+                                                toolbar: '#currentTableBar',
+                                                align: "center",
+                                                fixed: "right"
+                                            }
+
+                                        ]
+                                    ],
+                                    // 排序，应用后会导致无数据时没有提示
+                                    // initSort: {
+                                    //     field: 'floor_layer', //排序字段，对应 cols 设定的各字段名
+                                    //     type: 'asc', //排序方式  asc: 升序、desc: 降序、null: 默认排序
+                                    // },
+                                    response: {
+                                        statusName: 'code', //规定返回的状态码字段为code
+                                        statusCode: 200 //规定成功的状态码味200
+                                    },
+                                    parseData: function(result) {
+                                        return {
+                                            "count": result.count + 1,
+                                            "code": result.state, //解析接口状态
+                                            "msg": result.msg, //解析提示文本
+                                            "data": result.data //解析数据列表
+                                        }
+                                    },
+                                    limits: [10, 15, 20, 25, 50, 100],
+                                    limit: 15,
+                                    page: true,
+                                    skin: 'line'
+                                });
+                            }
+                        },
+                    });
+                }
+            }
+
+            //得到床位设置-包含统计
+            getdata1();
+
+            function getdata1() {
+                $.ajax({
+                    url: '/sys_fkcy/bed_info/getAllBedSet.action',
+                    headers: header,
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(res) {
+                        //得到数据
+                        var data = res.data;
+                        var bed_data = $("#bed_data").html();
+                        //设置到模板
+                        laytpl(bed_data).render(data, function(html) {
+                            $('#bed_div').html(html);
+                        });
+                    }
+                });
+            }
+
+            //触发事件
+            var active = {
+                tabChange: function() {
+                    //切换到指定Tab项
+                    element.tabChange('demo', '22'); //切换到：用户管理
+                }
+            }
+
+            $('#demo').on('click', function() {
+                var othis = $(this),
+                    type = othis.data('type');
+                active[type] ? active[type].call(this, othis) : '';
+            });
+
+        });
+
+        // 打开入住登记（弹窗）
+        function open_child() {
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+                var index = layer.open({
+                    title: '入住登记',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: '../../checkin/checking.html'
+                });
+
+            })
+        }
+
+        // 客户信息编辑页（弹窗）
+        function edit(data) {
+            //alert(data);
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+                var index = layer.open({
+                    title: '入住登记',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: '../../checkin/basicInfo/edit.html',
+                    success: function(layero, index) { //弹出层打开后的回调函数
+                        var iframe = window['layui-layer-iframe' + index];
+                        // 向子页面的全局函数child传参
+                        iframe.child(data);
+                    }
+                });
+            })
+        }
+    </script>
+</body>
+
+</html>

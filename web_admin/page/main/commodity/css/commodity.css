@@ -1,0 +1,14 @@
+.layui-table.bigimg {  
+width: 100%;
+}
+.bigimg {
+position:fixed;
+width: auto;
+height: auto;
+left:10%;
+top:10%;
+z-index:90000;
+
+margin:auto;
+
+}

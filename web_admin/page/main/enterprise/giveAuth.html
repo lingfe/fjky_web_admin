@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>企业菜单权限授权</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	</head>
+	
+	<body style="background:#f2f2f2;">
+		<!-- 操作按钮 -->
+		<button style="position: fixed; top:20px; right: 20px;z-index:999;" class="layui-btn" id="shouquan">
+			<i class="layui-icon layui-icon-auz"></i>确定授权
+		</button>
+		
+		<!-- 授权对象id -->
+		<input type="text" id="qiId"  hidden="true" />
+		
+		<!-- 菜单权限数据(树结构) -->
+		<div style="margin:10px;background:#fff;padding:10px;min-height:80px;">
+			<div id="menuActionDataAll" class="demo-tree"></div>
+		</div>
+
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use([ "tree",'util',"layer" ], function() {
+				//定义组件变量
+				var $ = layui.jquery;
+				var tree = layui.tree
+				  ,layer = layui.layer
+				  ,util = layui.util
+				var token = Storage.get("token");
+		
+				//加载动画
+				layer.msg("", {type: 3,time: 0 });
+				//ajax得到菜单权限数据
+				getData();
+				function getData() {
+					//渲染表格
+					$.ajax({
+						url : '/sys_fkcy/enterprise/seeEnterpriseMenuAction.action?enterprise_id=' + $("#qiId").val(),//授权对象id,
+						headers : { //通过 request 头传递
+							token : token
+						},
+						type : 'post',
+						dataType : 'json',
+						success : function(res) {
+							if(res.state == 200){
+								//加载数据
+								renderTable(res.data);
+							}else if (res.state == 401) {
+								window.location.href = '../../bcxt/login/login.html';
+							}else if (res.state == 402){
+								layer.msg(res.msg, {
+									icon:5, 
+									time:1000 },
+									function() {
+										//只是关闭
+										var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+										parent.layer.close(index);		//关闭窗口
+								});
+							}else {
+								layer.msg(res.msg, {
+									icon : 5
+								}); //失败的表情
+							}
+							return false;
+						}
+					});
+				}
+				
+				//加载数据
+				var renderTable = function(data) {
+					localStorage.setItem('checkChild',"false");//初始化去掉全选功能
+					tree.render({
+						elem : '#menuActionDataAll',
+						text : {
+							defaultNodeName : '未命名', //节点默认名称
+							none : '无数据' //数据为空时的提示文本
+						},
+						data : data,
+						checkChirld : true,
+						showCheckbox : true, //是否显示复选框
+						id : 'menuAction',	//设定实例唯一索引，用于基础方法传参\读取使用。
+						isJump : false, //是否允许点击节点时弹出新窗口跳转
+						click: function(obj){
+							//关闭加载动画
+							layer.close(layer.index);
+					    },
+						oncheck: function(obj){
+							//关闭加载动画
+							layer.close(layer.index);
+						}
+					});
+					localStorage.setItem('checkChild',"true");//初始化页面完成后恢复全选功能
+				}
+				
+				//确定授权点击事件
+				$("#shouquan").on("click", function() {
+					//加载动画
+					layer.msg("", {type: 3,time: 0 });
+					//获取选中节点的数据
+					var id_menuAction=$("#menuAction");
+					var checkedData = tree.getChecked('menuAction'); 
+					//验证
+					if (checkedData.length<=0) {
+						//提示
+						layer.msg("请选择要授予的菜单权限!", {icon : 5}); //失败的表情
+						return;
+					};
+					
+					//定义权限菜单id字符串变量
+					let str = '';
+					
+					//递归得到菜单权限id
+					getStr(checkedData);
+					function getStr(arr) {
+						for (let i = 0; i < arr.length; i++) {
+							str += arr[i].id + ',';
+							//验证是否有子节点
+							if (arr[i].children.length > 0) {
+								//是-继续调用
+								getStr(arr[i].children);
+							}
+						}
+					}
+					//去掉尾部的","号
+					str = str.substring(0, str.length - 1);
+					
+					//调用-保存授予的权限菜单
+					sentData(str);
+				});
+				
+				//保存授予的权限菜单
+				function sentData(str) { 
+					$.ajax({
+						url : localurl + '/sys_fkcy/enterprise/addEnterpriseMenuAction.action',
+						context : document.body, 
+						headers : header,
+						type : "POST",
+						data : {
+							"enterprise_id" : $("#qiId").val(),//授权对象id
+							"str_menu_id" : str 	//菜单权限id字符串
+						},
+						xhrFields : {
+							withCredentials : true
+						},
+						success : function(data) {
+							if (data.state == 200) {
+								layer.msg(data.msg, {
+									icon : 6, //成功的表情
+									time : 1000 //1秒关闭（如果不配置，默认是3秒）
+								}, function() {
+									//只是关闭
+									var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+									parent.layer.close(index);		//关闭窗口
+								});
+							} else {
+								layer.msg(data.msg, {
+									icon : 5
+								}); //失败的表情
+								return;
+							}
+						}
+					});
+				}
+			});
+		
+			//父窗体调用传值
+			function child(data) {
+				var $ = layui.jquery;
+				$("#qiId").val(data.id);
+			}
+		</script>
+	</body>
+</html>

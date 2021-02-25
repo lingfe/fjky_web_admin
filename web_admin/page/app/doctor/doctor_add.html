@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增医生</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../css/hospital.css">
+</head>
+
+<body>
+    <form class="layui-form" action="">
+        <div class="layui-form-item lay_item">
+            <label class="layui-form-label label_title">医生姓名：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="doc_name" name="doc_name" lay-verify="required" placeholder="" autocomplete="off" class="layui-input">
+                <div class="layui-upload box-upload">
+                    <div class="layui-upload-list">
+                        <img class="layui-upload-img demo1" id="doc_img" />
+                        <p id="demoText"></p>
+                    </div>
+                    <button type="button" id="test1">
+                        <p>+</p>
+                        <p style="color: #5f5f5f;">上传照片</p>
+                    </button>
+                </div>
+            </div>
+            <label class="layui-form-label label_title">医生职称：</label>
+            <div class="layui-input-inline lay_line">
+                <select id="doc_title" name="doc_title" lay-verify="required" class="select_wd120" style="width: 100px;">
+                    <option> </option>
+                    <option value="主任医师">主任医师</option>
+                    <option value="住院医师">住院医师</option>
+                    <option value="主治医师">主治医师</option>
+                    <option value="副主任医师">副主任医师</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item lay_item" style="margin-top:0px;border-top: 0px;">
+            <label class="layui-form-label label_title">联系电话：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="doc_phone" name="doc_phone" lay-verify="required|tellphone" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+            <label class="layui-form-label label_title">所属科室：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="doc_department" lay-verify="required" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item lay_item" style="margin-top:0px;border-top: 0px;">
+            <label class="layui-form-label label_title">所属医院：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="doc_hosptital" name="doc_hosptital" lay-verify="required" placeholder="" autocomplete="off" class="layui-input">
+            </div>
+            <label class="layui-form-label label_title">医院等级：</label>
+            <div class="layui-input-inline lay_line">
+                <select id="hosptital_level" name="hosptital_level" lay-verify="required" class="select_wd120" style="width: 100px;">
+                    <option> </option>
+                    <option value="三甲">三甲</option>
+                    <option value="三乙">三乙</option>
+                    <option value="三丙">三丙</option>
+                    <option value="二甲">二甲</option>
+                    <option value="二乙">二乙</option>
+                    <option value="二丙">二丙</option>
+                    <option value="一甲">一甲</option>
+                    <option value="一乙">一乙</option>
+                    <option value="一丙">一丙</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-inline" style="margin-top: 30px">
+            <label class="title">擅长领域:</label>
+            <div class="layui-input-block  lay_block">
+                <textarea id="doc_range" name="doc_range" placeholder="请输入医生擅长领域" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-inline" style="margin-top: 30px">
+            <label class="title">背景介绍:</label>
+            <div class="layui-input-block lay_block">
+                <textarea id="doc_background" name="doc_background" placeholder="请输入医生背景介绍" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-row" style="margin-top: 40px;">
+            <div class="layui-col-xs-offset9">
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="margin-left: 166px;">
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        //加载layui指定组件
+
+        layui.use(['form', 'table', 'jquery', 'laydate', 'upload'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+                upload = layui.upload;
+            var token = Storage.get("token");
+
+            // var uploadInst = upload.render({
+            //     elem: '#test1',
+            //     url: '/sys_fkcy/images/imageUpload.action',
+            //     headers: header,
+            //     done: function(res, index, upload) {
+            //         if (res.state == 200) {
+            //             $(".demo1").attr("src", res.data.imgUrl);
+            //             layer.msg(res.msg, {
+            //                 icon: 6,
+            //                 time: 1000
+            //             });
+            //         } else {
+            //             layer.msg(res.msg, {
+            //                 icon: 5,
+            //                 time: 1000
+            //             });
+            //         }
+            //     }
+            // });
+
+            //图片上传
+            var uploadInst = upload.render({
+                elem: '#test1',
+                url: '/sys_fkcy/images/imageUpload.action', //改成您自己的上传接口
+                headers: header,
+                before: function(obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function(index, file, result) {
+                        $('.demo1').attr('src', result); //图片链接（base64）
+                    });
+                },
+                done: function(res) {
+                    //如果上传失败
+                    if (res.code > 0) {
+                        return layer.msg('上传失败');
+                    }
+                    //上传成功
+                },
+                error: function() {
+                    //演示失败状态，并实现重传
+                    var demoText = $('#demoText');
+                    demoText.html('<span style="color: #FF5722;">上传失败</span>');
+                }
+            });
+            //验证电话号码或座机号码
+            var mobile = /^([0-9]{3,4}-)?[0-9]{7,8}$/,
+                phone = /^((\+?86)|(\(\+86\)))?(13[012356789][0-9]{8}|15[012356789][0-9]{8}|18[02356789][0-9]{8}|147[0-9]{8}|1349[0-9]{7})$/;
+            form.verify({
+                tellphone: function(value) {
+                    var flag = mobile.test(value) || phone.test(value);
+                    if (!flag) {
+                        return '请输入正确座机号码或手机号';
+                    }
+                }
+            });
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/app/doctor/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "doc_name": $("#doc_name").val(),
+                        "doc_phone": $("#doc_phone").val(),
+                        "img": $("#doc_img").attr("src"),
+                        "doc_title": $("#doc_title").val(),
+                        "doc_hosptital": $("#doc_hosptital").val(),
+                        "doc_department": $("#doc_department").val(),
+                        "hosptital_level": $("#hosptital_level").val(),
+                        "doc_range": $("#doc_range").val(),
+                        "doc_background": $("#doc_background").val(),
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            })
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

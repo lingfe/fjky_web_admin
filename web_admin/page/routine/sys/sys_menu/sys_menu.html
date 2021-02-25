@@ -1,0 +1,150 @@
+<!--
+创建者:lingfe
+v1.0-
+	2020.10.10-lingfe:C-菜单树状展示
+v1.1-
+	2020.11.08-郭万兵:A-加入表单属性修改状态。
+v1.2-
+	2020.11.09-lingfe:U-重写修改状态函数。A-选中上级更改状态，下级随着更改，加入递归。
+v1.5.0-
+	2021.01.20-lingfe:删除修改状态函数，停用修改状态功能，隐藏状态列
+
+字符说明: C=创建/A=添加/D=删除/U=修改/
+-->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>菜单管理</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 内容 start -->
+		<div class="layuimini-container">
+			<div class="layuimini-main">
+				<!-- table树头部全局功能  -->
+				<div class="layui-btn-group">
+					<button class="layui-btn" id="btn-expand" style=" height: 34px;line-height: 34px;">全部展开</button>
+					<button class="layui-btn layui-btn-normal" id="btn-fold"
+						style=" height: 34px;line-height: 34px;">全部折叠</button>
+				</div>
+
+				<!-- 数据列表 -->
+				<table id="munu-table" class="layui-table" lay-filter="munu-table"></table>
+			</div>
+		</div>
+		<!-- 内容 end -->
+
+		<!-- 操作列 -->
+		<script type="text/html" id="auth-state">
+			<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+		</script>
+
+		<!-- 图标 -->
+		<script type="text/html" id="iconPicker">
+			{{# if (d.action != 'undefined' && d.action != "" && d.action != null) { }}
+					<i class="layui-icon layui-icon-auz" style="font-size: 30px; color: red;"></i>  
+			{{# }else { }}
+				<i style="font-size: 30px;" class="{{d.icon}}"></i>
+			{{# } }}
+		</script>
+
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//定义layui指定组件
+			layui.use(['table', 'treetable'], function () {
+				//定义layui组件变量
+				var $ = layui.jquery;
+				var table = layui.table;
+				var treetable = layui.treetable;
+				
+				//请求通行证
+				var token = JSON.parse(localStorage.getItem("token"));
+
+				// 渲染表格tree
+				treetable.render({
+					treeColIndex: 1,
+					treeSpid: "admin",
+					treeIdName: 'id',
+					treePidName: 'superior_id',
+					elem: '#munu-table',
+					url: '/sys_fkcy/menu/getAll?token=' + token,
+					cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+					cols: [[
+						{ type: 'numbers',title: '序号' },
+						{ field: 'title', width: 220, title: '菜单名称' },
+						{ field: 'state', minWidth: 80, width: 80, align: 'center', templet: function (d) {
+								if (d.action != 'undefined' && d.action != "" && d.action != null) {
+									return '<span class="layui-badge layui-bg-red">权限</span>';
+								}
+								if (d.superior_id == 'admin') {
+									return '<span class="layui-badge layui-bg-blue">目录</span>';
+								} else {
+									return '<span class="layui-badge-rim">菜单</span>';
+								}
+							}, title: '类型'
+						},
+						{ field: 'icon',minWidth: 80,width: 80, title: '图标', toolbar: '#iconPicker', align: 'center' },
+						{ field: 'icon',width: 180, title: '图标名称' },
+						{ field: 'href', title: '菜单URL' },
+						{ templet: '#auth-state',width: 120, align: 'center', title: '操作',fixed: "right"  },
+					]],
+					parseData: function (data) {
+						$("#iconPicker").val(data.icon);
+					},
+					done: function () {
+						layer.closeAll('loading');
+					}
+				});
+
+				//全部展开
+				$('#btn-expand').click(function () {
+					treetable.expandAll('#munu-table');
+				});
+
+				//全部折叠
+				$('#btn-fold').click(function () {
+					treetable.foldAll('#munu-table');
+				});
+
+				//监听工具条
+				table.on('tool(munu-table)', function (obj) {
+					var data = obj.data;
+					// 监听编辑操作
+					if (obj.event === 'edit') {
+						var index = layer.open({
+							title: '编辑菜单',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['30%', '250px'],
+							content: './edit.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								var body = layer.getChildFrame("body", index);
+								if (result.state == 0) {
+									body.find("input[name=state][value=0]").attr("checked", true);
+								} else {
+									body.find("input[name=state][value=1]").attr("checked", true);
+								}
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							}
+						});
+						return false;
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

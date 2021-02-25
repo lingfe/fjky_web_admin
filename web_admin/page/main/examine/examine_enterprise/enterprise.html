@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>审核企业</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		
+	</head>
+	
+	<body>	
+		<!-- table数据列表 -->
+		<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+		
+		<!-- 图片放大 -->
+		<div id="fangda" style="position:fixed;left:10%;top:10%;z-index:999;">
+			<img style="max-width:500px;max-height:500px;" src="" alt="">
+		</div>
+		
+		<!-- 状态 -->
+		<script type="text/html" id="id_state">
+			{{# if (d.state == 0) { }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-radius">正常</button>
+			{{# }else if(d.state == 1){ }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius">审核中</button>
+			{{# }else if(d.state == 2){ }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius">审核不通过</button>
+			{{# } }}
+		</script>
+		
+		<!-- 表格头操作 -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-sm layui-btn-green" lay-event="examine"><i class="layui-icon layui-icon-auz"></i>批量审核</button>
+			</div>
+		</script>
+		
+		<!-- 操作 -->
+		<script type="text/html" id="currentTableBar">
+			<a class="layui-btn layui-btn-xs layui-btn-xs data-count-delete" lay-event="info"><i class="layui-icon layui-icon-auz"></i>查看详细</a>
+		</script>
+		
+		<!-- 验证logo图片 -->
+		<script type="text/html" id="id_logo">
+			{{# if (d.ent_logo != null) { }}
+				<div class=''><img src='{{d.ent_logo}}'/></div>
+			{{# }else { }}
+				<div class=''><img src='https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg'/></div>
+			{{# } }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'table','upload'], function () {
+				//定义layui组件变量
+				var $ = layui.jquery, 
+					form = layui.form,
+					table = layui.table,
+					upload = layui.upload;
+					
+				//token请求通行证
+				var token = Storage.get("token");
+				
+				//table数据列表
+				table.render({
+					elem: '#currentTableId',					//将数据通过id选择器渲染到目标div
+					url: '/sys_fkcy/enterprise/getPage.action',	//请求接口也可换成josn
+					toolbar: '#toolbarDemo',					//头部操作id
+					defaultToolbar: ['filter','exports','exports_data','print'],
+					cellMinWidth: 180,							//全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+					headers: {token: token },					//token请求通行证
+					where: {
+						searchKey: '审核中'						//参考API状态码文档
+					},
+					cols: [[ 									//table数据字段以及处理
+						{ type: "checkbox", width: 50 },
+						{ field: 'id', width: 80, title: 'ID', sort: true, align: "center" },
+						{ field: 'ent_name', width: 230, title: '企业名称', align: "center" },
+						{ field: 'state', width: 120, title: '状态', align: 'center', toolbar: '#id_state'},
+						{ field: 'ent_phone', title: '企业联系电话', sort: true, align: "center" },
+						{ field: 'ent_logo',  title: '企业logo', toolbar:'#id_logo', align: "center"},
+						{ field: 'crt_date', width:240,  title: '创建时间', templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>", align: "center" },
+						{ title: '操作', minWidth: 250, toolbar: '#currentTableBar', align: "center", fixed: "right" }
+					]],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 	//规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex',	//当前页，默认page，
+						limitName: 'pageNum',	//页容量，默认limit
+					},
+					parseData: function (res) {
+						//验证是否有权限
+						if (res.state != 200){
+							layer.msg(res.msg, {
+								icon:5, 
+								time:1000 },
+								function() {
+									//获取当前窗口的name
+									var index=parent.layer.getFrameIndex(window.name); 
+									//关闭窗口
+									layui.close(index);
+							});
+							return;
+						}
+						
+						//返回值字段对应处理
+						return {
+							"code": res.state, 			//解析接口状态
+							"msg": res.msg, 			//解析提示文本
+							"count": res.data.numCount,	//总数量量
+							"data": res.data.data 		//解析数据列表
+						}
+					},
+					page: true,								//开启分页
+					limits: [5,10, 15, 20, 25, 50, 100],	//分页页容量选择
+					limit: 10,								//默认页容量
+					exp:{	//导出参数
+						key:"enterprise",					//key(数据字典定义)根据key导出相应的数据
+						url:"/sys_fkcy/excel/exportExcel",	//导出接口
+						file_name:'企业信息-审核流程部分',				//导出的文件名称(导出的文件名称,也会用作exceltitle）
+						where:"state!=0"
+					},
+					skin: 'line'
+				});
+				
+				//图片放大
+				$("#currentTableId").next().on('mouseover mouseout', 'img', function(e) {
+					let $box = $("#fangda img");
+					if (e.type == "mouseover") {
+						$box.attr('src', $(this)[0].src).show();
+					} else if (e.type == "mouseout") {
+						$box.hide();
+					}
+				})
+				
+				//toolbar监听事件
+				table.on('toolbar(currentTableFilter)', function (obj) {
+					//监听审核操作
+					if(obj.event == 'examine'){
+						var checkStatus = table.checkStatus('currentTableId')
+							, data = checkStatus.data;
+						if(data.length>=1){
+							layer.open({
+								title: '审核',	//弹窗标题
+								type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+								shade: 0.2,			//遮罩层透明度0.1~1
+								maxmin: true,		//是否开启最大化
+								shadeClose: true,	//是否点击遮罩关闭
+								content: './examine.html',	//内容
+								success: function (layero, index) { //弹出层打开后的回调函数
+									var id_str=[];
+									var iframe = window['layui-layer-iframe' + index];
+									//窗体自适应
+									layer.iframeAuto(index);
+									for(var i=0;i<=data.length;i++){
+										if(data.length == i){
+											// 向子页面的全局函数child传参
+											data.id_str=id_str.join(',');
+											iframe.child(data);
+										}else{
+											id_str.push(data[i].id);
+										}
+									}
+								}
+							});
+						}else{
+							layer.msg("请选择您要审核的企业", { icon: 5 });//失败的表情
+						}
+					}
+				});
+
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function (obj) {
+					console.log(obj)
+				});
+				
+				//监听行双击事件
+				table.on('rowDouble(currentTableFilter)', function(obj){
+					layer.msg("双击");
+				});
+
+				//监听操作事件
+				table.on('tool(currentTableFilter)', function (obj) {
+					let data = obj.data;
+					//查看详情
+					if(obj.event=='info'){
+						
+						var index = layer.open({
+							title: '企业详情',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['100%', '100%'],
+							content: './enterprise_detail.html',
+							success: function(layero, index) { //弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+						layer.full(index);
+						$(window).on("resize", function() {
+							layer.full(index);
+						});
+						
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>jQuery分步步骤</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" type="text/css" href="./jindutiaoOnfenbu.css">
+	</head>
+
+	<body style="">
+		<!-- 进度条与分步 -->
+		<div class="main">
+			<div id="step"></div>
+		</div>
+		
+		<!-- 切换内容 -->
+		<iframe id="ifr" style="width:100%;height:400px;" src="www.baidu.com"></iframe>
+		
+		<!-- 操作按钮 -->
+		<div class="btns">
+			<button id="prevBtn">上一步</button>
+			<button id="nextBtn">下一步</button>
+			<button id="btn1">跳到第二步</button>
+			<button id="btn2">跳到第三步</button>
+		</div>
+		<div class="info">index：<span id="index">0</span></div>
+		
+		<!-- 引入js资源 -->
+		<script src="http://demo.jb51.net/js/2017/jQuery_yybzfbjst/js/jquery.min.js"></script>
+		<script src="./jindutiaoOnfenbu.js"></script>
+		<script type="text/javascript">
+			var $step = $("#step");
+			var $index = $("#index");
+
+			//初始配置
+			$step.step({
+				index: 1, //当前位置
+				time: 500,//加载时间
+				title: [{ title:"填写申请表",url:'123',id:'1'}, { title:"上传资料",url:'123',id:'2'},{ title:"待确认",url:'123',id:'3'}, { title:"已确认",url:'123',id:'4'}, { title:"预约完成",url:'123',id:'5'}]
+			});
+			$index.text($step.getIndex());
+			
+			//上一步
+			$("#prevBtn").on("click", function() {
+				$step.prevStep();
+				$index.text($step.getIndex());
+			});
+			
+			//下一步
+			$("#nextBtn").on("click", function() {
+				$step.nextStep();
+				$index.text($step.getIndex());
+			});
+			
+			//跳转到某一步
+			$("#btn1").on("click", function() {
+				$step.toStep(1);
+				$index.text($step.getIndex());
+			});
+			$("#btn2").on("click", function() {
+				$step.toStep(2);
+				$index.text($step.getIndex());
+			});
+		</script>
+	</body>
+</html>

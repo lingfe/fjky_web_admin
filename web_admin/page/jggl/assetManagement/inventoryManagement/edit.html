@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑床位类型</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+
+<body>
+	
+    <!--表单 start-->
+	<form class="layui-form" action="">
+	  	<div class="layui-form-item">
+		    <label class="layui-form-label" class="layui-table-cell">供应商名称:</label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="供应商名称" required  lay-verify="required" placeholder="请输入供应商名称" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">供应商性质:</label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="供应商性质" required  lay-verify="required" placeholder="请输入供应商性质" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">负责人:</label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="负责人" required  lay-verify="required" placeholder="请输入负责人" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">联系电话:</label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="联系电话" required  lay-verify="required" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">供应状态:</label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="供应状态" required  lay-verify="required" placeholder="请输入供应状态" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label" class="layui-table-cell1">供应商联系地址:</label>
+		    <div class="layui-input-block">
+	      		<textarea id='供应商联系地址' class="layui-textarea" style="resize:none;" placeholder="供应商联系地址"></textarea>
+			</div>
+		</div>
+		
+	  	
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset4">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+    
+    
+    
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+
+                $.ajax({
+                    url: '/sys_fkcy/jggl/bed_type/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    data: {
+                    	"id": $("#id").val(),
+                        "bt_name": $("#bt_name").val(),
+                        "bt_cost_month": $("#bt_cost_month").val(),
+                        "bt_cost_month_pack": $("#bt_cost_month_pack").val(),
+                        "bt_describe" : $("#bt_describe").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+   
+        });
+        
+        // 获取父级数据
+        function child(data) {
+            $ = layui.$;
+            console.log(data);
+			$('#id').val(data.id);
+			$('#供应商名称').val(data.供应商名称);
+            $('#供应商性质').val(data.供应商性质);
+            $('#负责人').val(data.负责人);
+            $('#联系电话').val(data.联系电话);
+            $('#供应状态').val(data.供应状态);
+            $('#供应商联系地址').val(data.联系地址);
+
+            layui.form.render();
+        }
+        //供应商名称,供应商性质,负责人,联系电话,供应状态,供应商联系地址
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="utf-8">
+	    <title>就诊病例</title>
+	    <!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+	    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+	</head>
+	<body>
+
+		<!--左操作栏-->
+		<div class="layui-row">
+			<input type="hidden" name="ess_id" id="ess_id" value="" />
+			<div class="layui-col-md2 layui-col-sm3">	
+				<div class="kehuguinfo_jzbl_lt">
+					<input type="hidden" id="ess_id" />
+					<img src="../../../../images/lbw.jpg"style="padding-top: 35px;"  height="142px" width="120px">
+					<p>姓名：<span id="full_name"></span></p>
+					<p>床位：<span id='bed_'></span></p>
+					<p>年龄：<span id="age"></span></p>
+					<div class="kehuguinfo_jzbl_lb">
+						<ul class="layui-nav-tree lb_hover">
+						  <li class="layui-nav-item"><a id="li1" href="">基础档案</a></li>
+						  <li class="layui-nav-item"><a id="li2" href="">日常监测</a></li>
+						  <li class="layui-nav-item"><a id="li3" style="color: #1594FF;" href="">就诊病例</a></li>
+						  <li class="layui-nav-item"><a id="li4" onclick="gwbs()">过往病史</a></li>
+						  <li class="layui-nav-item"><a id="li5" onclick="tjbg()">体检报告</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-md10 layui-col-sm9" style="height: 777px;">
+					<!--子页面（kehuinfo_jzbl_info.html）-->
+					<iframe src="./kehuinfo_jzbl_info.html" width="100%" height="770px" frameborder="0" marginheight='0' marginwidth="0"></iframe>
+			</div>
+	
+		<!-- 引入js资源 --> 
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script charset="UTF-8">
+    	
+    	//得到父级内容(kehuinfo.html)
+    	function child(data){
+    		layui.use('jquery',function(){
+    			var $ = layui.jquery;
+				$('#ess_id').val(data.id);	// 用户id赋值
+	    		$('#age').text(data.age);	// 用户年龄赋值
+	    		$('#full_name').text(data.full_name); // 用户姓名赋值
+    		})
+    	}
+    	
+    	
+    	// 过往病史
+    	function gwbs(){
+    		layui.use('jquery', function(){
+    			var $ = layui.jquery;
+    			$('#li1').css('color', 'black');
+    			$('#li2').css('color', 'black');
+    			$('#li3').css('color', 'black');
+    			$('#li4').css('color', '#1594FF');
+    			$('#li5').css('color', 'black');
+    			$('iframe').attr('src', './kehuinfo_gwbs_info.html');
+    		})
+    	}
+    	// 体检报告
+    	function tjbg(){
+    		layui.use('jquery', function(){
+    			var $ = layui.jquery;
+    			$('#li1').css('color', 'black');
+    			$('#li2').css('color', 'black');
+    			$('#li3').css('color', 'black');
+    			$('#li4').css('color', 'black');
+    			$('#li5').css('color', '#1594FF');
+    			$('iframe').attr('src', './kehuinfo_tjbg_info.html');
+    		})
+    	}
+    </script>
+	</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>订单信息</title>
+	<!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	<link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+	
+	<!-- 内容 start -->
+	<div class="layuimini-container">
+		<div class="layuimini-main">
+			<!-- 搜索 start -->
+			<fieldset class="layui-elem-field " style="margin-top:20px;border-width:1px 0 0;">
+				<legend>搜索</legend>
+				<div style="margin: 10px 0px 0px 10px">
+					<form class="layui-form layui-form-pane" action="">
+						<div class="layui-form-item" style="margin-bottom:0px;">
+							<div class="layui-inline pane">
+								<label class="layui-form-label">订单号</label>
+								<div class="layui-input-inline">
+									<input name="searchKey" placeholder="请输入订单号" class="layui-input"/>
+								</div>
+							</div>
+							<div class="layui-inline">
+								<button type="submit" class="layui-btn layui-btn-primary" lay-submit
+									lay-filter="data-search-btn">
+									<i class="layui-icon"></i>搜索
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</fieldset>
+			<!-- 搜索 end -->
+			
+			<!-- tab数据列表 -->
+			<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+		</div>
+	</div>
+	<!-- 内容 end -->
+	
+	<!-- 操作 -->
+	<script type="text/html" id="currentTableBar">
+		<a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+	</script>
+	
+	<!-- 状态 -->
+	<script type="text/html" id="id_state">
+		{{# if (d.state == 0) { }}
+			<button type="button" class="layui-btn layui-btn-xs layui-btn-radius">正常</button>
+		{{# }else if(d.state == 1){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-red layui-btn-radius">未支付</button>
+		{{# }else if(d.state == 2){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-RosyBrown layui-btn-radius">已取消</button>
+		{{# }else if(d.state == 3){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-Orange layui-btn-radius">退款中</button>
+		{{# }else if(d.state == 4){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-Khaki layui-btn-radius">已退款</button>
+		{{# }else if(d.state == 5){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-black layui-btn-radius">未退款</button>
+		{{# }else if(d.state == 6){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-DarkSeaGreen layui-btn-radius">未评价</button>
+		{{# }else if(d.state == 7){ }}
+			<button type="button" class="layui-btn layui-btn-xs bg-color-green layui-btn-radius">已评价</button>
+		{{# } }}
+	</script>
+
+	<!-- 金额处理 -->
+	<script type="text/html" id="dollar">
+		{{# if (d.total_fee == ''||d.total_fee==undefined) { }}
+			<span style="color:red;">0</span>
+			<span style="color:green;">/元</span>
+		{{# }else { }}
+			<span style="color:red;">{{d.total_fee/100}}</span>
+			<span style="color:green;">/元</span>
+		{{# } }}
+    </script>
+	
+	<!-- 数量处理/份 -->
+	<script type="text/html" id="rep_num">
+		{{# if (d.rep_num == ''||d.rep_num==undefined) { }}
+			<span style="color:red;">x 0</span>
+			<span style="color:green;">/份</span>
+			
+		{{# }else { }}
+			<span style="color:red;">x {{d.rep_num}}</span>
+			<span style="color:green;">/份</span>
+		{{# } }}
+    </script>
+	
+	<!-- 引入js资源 -->
+	<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+	<script charset="utf-8">
+		//加载layui指定组件
+		layui.use(['form', 'table'], function () {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				table = layui.table;
+
+			//数据列表
+			table.render({
+				elem: '#currentTableId',
+				url: '/sys_fkcy/pay/getPage', //数据接口
+				cellMinWidth : 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+				totalRow: true,
+				cols: [[
+					{
+						field: 'id',
+						title: '订单号',
+						totalRowText: '合计',
+						unresize: true,
+						sort: true,
+						fixed: "left"
+					},
+					{
+						field: 'total_fee',
+						width: 150,
+						title: '付款金额/元',
+						align: "center",
+						toolbar: "#dollar",
+						totalRow: true,		//开启统计行
+						calculation:100,	//计算单位
+						valueStyle:"color:red;",//值的样式
+						labelStyle:"color:green;",	//标签的样式
+						decimal:2,			//保留几位小数
+						label:"/元",		//标签
+					},
+					{
+						field: 'rep_num',
+						width: 100,
+						title: '数量/份',
+						align: "center",
+						toolbar: "#rep_num",
+						totalRow: true,	//开启统计行
+						calculation:1,	//计算单位
+						decimal:0,		//保留几位小数
+						valueStyle:"color:red;",//值的样式
+						labelStyle:"color:green;",	//标签的样式
+						label:"/份",	//标签
+					},
+					{
+						field: 'state',
+						width: 100,
+						title: '状态',
+						toolbar: '#id_state',
+						align: "center"
+					},
+					{
+						field: 'comm_name',
+						title: '商品名称',
+						width: 150,
+						align: "center"
+					},
+					{
+						field: 'yw_name',
+						width: 150,
+						title: '业务名称',
+						align: "center"
+					},
+					{
+						field: 'user_name',
+						width: 130,
+						title: '支付人',
+						sort: true,
+						align: "center"
+					},
+					
+					{
+						field: 'crt_date',
+						title: '创建时间',
+						sort: true,
+						templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>",
+						align: "center"
+					},{
+						title: '操作',
+						width: 100,
+						toolbar: '#currentTableBar',
+						align: "center",
+						fixed: "right"
+					}
+				]],
+				response: {
+					statusName: 'code', //规定返回的状态码字段为code
+					statusCode: 200 //规定成功的状态码味200
+				},
+				request: {
+					pageName: 'pageIndex', //当前页，默认page，
+					limitName: 'pageNum', //页容量，默认limit
+				},
+				parseData: function (res) {
+					return {
+						"code": res.state, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"count": res.data.numCount,
+						"data": res.data.data //解析数据列表
+					}
+				},
+				limits: [10, 15, 20, 25, 50, 100],
+				limit: 10,
+				size: 'lg',
+				page: true,
+				skin: 'rows'
+			});
+
+			// 监听搜索操作
+			form.on('submit(data-search-btn)', function (data) {
+				var result = data.field;
+				//执行搜索重载
+				table.reload('currentTableId', {
+					where: {
+						searchKey: result.searchKey
+					},
+					page: {
+						curr: 1 //默认第一页
+					}
+				});
+				return false;
+			});
+
+			//监听表格复选框选择
+			table.on('checkbox(currentTableFilter)', function (obj) {
+				console.log(obj)
+			});
+
+			//监听操作事件
+			table.on('tool(currentTableFilter)', function (obj) {
+				var data = obj.data;
+				//监听编辑操作
+				if (obj.event === 'edit') {
+					var index = layer.open({
+						title: '编辑订单',
+						type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+						shade: 0.2,			//遮罩层透明度0.1~1
+						maxmin: true,		//是否开启最大化
+						shadeClose: true,	//是否点击遮罩关闭
+						area: ['30%','320px'],		//指定窗口大小
+						content: './edit.html',
+						success: function (layero, index) { //弹出层打开后的回调函数
+							result = JSON.stringify(data);
+							result = $.parseJSON(result);
+							var iframe = window['layui-layer-iframe' + index];
+							var body=layer.getChildFrame("body",index);
+							//验证并选中
+							switch (result.state) {
+								case 0:
+									body.find("input[name=state][value=0]").attr("checked", true);
+									break;
+								case 1:
+									body.find("input[name=state][value=1]").attr("checked", true);
+									break;
+								case 2:
+									body.find("input[name=state][value=2]").attr("checked", true);
+									break;
+								case 3:
+									body.find("input[name=state][value=3]").attr("checked", true);
+									break;
+								case 4:
+									body.find("input[name=state][value=4]").attr("checked", true);
+									break;
+								case 5:
+									body.find("input[name=state][value=5]").attr("checked", true);
+									break;
+								case 6:
+									body.find("input[name=state][value=6]").attr("checked", true);
+									break;
+								case 7:
+									body.find("input[name=state][value=7]").attr("checked", true);
+									break;
+								default:
+									break;
+							}
+
+							// 更新表单
+							iframe.layui.form.render(); 
+							// 向子页面的全局函数child传参
+							iframe.child(result);
+						}
+					});
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

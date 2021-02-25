@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>修改护理记录</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css?date" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css?date" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">护理时间：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="nursing_datetime" type="text" name="nursing_datetime" lay-verify="required"
+                        lay-reqtext="请选择护理时间" placeholder="yyyy-MM-dd HH:mm" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">护理项目：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="nur_project_name" type="text" name="nur_project_name" lay-submit lay-filter="projectBt"
+                        placeholder="请选择护理项目" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">护工：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="staff_name" type="text" name="staff_name" lay-submit lay-filter="hugong"
+                        placeholder="请选择护工" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="ess_name" type="text" name="ess_name" lay-submit lay-filter="user" placeholder="请选择用户"
+                        value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">床位信息：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="bed_name" type="text" name="bed_name" readonly placeholder="请输入床位信息" value=""
+                        class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">完成情况：</label>
+            <div class="layui-input-block">
+                <textarea id="nur_situation" name="nur_situation" placeholder="请输入护理完成情况"
+                    class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 隐藏属性 -->
+        <input id="id" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js?date"></script>
+    <script>
+        layui.use(['form', 'laydate'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var laydate = layui.laydate;
+
+            // 日期选择器
+            laydate.render({
+                elem: '#nursing_datetime',
+                type: 'datetime',
+                format: 'yyyy-MM-dd HH:mm'
+                , trigger: 'click'
+            });
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            /* 监听护理项目输入框*/
+            form.on('submit(projectBt)', function (data) {
+                var index = layer.open({
+                    title: '请选择护理项目',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chooseProject.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+                    }
+                });
+            });
+            /* 监听护工输入框*/
+            form.on('submit(hugong)', function (data) {
+                var index = layer.open({
+                    title: '请选择护工',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chooseStaff.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+                    }
+                });
+            });
+            /* 监听客户输入框*/
+            form.on('submit(user)', function (data) {
+                var index = layer.open({
+                    title: '请选择用户',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chooseUser.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+                    }
+                });
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/record_nursing/updateWhereId.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#id").val(),
+                        "nur_datetime": $("#nursing_datetime").val(),
+                        "nur_project_name": $("#nur_project_name").val(),
+                        "staff_name": $("#staff_name").val(),
+                        "ess_id": $("#ess_id").val(),
+                        "ess_name": $("#ess_name").val(),
+                        "bed_name": $("#bed_name").val(),
+                        "nur_situation": $("#nur_situation").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        // 获取选择项目页面传来的值
+        function getDataFromSon(data) {
+            var $ = layui.$;
+            $("#nur_project_name").val(data.nur_project_name);
+
+        }
+        // 获取选择护工页面传来的值
+        function getDataFromSon2(data) {
+            var $ = layui.$;
+            $("#staff_name").val(data.ename);
+        }
+        // 获取选择客户页面传来的值
+        function getDataFromSon3(data) { 
+            var $ = layui.$;
+            $("#ess_id").val(data.id);
+            $("#ess_name").val(data.full_name);
+            $("#bed_name").val(data.bed);
+        }
+        // 获取父级数据
+        function child(data) {
+            var $ = layui.$;
+            $("#id").val(data.id);
+            $("#nursing_datetime").val(data.nur_datetime);
+            $("#nur_project_name").val(data.nur_project_name);
+            $("#staff_name").val(data.staff_name);
+            $("#ess_name").val(data.ess_name);
+            $("#bed_name").val(data.bed_name);
+            $("#nur_situation").val(data.nur_situation);
+        }
+    </script>
+
+</body>
+
+</html>

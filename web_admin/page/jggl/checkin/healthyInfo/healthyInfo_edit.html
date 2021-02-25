@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑基本信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form">
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">自理情况</label>
+            <div class="layui-input-block">
+                <select id="hea_zili_situation" name="hea_zili_situation" lay-verify="required" lay-reqtext="请选择自理情况"
+                    class="select_wd120">
+                    <option value="介助">介助</option>
+                    <option value="介护">介护</option>
+                    <option value="失能老人">失能老人</option>
+                    <option value="半失能老人">半失能老人</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label required">视力情况</label>
+                <div class="layui-input-inline">
+                    <select id="hea_vision" name="hea_vision" lay-verify="required" lay-reqtext="请选择视力情况"
+                        class="select_wd120">
+                        <option value="正常">正常</option>
+                        <option value="有损">有损</option>
+                        <option value="失明">失明</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label required">听力情况</label>
+                <div class="layui-input-inline">
+                    <select id="hea_hearing" name="hea_hearing" lay-verify="required" lay-reqtext="请选择听力情况"
+                        class="select_wd120">
+                        <option value="正常">正常</option>
+                        <option value="轻度听力障碍">轻度听力障碍</option>
+                        <option value="重度听力障碍">重度听力障碍</option>
+                        <option value="失聪">失聪</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">主治医院</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="hea_zhuzhi_hospital" placeholder="请输入主治医院" value="">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">主治医师</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="hea_zhuzhi_doctor" placeholder="请输入主治医师" value="">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">医院电话</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="hea_hospital_phone" placeholder="请输入医院电话" value="">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">过敏药物</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="hea_allergy_medicine" placeholder="请输入过敏药物" value="">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">病史情况</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="layui-textarea" id="hea_medical_history" placeholder="请输入病史情况"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">主要疾病</label>
+            <div class="layui-input-block" id="hea_zhuyao_disease">
+                <input type="checkbox" name="hea_zhuyao_disease" value="高血糖" title="高血糖">
+                <input type="checkbox" name="hea_zhuyao_disease" value="高血压" title="高血压">
+                <input type="checkbox" name="hea_zhuyao_disease" value="心脏病" title="心脏病">
+                <input type="checkbox" name="hea_zhuyao_disease" value="脑血栓" title="脑血栓">
+                <input type="checkbox" name="hea_zhuyao_disease" value="冠心病" title="冠心病">
+                <input type="checkbox" name="hea_zhuyao_disease" value="关节炎" title="关节炎">
+                <input type="checkbox" name="hea_zhuyao_disease" value="风湿" title="风湿">
+                <input type="checkbox" name="hea_zhuyao_disease" value="其他" title="其他">
+            </div>
+        </div>
+        <input id="id" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item" style="float:right;">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer', 'laydate'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                //获取checkbox[name='hea_zhuyao_disease]的值
+                var arr = new Array();
+                $("input:checkbox[name='hea_zhuyao_disease']:checked").each(function (i) {
+                    arr[i] = $(this).val();
+                });
+                var hea_zhuyao_disease = arr.join(",");//将数组合并成字符串
+                $.ajax({
+                    url: '/sys_fkcy/healthy_info/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#id").val(),
+                        "hea_zili_situation": $("#hea_zili_situation").val(),
+                        "hea_vision": $("#hea_vision").val(),
+                        "hea_hearing": $("#hea_hearing").val(),
+                        "hea_zhuzhi_hospital": $("#hea_zhuzhi_hospital").val(),
+                        "hea_zhuzhi_doctor": $("#hea_zhuzhi_doctor").val(),
+                        "hea_hospital_phone": $("#hea_hospital_phone").val(),
+                        "hea_allergy_medicine": $("#hea_allergy_medicine").val(),
+                        "hea_medical_history": $("#hea_medical_history").val(),
+                        "hea_zhuyao_disease": hea_zhuyao_disease
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                        else {
+                            layer.msg(data.msg, {
+                                icon: 5,//失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        // 获取父级数据
+        function child(data) {
+            $("#hea_zhuzhi_doctor").val(data.hea_zhuzhi_doctor);
+            $("#hea_zhuzhi_hospital").val(data.hea_zhuzhi_hospital);
+            $("#hea_hospital_phone").val(data.hea_hospital_phone);
+            $("#hea_allergy_medicine").val(data.hea_allergy_medicine);
+            $("#hea_medical_history").val(data.hea_medical_history);
+            $("#id").val(data.id);
+            // //下拉框 自理情况、视力情况、听力情况赋值
+            $("option[value='" + data.hea_zili_situation + "']").attr("selected", true);
+            $("option[value='" + data.hea_vision + "']").attr("selected", true);
+            $("option[value='" + data.hea_hearing + "']").attr("selected", true);
+            layui.form.render();
+        }
+    </script>
+</body>
+
+</html>

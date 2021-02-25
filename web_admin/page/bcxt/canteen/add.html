@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>添加食堂信息</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required" style="margin-left: auto;">食堂名称</label>
+            <div class="layui-input-block">
+                <input id="cant_name" type="text" lay-verify="required" name="cant_name" lay-reqtext="食堂名称不能为空"
+                    placeholder="请输入食堂名称" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">食堂地址</label>
+            <div class="layui-input-block">
+                <input id="cant_address" type="text" name="cant_address" lay-verify="required" lay-reqtext="食堂地址不能为空"
+                    placeholder="请输入食堂地址" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">联系电话</label>
+            <div class="layui-input-block">
+                <input id="cant_phone" type="text" name="cant_phone" lay-reqtext="联系电话不能为空" placeholder="请输入联系电话"
+                    lay-verify="tellphone" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">开放时间</label>
+            <div class="layui-input-block">
+                <input id='cant_open_date' name="cant_open_date" lay-verify="required" lay-reqtext="开放时间不能为空"
+                    placeholder="早上12：00" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">关闭时间</label>
+            <div class="layui-input-block">
+                <input type="text" id="cant_shut_date" name="cant_shut_date" lay-reqtext="关闭时间不能为空"
+                    lay-verify="required" placeholder="下午6：00" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">最晚报备时间</label>
+            <div class="layui-input-block">
+                <input type="text" id="cant_report_date" name="cant_report_date" lay-reqtext="最晚报备时间不能为空"
+                    lay-verify="required" placeholder="早上11：30" value="" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">关闭</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'laydate'], function () {
+            $ = layui.$;
+            var form = layui.form,
+                layer = layui.layer;
+            var laydate = layui.laydate;
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新父窗体
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //时间选择器
+            laydate.render({
+                elem: '#cant_open_date'
+                , type: 'time'
+                , format: '北京时间：HH点mm分' //可任意组合
+            });
+            //时间选择器
+            laydate.render({
+                elem: '#cant_shut_date'
+                , type: 'time'
+                , format: '北京时间：HH点mm分' //可任意组合
+            });
+            //时间选择器
+            laydate.render({
+                elem: '#cant_report_date'
+                , type: 'time'
+                , format: '北京时间：HH点mm分' //可任意组合
+            });
+
+
+            var mobile = /^1[3|4|5|7|8]\d{9}$/, phone = /^0\d{2,3}-?\d{7,8}$/;//指定座机和手机号码格式
+            form.verify({
+                tellphone: function (value) {
+                    var flag = mobile.test(value) || phone.test(value);
+                    if (!flag) {
+                        return '请输入正确座机号码或手机号';
+                    }
+                }
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/enterprise_canteen/save.action'
+                    ,
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "cant_name": $("#cant_name").val(),
+                        "cant_address": $("#cant_address").val(),
+                        "cant_phone": $("#cant_phone").val(),
+                        "cant_open_date": $("#cant_open_date").val(),
+                        "cant_shut_date": $("#cant_shut_date").val(),
+                        "cant_report_date": $("#cant_report_date").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                        else {
+                            layer.msg(data.msg, {
+                                icon: 5,//失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+
+        });
+    </script>
+</body>
+
+</html>

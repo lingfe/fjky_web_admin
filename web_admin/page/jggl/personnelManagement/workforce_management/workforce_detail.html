@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排班管理</title>
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../../../css/public.css">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css">
+
+</head>
+
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!--table数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div> 
+    <!-- 内容 end -->
+
+    <!-- table头部操作 start(搜索框，添加登记)--> 
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <div class="layui-inline">
+            </div>
+            <form class="layui-form layui-form-pane" style="float:left">
+                <div class="layui-inline">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="searchKey" placeholder="请输入员工姓名或身份证号" lay-search="" class="inputTest" maxlength="18">
+                            <!-- style="width:180px;height: 30px;line-height: 20px;padding: 0 10px;font-size: 12px;margin-bottom: 10px;display: inline-block;" -->
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+            <div class="layui-inline">
+                <button type="submit" style="width:150px ;margin-left:50px " class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="data-search-btn" lay-event="add"><i class="layui-icon layui-icon-add-1" ></i>新增</button>
+            </div>
+        </div>
+    </script>
+    <!-- table头部操作 end-->
+
+    <!-- 列表操作 start(编辑， 删除) -->
+    <script type="text/html" id="currentTableBar">
+        <a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>调整</a>
+        <a class="delTest" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    </script>
+    <!-- 列表操作 end -->
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+        // 加载组件
+        layui.use(['table', 'form'], function() {
+            //定义layui模块变量
+            var $ = layui.jquery;
+            var table = layui.table;
+            var form = layui.form;
+            var token = Storage.get("token");
+
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function(data) {
+                var result = data.field;
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey //关键字
+                    },
+                    page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/setting_schedule/getPage.action', // 数据接口
+                toolbar: '#toolbarDemo', // 渲染对象
+                cellMinWidth: 100,
+                headers: header,
+                text: {
+                    none: '无数据' //数据为空时的提示文本
+                },
+                defaultToolbar: ['exports'],
+                cols: [
+                    [{
+                        field: 'id',
+                        title: 'id',
+                        hide: 'true'
+                    }, {
+                        field: 'ss_scenario_name',
+                        title: '方案名称',
+                        align: "center",
+                    }, {
+                        field: 'staff_name',
+                        title: '排班人员',
+                        align: "center",
+                    }, {
+                        field: 'id_card',
+                        title: '身份证号',
+                        align: "center",
+                    }, {
+                        field: 'phone',
+                        title: '电话号码',
+                        align: "center",
+                    }, {
+                        field: 'ss_cycle',
+                        title: '排班周期',
+                        align: "center",
+                    }, {
+                        field: 'ss_shift_setting',
+                        title: '设置班次',
+                        align: "center",
+                    }, {
+                        field: 'ss_start_time',
+                        title: '开始时间',
+                        align: "center",
+                    }, {
+                        field: 'ss_stop_time',
+                        title: '结束时间',
+                        align: "center",
+                    }, {
+                        field: 'ss_explain',
+                        title: '排班说明',
+                        align: "center",
+                    }, {
+                        title: '操作',
+                        minWidth: 180,
+                        toolbar: '#currentTableBar',
+                        align: "center",
+                        fixed: "right"
+                    }]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+
+            //toolbar监听事件(头部添加操作)
+            table.on('toolbar(currentTableFilter)', function(obj) {
+                if (obj.event === 'add') { // 监听添加操作
+                    var index = layer.open({
+                        title: '新增排班',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['800px', '400px'],
+                        content: './workforce_add.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    })
+                } 
+            });
+
+            //监听操作事件(列表编辑，列表删除)
+            table.on('tool(currentTableFilter)', function(obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    //layer.alert('正在开发中!...');return false;
+                    var index = layer.open({
+                        title: '编辑排班',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['800px', '450px'],
+                        content: './workforce_edit.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    $(window).on("resize", function() {
+                        layer.full(index);
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', {
+                        title: "提示",
+                        icon: 3
+                    }, function(index) {
+                        obj.del();
+                        $.ajax({
+                            url: '/sys_fkcy/jggl/setting_schedule/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function(data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function() {
+                                        obj.del();
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function() {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+
+</html>

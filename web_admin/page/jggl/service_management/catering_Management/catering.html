@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>餐饮管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+<style>
+    .layui-tab>.layui-tab-title .layui-this {
+        background-color: #1594FF;
+        color: #FFFFFF
+    }
+</style>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layui-tab" id="demo_to">
+        <ul class="layui-tab-title">
+            <li class="demo layui-this" ifdata="./package_ma.html" lay-id="222">套餐管理</li>
+            <li class="demo" ifdata="../meals_detail/meal_detail.html" lay-id="333">报餐详情</li>
+        </ul>
+        <!--存储id-->
+        <input type="hidden" id="ess_id" />
+    </div>
+    <iframe src="./package_ma.html" id="if_id" height="100%" width="100%" marginheight="0" scrolling="auto"
+        style="min-height: 800px;" allowtransparency="true" name="fm" frameborder="0"></iframe>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['element'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery
+                , element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+            // 取父级id
+            var $ess_id = $("#ess_id", parent.document).val();
+            $('#ess_id').val($ess_id);
+
+            //触发事件
+            $('.demo').on('click', function (res) {
+                $("#if_id").attr("src", res.currentTarget.attributes.ifdata.value);
+                //切换到指定Tab项
+                element.tabChange('demo_to', res.currentTarget.attributes['lay-id'].value); //切换到：用户管理
+            });
+
+
+            $(".layui-this").click(function () {
+                $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);
+            })
+            function setIframeHeight(iframeId) {
+                var cwin = document.getElementById(iframeId);
+                if (document.getElementById) {
+                    if (cwin && !window.opera) {
+                        if (cwin.contentDocument && cwin.contentDocument.body.offsetHeight) {
+                            cwin.height = cwin.contentDocument.body.offsetHeight + "px"; //FF NS
+                            console.log("FF NS cwin.height=" + cwin.height);
+                        } else if (cwin.Document && cwin.Document.body.scrollHeight) {
+                            cwin.height = cwin.Document.body.scrollHeight + "px"; //IE
+                            console.log("IE cwin.height=" + cwin.height);
+                        }
+                    } else if (cwin.contentWindow.document && cwin.contentWindow.document.body.scrollHeight) {
+                        cwin.height = cwin.contentWindow.document.body.scrollHeight + "px"; //Opera
+                    }
+                }
+                console.log("cwin.height=" + cwin.height);
+            };
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>床位管理</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../css/public.css" media="all">
+		<link rel="stylesheet" href="../uncheckin/uncheckin.css">
+	</head>
+
+	<body>
+		<!-- 内容 -->
+		<div class="layui-row layui-col-space15">
+			<!-- 楼房管理--left -->
+			<div class="layui-col-md3">
+				<div class="layui-card">
+					<div class="layui-card-body">
+						<div id="bedAll" class="demo-tree-more"></div>
+					</div>
+				</div>
+			</div>
+			<!-- 楼房信息--right -->
+			<div class="layui-col-md9">
+				<div class="layui-card" style="min-height: 200px;">
+					<div class="layui-card-header">楼房信息</div>
+					<div class="layuimini-main">
+						<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- 头部操作 -->
+		<script type="text/html" id="toolbarDemo">
+			<button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add">
+				<i class="layui-icon layui-icon"></i>添加</button>
+			<button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete">
+				<i class="layui-icon layui-icon-delete"></i>多项删除</button>
+		</script>
+
+		<!-- 列表操作 start(编辑， 删除) -->
+		<script type="text/html" id="currentTableBar">
+			<a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="delTest" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+		</script>
+		<!-- 列表操作 end -->
+
+		<!-- 验证楼层-是否为空 -->
+		<script type="text/html" id="to_ceng">
+			{{# if (d.floor_layer == '') { }}
+			<span>--</span> {{# }else { }}
+			<span>{{d.floor_layer}}</span> {{# } }}
+		</script>
+
+		<!-- 验证房间号-是否为空 -->
+		<script type="text/html" id="jian">
+			{{# if (d.room_number == '') { }}
+			<span>--</span> {{# }else { }}
+			<span>{{d.room_number}}</span> {{# } }}
+		</script>
+
+		<!-- 验证床位号-是否为空 -->
+		<script type="text/html" id="hao">
+			{{# if (d.bed_number == '') { }}
+			<span>--</span> {{# }else { }}
+			<span>{{d.bed_number}}</span> {{# } }}
+		</script>
+		
+		<!-- 验证床位类型-是否为空 -->
+		<script type="text/html" id="bed_type">
+			{{# if (d.bed_type_name == '') { }}
+				<span>--</span> 
+			{{# }else { }}
+				<span>{{d.bed_type_name}}</span> 
+			{{# } }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			// 加载组件
+			layui.use(['table', "tree", 'treetable', 'form'], function() {
+				var $ = layui.jquery;
+				var table = layui.table;
+				var form = layui.form;
+				var tree = layui.tree;
+				var treetable = layui.treetable;
+				var token = Storage.get("token");
+				var bed_data=null;
+
+				//获取数据
+				getData();
+				function getData() {
+					//渲染表格
+					$.ajax({
+						url: '/sys_fkcy/bed_info/getAll.action',
+						headers: { //通过 request 头传递
+							token: token
+						},
+						type: 'post',
+						dataType: 'json',
+						success: function(res) {
+							if (res.state == 401) {
+								window.location.href = '../../bcxt/login/login.html';
+							} else {
+								renderTable(res.data);
+							}
+
+						}
+					});
+
+					// 获取树
+					var renderTable = function(data) {
+						tree.render({
+							elem: '#bedAll'
+							,text: {
+								defaultNodeName: '未命名' //节点默认名称
+								,none: '无数据' //数据为空时的提示文本
+							}
+							,data: data
+							,isopen: true //加载完毕后的展开状态，默认值：true
+							,checkChirld: false
+							,showLine: true //是否开启连接线
+							,url: '/sys_fkcy/bed_info/getAll.action'
+							,showCheckbox: false //是否显示复选框
+							,id: 'demoId1'
+							,isJump: false //是否允许点击节点时弹出新窗口跳转
+							,click: function(obj) {
+								//节点高亮
+								var nodes = document.getElementsByClassName("layui-tree-txt");
+								for (var i = 0; i < nodes.length; i++) {
+									if (nodes[i].innerHTML === obj.data.title){
+										nodes[i].style.color = "red";
+									}else{
+										nodes[i].style.color = "#555";
+									}										
+								}
+								
+								//获取当前点击的节点数据
+								var dataId = obj.data.id; 
+								bed_data=obj.data;
+								
+								//表格重载
+								table.reload('currentTableId',{
+									url: '/sys_fkcy/bed_info/getWherePid.action?pid=' + dataId, //数据接口
+									parseData: function(result) {
+										return {
+											"count": result.count,
+											"code": result.state, //解析接口状态
+											"msg": result.msg, //解析提示文本
+											"data": result.data //解析数据列表
+										}
+									}
+								});  
+							}
+						});
+					}
+				}
+				
+				//数据列表
+				table.render({
+					elem: '#currentTableId',
+					url: '/sys_fkcy/bed_info/getPage.action', //数据接口
+					toolbar: '#toolbarDemo',
+					cellMinWidth: 100,
+					headers: header,
+					text: {
+						none: '无数据' //数据为空时的提示文本
+					},
+					defaultToolbar: ['filter', 'exports', 'print', {
+						title: '提示',
+						layEvent: 'LAYTABLE_TIPS',
+						icon: 'layui-icon-tips'
+					}],
+					cols: [
+						[{
+							type: "checkbox",
+							width: 30
+						}, {
+							field: 'pid',
+							title: '上级ID',
+							align: "center",
+							hide: "true"
+						}, {
+							field: 'floor_tung_name',
+							title: '楼栋名称',
+							align: "center"
+						}, {
+							field: 'floor_layer',
+							title: '楼层名称',
+							toolbar: '#to_ceng',
+							align: "center"
+						}, {
+							field: 'room_number',
+							title: '房间号',
+							toolbar: '#jian',
+							align: "center"
+						}, {
+							field: 'bed_number',
+							title: '床位号',
+							toolbar: '#hao',
+							align: "center"
+						}, {
+							field: 'data_type',
+							title: '数据类型',
+							align: "center"
+						}, {
+							field: 'bed_type_name',
+							title: '床位类型',
+							toolbar: '#bed_type',
+							align: "center"
+						}, {
+							title: '操作',
+							minWidth: 200,
+							toolbar: '#currentTableBar',
+							align: "center",
+							fixed: "right"
+						}]
+					],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 //规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex', //当前页，默认page，
+						limitName: 'pageNum', //页容量，默认limit
+					},
+					parseData: function(res) {
+						return {
+							"code": res.state, //解析接口状态
+							"msg": res.msg, //解析提示文本
+							"count": res.data.numCount,
+							"data": res.data.data //解析数据列表
+						}
+					},
+					limits: [10, 15, 20, 25, 50, 100],
+					limit: 15,
+					page: true,
+					skin: 'line'
+				});
+
+				//toolbar监听事件
+				table.on('toolbar(currentTableFilter)', function(obj) {
+					if (obj.event === 'add') { // 监听添加操作
+						var index = layer.open({
+							title: '添加楼房信息',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['500px', '400px'],
+							content: './bedInfo_add.html',
+							success: function(layero, index) { //弹出层打开后的回调函数
+								// layer.full(index);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(bed_data);
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+					} else if (obj.event === 'delete') { // 监听删除操作
+						var checkStatus = table.checkStatus('currentTableId'),
+							data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认删除所选的全部内容吗？注意:(本操作不可恢复!)', {
+								title: "批量删除提示",
+								icon: 3
+							}, function(index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url: '/sys_fkcy/bed_info/deleteWhereId.action?id=' + data[i].id,
+										type: 'post',
+										headers: header,
+										success: function(data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, {
+													icon: 5
+												}); //失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon: 6, //成功的表情
+													time: 1000 //1秒关闭（如果不配置，默认是3秒）
+												}, function() {
+													location.reload(); //刷新
+												});
+											}
+										},
+										complete: function() {
+											layer.close(this.layerIndex);
+										},
+									});
+								}
+
+							});
+
+						} else {
+							layer.msg("请先选择您要删除的数据", {
+								icon: 5
+							}); //失败的表情
+							return;
+						}
+
+
+					}
+				});
+
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function(obj) {
+					console.log(obj)
+				});
+
+				//监听操作事件
+				table.on('tool(currentTableFilter)', function(obj) {
+					var data = obj.data;
+					if (obj.event === 'edit') {
+						//layer.alert('正在开发中!...');return false;
+						var index = layer.open({
+							title: '编辑楼房信息',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['500px', '400px'],
+							content: './bedInfo_edit.html',
+							success: function(layero, index) { //弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+						$(window).on("resize", function() {
+							layer.full(index);
+						});
+						return false;
+					} else if (obj.event === 'delete') {
+						layer.confirm('确认删除吗？', {
+							title: "提示",
+							icon: 3
+						}, function(index) {
+							obj.del();
+							$.ajax({
+								url: '/sys_fkcy/bed_info/deleteWhereId.action?id=' + data.id,
+								type: 'post',
+								headers: header,
+								success: function(data) {
+									if (data.state == 401) {
+										window.location.href = "../login/login.html";
+									} else if (data.state == 200) {
+										layer.msg(data.msg, {
+											icon: 6, //成功的表情
+											time: 1000 //1秒关闭（如果不配置，默认是3秒）
+										}, function() {
+											obj.del();
+											location.reload();
+										});
+									} else {
+										layer.msg(data.msg, {
+											icon: 5
+										}); //失败的表情
+										return;
+									}
+								},
+								complete: function() {
+									layer.close(this.layerIndex);
+								},
+							});
+							layer.close(index);
+						});
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

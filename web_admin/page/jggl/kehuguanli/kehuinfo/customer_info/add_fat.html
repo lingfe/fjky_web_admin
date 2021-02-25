@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>添加血脂</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">测量时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="start_time" name="start_time" lay-verify="datetime"
+                    placeholder="yyyy-MM-dd HH:mm" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">总胆固醇：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="total_cholesterol" name="total_cholesterol" lay-reqtext="总胆固醇不能为空" oninput="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')"
+                    lay-verify="required" placeholder="请输入总胆固醇" value="" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">mmol/L</div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">甘油三脂：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="triglycerides" name="triglycerides" lay-reqtext="甘油三脂不能为空" lay-verify="required" oninput="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')"
+                    placeholder="请输入甘油三脂" value="" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">mmol/L</div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">高密度脂蛋白：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="high_density_lipoprotein" name="high_density_lipoprotein"
+                    lay-reqtext="高密度脂蛋白不能为空" lay-verify="required" placeholder="请输入高密度脂蛋白" oninput="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')" value="" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">mmol/L</div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">低密度脂蛋白：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="low_density_lipoprotein" name="low_density_lipoprotein" lay-reqtext="低密度脂蛋白不能为空" oninput="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')"
+                    lay-verify="required" placeholder="请输入低密度脂蛋白" value="" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">mmol/L</div>
+        </div>
+
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">分析：</label>
+            <div class="layui-input-inline">
+                <select id="analysis" name="" lay-verify="required" lay-reqtext="请选择分析">
+                    <option value="正常">正常</option>
+                    <option value="低">低</option>
+                    <option value="偏低">偏低</option>
+                    <option value="偏高">偏高</option>
+                </select>
+            </div>
+        </div>
+        <!--存储id-->
+        <input type="hidden" id="ess_id" />
+        <!-- 操作按钮 -->
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">添加</button>
+                <button class="layui-btn layui-btn-primary" id="close">关闭</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js?date"></script>
+    <script>
+        //引入layui表单、日期组件
+        layui.use(['form', 'laydate'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var laydate = layui.laydate;
+
+            // 取父级id
+            var $ess_id = $("#ess_id", parent.document).val();
+            $('#ess_id').val($ess_id);
+
+            // 日期选择器
+            laydate.render({
+                elem: '#start_time',
+                type: 'datetime',
+                format: 'yyyy-MM-dd HH:mm'
+                , trigger: 'click'
+            });
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //监听表单提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/blood_fat/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "ess_id": $("#ess_id").val(),
+                        "measure_datetime": $("#start_time").val(),
+                        "total_cholesterol": $("#total_cholesterol").val(),
+                        "triglycerides": $("#triglycerides").val(),
+                        "high_density_lipoprotein": $("#high_density_lipoprotein").val(),
+                        "low_density_lipoprotein": $("#low_density_lipoprotein").val(),
+                        "analysis": $("#analysis").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+
+                        }
+
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+
+</body>
+
+</html>

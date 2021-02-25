@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<div id="table1" style="height: 376px;width: 550px;"></div>
+		<!-- 引入 echarts.js -->
+		<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+		<script src="../../../../../js/jquery.min.js"></script>
+		<script src="../../../../bcxt/login/login.js"></script>
+		<script type="text/javascript">
+			var result = null,
+				titles = null;
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/institution/occupancyStatistics.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					result = data.data.data;
+					titles = data.data.titles;
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		</script>		
+
+		<script type="text/javascript">
+			var uploadedDataURL = '../../../../../images/gnrk_img/title.png';
+			var my_echarts = echarts.init(document.getElementById('table1'));
+			option = {
+				title: {
+					text: '入住人口统计(近一个月)',
+					textStyle: {
+						fontSize: 20,
+						fontWeight: 'normal',
+						color: '#2C55FF',
+					},
+					y: '12px',
+					x: '39px'
+				},
+				graphic: [{
+					z: 4,
+					type: 'image',
+					id: 'logo',
+					left: '5%',
+					top: '4.2%',
+					z: -10,
+					bounding: 'raw',
+					rotation: 0, //旋转
+					origin: [64.5, 32.5], //中心点
+					scale: [1.0, 1.0], //缩放
+					style: {
+						image: uploadedDataURL,
+						// width: 129,
+						// height: 65,
+						opacity: 1
+					}
+				}],
+				backgroundColor: "#fff",
+				color: ["#2f89cf"],
+				tooltip: {
+					trigger: "axis",
+					axisPointer: {
+						// 坐标轴指示器，坐标轴触发有效
+						type: "shadow" // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				grid: {
+					left: "5%",
+					top: "22%",
+					right: "0%",
+					bottom: "4%",
+					containLabel: true
+				},
+				xAxis: [{
+					type: "category",
+					data: titles,
+					axisTick: {
+						alignWithLabel: true
+					},
+					axisLabel: {
+						textStyle: {
+							color: "#000",
+							fontSize: "12"
+						}
+					},
+					axisLine: {
+						show: false
+					}
+				}],
+				yAxis: [{
+					minInterval: 1,
+					name: "人",
+					nameTextStyle: {
+						color: "#000"
+					},
+					type: "value",
+					axisLabel: {
+						textStyle: {
+							color: "#000",
+							fontSize: "12"
+						}
+					},
+					axisLine: {
+						lineStyle: {
+							color: "rgba(0,0,0,.1)"
+							// width: 1,
+							// type: "solid"
+						}
+					},
+					splitLine: {
+						lineStyle: {
+							color: "rgba(0,0,0,.1)"
+						}
+					}
+				}],
+				series: [{
+					name: "人口数量",
+					type: "bar",
+					barWidth: "20%",
+					data: result,
+					itemStyle: {
+						barBorderRadius: 5
+					}
+				}]
+			};
+			my_echarts.setOption(option);
+		</script>
+	</body>
+
+</html>

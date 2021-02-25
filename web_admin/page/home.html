@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>主页</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+		<link rel="stylesheet" href="../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 内容 start -->
+		<div class="layui-col-space15">
+			<!-- 右边 start -->
+			<div class="layui-col-md8">
+				<div class="layui-row layui-col-space15">
+					<!-- 数据统计 -->
+					<div class="layui-col-md6">
+						<div class="layui-card">
+							<div class="layui-card-header">
+								<i class="fa fa-warning icon-red"></i>数据统计
+							</div>
+							<div class="layui-card-body">
+								<div id="view" class="layui-row layui-col-space10" style="min-height:210px;"></div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 快捷入口 -->
+					<div class="layui-col-md6">
+						<div class="layui-card">
+							<div class="layui-card-header">
+								<i class="fa fa-credit-card icon-blue"></i>快捷入口
+							</div>
+							<div class="layui-card-body">
+								<div id="menu_div" class="layui-row layui-col-space10" style="min-height:210px;"></div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 近一周统计数据 -->
+					<div class="layui-col-md12">
+						<div class="layui-card">
+							<div class="layui-card-header">
+								<i class="fa fa-line-chart icon-green"></i>近一周统计数据
+							</div>
+							<div class="layui-card-body">
+								<div id="echarts-records" style="min-height:450px"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 右边 end -->
+
+			<!-- 左边 start -->
+			<div class="layui-col-md4 layui-col-space15">
+				<div class="layui-row layui-col-space15">
+					<!-- 近三年统计数据 -->
+					<div class="layui-col-md12">
+						<div class="layui-card">
+							<div class="layui-card-header">
+								<i class="fa fa-bullhorn icon-green"></i>近三年统计数据
+							</div>
+							<div class="layui-card-body">
+								<div id="echarts-dataset" class="layui-row layui-col-space10"
+									style="min-height:260px;"></div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 年龄范围占比 -->
+					<div class="layui-col-md12">
+						<div class="layui-card">
+							<div class="layui-card-header">
+								<i class="fa fa-fire icon-green"></i>年龄范围占比
+							</div>
+							<div class="layui-card-body">
+								<div id="echarts-pies" class="layui-row layui-col-space10"
+									style="min-height:370px;"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 左边 end -->
+		</div>
+		<!-- 内容 end -->
+		
+		<!-- 数据统计 -->
+		<script id="data" type="text/html">
+			{{#  layui.each(d.list_data, function(index, item){ }}
+				<div class="layui-col-md6">
+					<div class="layui-col-md12" style="background:#f2f2f2;padding:10px;">
+						<div class="layui-col-md6">
+							<h5 class="layui-col-md12">{{ item.key }}</h5>
+							<h1 class="layui-col-md12">{{ item.value }}</h1>
+							<small class="layui-col-md12">{{ item.unit }}</small>
+						</div>
+						<div class="layui-col-md6" style="text-align:right;">
+							<span class="layui-btn layui-btn-xs layui-btn-radius {{ item.class }}">实时</span>
+						</div>
+					</div>
+				</div>
+			{{#  }); }}
+		</script>
+		
+		<!-- 菜单快捷入口 -->
+		<script id="menu_data" type="text/html">
+			{{#  layui.each(d.list_menu, function(index, item){ }}
+				<div class="layui-col-md3 muen">
+					<a href="javascript:;" layuimini-content-href="{{item.href}}" data-title="{{item.title}}" data-icon="{{item.icon}}">
+						<i class="{{item.icon}}"></i>
+						<cite>{{item.title}}</cite>
+					</a>
+				</div>
+			{{#  }); }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="./bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use([ 'layer', 'laytpl', 'miniTab', 'echarts' ],function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					layer = layui.layer,
+					laytpl = layui.laytpl,
+					miniTab = layui.miniTab,
+					echarts = layui.echarts;
+					
+				//调用快捷入口事件
+				miniTab.listen();
+				
+				//请求通行证
+				var token = Storage.get("token");
+	
+				//得到数据
+				getdata();
+				function getdata() {
+					$.ajax({
+						url : '/sys_fkcy/home/data.action',
+						headers : { //通过 request 头传递
+							token : token
+						},
+						type : 'post',
+						dataType : 'json',
+						success : function(res) {
+							var data = res.data;
+							var getTemplate = $('#data').html();
+							var menu_data = $("#menu_data").html();
+							//统计数据
+							laytpl(getTemplate).render(data,
+								function(html) {
+									$('#view').html(html);
+								});
+							//快速入口菜单
+							laytpl(menu_data).render(data,
+								function(html) {
+									$('#menu_div').html(html);
+								});
+						}
+					});
+				}
+	
+				/**
+				 * 最近三年统计数据
+				 */
+				 latelyThreeYearsVisitData();
+				 function latelyThreeYearsVisitData() {
+					$.ajax({
+						url : '/sys_fkcy/homeData/latelyThreeYearsVisitData',
+						headers : { //通过 request 头传递
+							token : token
+						},
+						type : 'post',
+						dataType : 'json',
+						success : function(res) {
+							var data = res.data;
+							dataset(data);//调用
+						}
+					});
+				}
+					
+				//最近三年统计数据-报表
+				function dataset(data){
+					var echartsDataset = echarts.init(document.getElementById('echarts-dataset'), 'walden');
+					var optionDataset = {
+						title : {
+							text : '',
+							left : 'left'
+						},
+						legend : {},
+						tooltip : {},
+						dataset : {
+							dimensions : data.params,
+							source : data.data
+						},
+						xAxis : {
+							type : 'category'
+						},
+						yAxis : {},
+						series : [{
+							type : 'bar'
+						},{
+							type : 'bar'
+						},{
+							type : 'bar'
+						}]
+					};
+					echartsDataset.setOption(optionDataset);
+				}
+				
+				//年龄范围占比-请求数据
+				ageRangeProportionData();
+				function ageRangeProportionData(){
+					$.ajax({
+						url : '/sys_fkcy/homeData/ageRangeProportionData',
+						headers : { //通过 request 头传递
+							token : token
+						},
+						type : 'post',
+						dataType : 'json',
+						success : function(res) {
+							var data = res.data;
+							pies(data);//调用
+						}
+					});
+				}
+	
+				/**
+				 * 年龄范围占比
+				 */
+				function pies(data){
+					var echartsPies = echarts.init(document.getElementById('echarts-pies'), 'walden');
+					var optionPies = {
+						title : {
+							text : '',
+							left : 'center'
+						},
+						tooltip : {
+							trigger : 'item',
+							formatter : '{a} <br/>{b} : {c} ({d}%)'
+						},
+						legend : {
+							orient : 'vertical',
+							left : 'left',
+							top : '18px',
+							data : data.titles
+						},
+						series : [ {
+							name : '指标统计',
+							type : 'pie',
+							radius : '55%',
+							center : [ '50%', '60%' ],
+							roseType : 'radius',
+							data : data.data,
+							emphasis : {
+								itemStyle : {
+									shadowBlur : 10,
+									shadowOffsetX : 0,
+									shadowColor : 'rgba(0, 0, 0, 0.5)'
+								}
+							}
+						} ]
+					};
+					echartsPies.setOption(optionPies);
+				}
+	
+				/**
+				 * 获取最近一周统计数据
+				 */
+				 get_latelyAWeekDataStatistics();
+				 function get_latelyAWeekDataStatistics() {
+					$.ajax({
+						url : '/sys_fkcy/homeData/latelyAWeekDataStatistics',
+						headers : { //通过 request 头传递
+							token : token
+						},
+						type : 'post',
+						dataType : 'json',
+						success : function(res) {
+							var data = res.data;
+							records(data);//调用
+						}
+					});
+				}
+				
+				/**
+				 * 最近一周统计数据-报表
+				 */
+				function records(data){
+					var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+					var optionRecords = {
+						tooltip : {
+							trigger : 'axis',
+							axisPointer: {
+								type: 'cross',
+								label: {
+									backgroundColor: '#6a7985'
+								}
+							}
+						},
+						legend : {
+							data : data.titles
+						},
+						grid : {
+							left : '3%',
+							right : '4%',
+							bottom : '3%',
+							containLabel : true
+						},
+						toolbox : {
+							feature : {
+								saveAsImage : {}
+							}
+						},
+						xAxis : {
+							type : 'category',
+							boundaryGap : false,
+							data : data.weekDays
+						},
+						yAxis : {
+							type : 'value'
+						},
+						series : data.data
+					};
+					echartsRecords.setOption(optionRecords);
+				}
+			});
+		</script>
+	</body>
+</html>

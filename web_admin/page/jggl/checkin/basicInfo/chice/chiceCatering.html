@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>套餐管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../uncheckin/uncheckin.css" media="all">
+</head>
+
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- tab数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+    <!-- 单行数据操作 -->
+    <script type="text/html" id="currentTableBar">
+		<a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+		<a class="delTest" lay-event="delete">删除</a>   
+    </script>
+    <!-- 头部 start -->
+    <script type="text/html" id="toolbarDemo">
+		<div class="layui-btn-container" >
+            <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon"></i>新增套餐</button>
+            <button class="layui-btn layui-btn-warm layui-btn-sm data-add-btn" lay-event="register"> <i class="layui-icon layui-icon"></i>报餐登记</button>
+		</div>
+	</script>
+    <!-- 头部 end -->
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'table'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var token = Storage.get("token");
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                // toolbar: '#toolbarDemo',
+                url: '/sys_fkcy/jggl/setMeal/getPage.action', //数据接口
+                cellMinWidth: 100,//全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+                headers: { //通过 request 头传递
+                    token: token
+                },
+                defaultToolbar: [''],
+                // defaultToolbar: ['filter', 'exports', 'print', {
+                //     title: '提示',
+                //     layEvent: 'LAYTABLE_TIPS',
+                //     icon: 'layui-icon-tips'
+                // }],
+                cols: [[
+                    { field: 'sm_name', width: 200, title: '套餐名称', align: "center" },
+                    { field: 'sm_price', width: 200, title: '套餐价格', align: "center" },
+                    { field: 'sm_price_baoyue', width: 200, title: '包月价格', align: "center" },
+                    { field: 'sm_intended_for', width: 200, title: '适用人群', align: "center" },
+                    { field: 'sm_describe', width: 300, title: '套餐描述', align: "center" },
+                    // { title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center", fixed: "right" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex',//当前页，默认page，
+                    limitName: 'pageNum',//页容量，默认limit
+                },
+                parseData: function (res) {
+                    //验证是否有权限
+                    if (res.state != 200) {
+                        layer.msg(res.msg, {
+                            icon: 5,
+                            time: 1000
+                        },
+                            function () {
+                                //获取当前窗口的name
+                                var index = parent.layer.getFrameIndex(window.name);
+                                //关闭窗口
+                                layui.close(index);
+                            });
+                        return; 
+                    }
+
+                    //返回值字段对应处理
+                    return {
+                        "code": res.state, 			//解析接口状态
+                        "msg": res.msg, 			//解析提示文本
+                        "count": res.data.numCount,	//总数量量
+                        "data": res.data.data 		//解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+            //监听行单击事件（双击事件为：rowDouble） 
+            table.on('row(currentTableFilter)', function (obj) {
+                // 向父级页面传值
+                var data = obj.data;
+                sendToParent(data)
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index); //关闭当前弹框
+                //标注选中样式
+                obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+            });
+            // 定义向父级页面传值函数
+            function sendToParent(data) {
+                parent.getDataFromSon_2(data);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+            }
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                // 监听添加操作
+                if (obj.event === 'add') {
+                    var index = layer.open({
+                        title: '新增套餐',	//弹窗标题
+                        type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+                        shade: 0.2,			//遮罩层透明度0.1~1
+                        maxmin: true,		//是否开启最大化
+                        shadeClose: false,	//是否点击遮罩关闭
+                        closeBtn: 0,
+                        area: ['800px', '500px'],		//指定窗口大小
+                        content: './add_meal.html', //内容
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            var iframe = window['layui-layer-iframe' + index];
+                            //高度自适应
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                } else if (obj.event === 'register') {
+                    //    layer.msg("维护中！！！！！", {
+                    //     icon: 5
+                    // }); //失败的表情
+                    var index = layer.open({
+                        title: '报餐详情登记',	//弹窗标题
+                        type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+                        shade: 0.2,			//遮罩层透明度0.1~1
+                        maxmin: true,		//是否开启最大化
+                        shadeClose: false,	//是否点击遮罩关闭
+                        closeBtn: 0,
+                        area: ['800px', '500px'],		//指定窗口大小
+                        content: './add_recordMeal.html', //内容
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            var iframe = window['layui-layer-iframe' + index];
+                            //高度自适应
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                }
+            });
+            //监听操作栏事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                let data = obj.data;
+                // 监听编辑操作
+                if (obj.event === 'edit') {
+                    // layer.msg("对不起！你没有权限！", {
+                    //     icon: 5
+                    // }); //失败的表情
+                    var index = layer.open({
+                        title: '编辑套餐信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        closeBtn: 0,
+                        area: ['600px', "500px"],
+                        content: './edit_meal.html',
+                        success: function (layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                        }
+                    });
+                    return false;
+                    // 监听删除操作
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', { title: "提示", icon: 3 }, function (index) {
+                        $.ajax({
+                            url: '/sys_fkcy/jggl/setMeal/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6,//成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(data.msg, { icon: 5 });//失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function () {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

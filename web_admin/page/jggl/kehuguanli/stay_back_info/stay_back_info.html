@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>退住信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" media="all">
+</head>
+
+<body>
+
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+
+    <!-- table头部操作 -->
+    <script type="text/html" id="toolbarDemo">
+		<div class="layui-btn-container">
+            <div class="layui-inline">
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>批量删除</button>
+            </div>
+            <form class="layui-form layui-form-pane" style="float:left">
+                <div class="layui-inline">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="searchKey" placeholder="请输入客户姓名或身份证号" lay-search=""
+                                class="inputTest" >
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn"  lay-submit
+                            lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+		</div>
+	</script>
+
+    <!-- 单行数据操作 -->
+    <script type="text/html" id="currentTableBar">
+		<a class="delTest" lay-event="delete">删除</a>   
+	</script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+
+            //加载数据到table
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/exit_record/getPage.action',
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                cols: [[
+                    {
+                        type: "checkbox"
+                    },
+                    { field: 'ess_info_id', minWidth: 20, title: '基本信息id',hide:"true" },
+                    { field: 'full_name', width: 90, title: '姓名' },
+                    { field: 'id_card', width: 200, title: '身份证号', align: "center" },
+                    { field: 'phone', width: 150, title: '联系电话', align: "center" },
+                    { field: 'entry_time', width: 200, title: '入住时间', align: "center" },
+                    { field: 'exit_time', width: 200, title: '退住时间', align: "center" },
+                    { field: 'exit_form', width: 100, title: '出院形式', align: "center" },
+                    { field: 'crt_date', width: 200, title: '登记时间', align: "center", templet: "<div>{{layui.util.toDateString(d.crt_date)}}</div>" },
+                    {
+                        title: '操作',
+                        minWidth: 250,
+                        toolbar: '#currentTableBar',
+                        align: "center",
+                        fixed: "right"
+                    }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: true,
+                skin: 'line',
+            });
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey	//关键字
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //toolbar监听头部操作事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                let ooo = obj.data;
+                // 监听批量删除操作
+                 if (obj.event === 'delete') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认删除选择内容吗？该操作不可恢复!', {
+                            title: "批量删除提示",
+                            icon: 3
+                        }, function (index) {
+                            for (var i = 0; i < data.length; i++) {
+                                $.ajax({
+                                    url: '/sys_fkcy/jggl/exit_record/deleteWhereId.action?id=' + data[i].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function (data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                            }, function () {
+                                                location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function () {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg('请先选择您要删除的数据！', {
+                            icon: 5
+                        }); //失败的表情
+                        return;
+                    }
+                }
+            });
+
+            //监听表格复选框选择
+            table.on('checkbox(currentTableFilter)', function (obj) {
+                console.log(obj)
+            });
+
+            //监听操作栏事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                let data = obj.data;
+                // 监听删除操作
+                if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗', {
+                        title: "删除提示",
+                        icon: 3
+                    }, function (index) {
+                        $.ajax({
+                            url: '/sys_fkcy/jggl/exit_record/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state != 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                    });
+                                }
+                            },
+                            complete: function () {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

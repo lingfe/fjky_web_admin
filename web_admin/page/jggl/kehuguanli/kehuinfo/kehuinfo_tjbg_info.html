@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>体检报告</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" / media="all">
+</head>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container" style="height:777px;">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+            <!--存储id-->
+            <input type="hidden" id="ess_id" />
+        </div>
+    </div>
+
+    <!-- table头部操作 -->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+                <div class="layui-row">
+                		<div class="layui-col-md11">
+                			<a 	class="layui-btn layui-btn-lg layui-btn-normal">体检报告</a>
+                		</div>
+                    	<div class="layui-col-md1">
+	  						<button class="layui-btn layui-btn-normal layui-btn-lg data-add-btn" onclick="add()"><i class="layui-icon layui-icon-add-1">上传体检报告</i></button>
+                    	</div>
+                </div>
+        </div>
+    </script>
+    	
+    	<script type="text/html" id="toolbarAdd_Dlt"> 
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="preview"><i class="layui-icon layui-icon-edit"></i>点击预览</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" href="/sys_fkcy/files/download?file_id={{d.file_id}}" target="_blank"><i class="layui-icon layui-icon-download-circle"></i>点击下载</a>
+    	</script>
+    	
+    <!-- 引入js资源 -->
+	<script src="../../../../lib/layui-v2.5.5/layui.js" charset="UTF-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="UTF-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'layer','jquery'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+                layer = layui.layer;
+                // 取父级id
+                var $ess_id = $("#ess_id",parent.document).val();
+                $('#ess_id').val($ess_id);
+            
+            //监听操作栏事件
+            table.on('tool(currentTableFilter)', function(obj) {
+                let data = obj.data;
+                // 监听编辑操作
+                if (obj.event === 'preview') {
+                	layui.use('layer',function(){
+                		$.ajax({
+								url: '/sys_fkcy/files/onlinePreview',
+								type: "POST",
+								data: {
+									"file_id": obj.data.file_id,
+								},
+								xhrFields: {
+									withCredentials: true
+								},
+								success: function(data) {
+									if(data.state == 200){
+										// 字符串转成json
+										var $my_data = $.parseJSON(data.data);
+										// 在新的标签页打开
+										window.open($my_data.data.viewUrl);
+									}else{
+										layer.msg('预览失败');
+									}
+								}
+							});
+		        	})
+                    // 监听查看详情操作
+                } else if (obj.event === 'download') {
+                	layer.alert('下载事件');
+				}
+            });
+                
+            //加载数据到table
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/phyexa/getPage.action',
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                defaultToolbar: '#toolbarDemo',
+                where: {
+                	'ess_id': $ess_id
+                },
+                cols: [
+                    [
+                    {field: 'ess_id', hide:true,align: "center"},	// 基本信息id
+                    {field: 'file_id', hide:true,align: "center"},	// 文件id
+                    {field: 'pex_datetime',minWidth: 170,title: '体检时间',align: "center"}, 
+                    {field: 'pex_hospital',minWidth: 130,title: '体检医院',align: "center"},
+                    {field: 'pex_result',minWidth: 130,title: '体检结果',align: "center"}, 
+                    {minWidth: 130,title: '操作',align: "center", toolbar:'#toolbarAdd_Dlt'}
+                    ]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.code,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: false,
+                skin: 'line',
+            });
+
+        });
+
+        // 打开窗口
+        function add(){
+        	layui.use('layer',function(){
+        		var layer = layui.layer;
+        		layer.open({
+                        title: '添加体检报告',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['504px', "437px"],
+                        content: './kehuinfo_tjbg_add.html',
+                  });
+        	})
+		}
+    </script>
+</body>
+
+</html>

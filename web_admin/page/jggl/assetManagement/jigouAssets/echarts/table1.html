@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 引入 echarts.js -->
+		<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+		<script src="../../../../../js/jquery.min.js"></script>
+		<script src="../../../../bcxt/login/login.js"></script>
+	</head>
+
+	<body>
+		<div id="table1" style="height: 330px;width: 570px;"></div>
+		<script type="text/javascript">
+			var $ass_totle = 0,
+				$cangku_sum = 0,
+				$pandian_sum = 0,
+				$gyshang_sum = 0;
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/jggl/assets/homeData.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					$ass_totle = data.data.ass_totle;
+					$cangku_sum = data.data.changku_sum;
+					$pandian_sum = data.data.panding_sum;
+					$gyshang_sum = data.data.gyshang_sum;
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		</script>
+
+		<script type="text/javascript">
+			var my_echarts = echarts.init(document.getElementById('table1'));
+			var trafficWay = [{
+				name: '资产总数',
+				value: $ass_totle
+			}, {
+				name: '仓库总数',
+				value: $cangku_sum
+			}, {
+				name: '盘点次数',
+				value: $pandian_sum
+			}, {
+				name: '供应商数量',
+				value: $gyshang_sum
+			}];
+
+			let title = '总量';
+			let bgColor = '#fff';
+			let fontColor = "#333";
+			let titleColor = '#666';
+			let scale = 1;
+			let echartData = [{
+					name: "资产总数",
+					value: $ass_totle,
+				},
+				{
+					name: "仓库总数",
+					value: $cangku_sum,
+				},
+				{
+					name: "盘点次数",
+					value: $pandian_sum,
+
+				},
+				{
+					name: "供应商数量",
+					value: $gyshang_sum,
+				},
+			];
+			let formatNumber = function(num) {
+				let reg = /(?=(\B)(\d{3})+$)/g;
+				return num.toString().replace(reg, ',');
+			}
+			let total = echartData.reduce((a, b) => {
+				return a + b.value * 1
+			}, 0);
+			option = {
+				title: [{
+					text: '{name|' + title + '}\n{val|' + formatNumber(total) + '}',
+					top: 'center',
+					x: '32%',
+					textStyle: {
+						rich: {
+							name: {
+								fontSize: 14,
+								fontWeight: 'normal',
+								color: '#666666',
+								padding: [10, 0]
+							},
+							val: {
+								fontSize: 32,
+								fontWeight: 'bold',
+								color: '#333333',
+								padding:[0,-3]
+							}
+						}
+					}
+			}, {
+					text: '资产数量分布图',
+					y: '8px',
+					x: '20px'
+				}],
+				backgroundColor: bgColor,
+				color: ['#FFC674', '#6CCEFF', '#8AA1FF', '#E1ACFF', '#FF7575'],
+				tooltip: {
+					trigger: 'item'
+				},
+				legend: {
+					orient: 'vertical',
+					icon: 'rect',
+					x: '70%',
+					y: 'center',
+					itemWidth: 14 * scale,
+					itemHeight: 14 * scale,
+					align: 'left',
+					textStyle: {
+						rich: {
+							name: {
+								fontSize: 12 * scale
+							},
+							value: {
+								fontSize: 16 * scale,
+								padding: [0, 5, 0, 15]
+							},
+							unit: {
+								fontSize: 12 * scale
+							}
+						}
+					},
+					formatter: function(name) {
+						let res = echartData.filter(v => v.name === name);
+						res = res[0] || {};
+						let unit = res.unit || '';
+						return '{name|' + name + '}  {value|' + res.value + '}{unit|' + unit + '}'
+					}
+					// data: legendName
+				},
+				series: [{
+					type: 'pie',
+					radius: ['40%', '60%'],
+					center: ['35%', '50%'],
+					data: echartData,
+					labelLine: {
+						normal: {
+							length: 20,
+							length2: 20
+						}
+					},
+					label: {
+						normal: {
+							formatter: params => {
+								return(
+									"{value|" +
+									params.value +
+									"}"
+								);
+							},
+							rich: {
+								value: {
+									fontSize: 16 * scale,
+									lineHeight: 16 * scale
+								},
+								unit: {
+									fontSize: 12 * scale,
+									lineHeight: 12 * scale,
+									padding: [0, 0, 2 * scale, 0]
+								}
+							}
+						}
+					},
+				}]
+			};
+			my_echarts.setOption(option);
+		</script>
+	</body>
+
+</html>

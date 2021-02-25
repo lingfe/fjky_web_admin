@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>客户信息管理</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+		<link rel="stylesheet" href="../../uncheckin/uncheckin.css" / media="all">
+	</head>
+
+	<body>
+
+		<!-- 内容 start  -->
+		<div class="layuimini-container">
+			<div class="layuimini-main">
+				<!-- 搜索 start -->
+				<div style="margin: 10px 0px 0px 0px">
+					<form class="layui-form layui-form-pane" action="">
+						<div class="layui-form-item">
+							<div class="layui-inline pane" style="margin-left: 0;">
+								<label class="layui-form-label" style="width:150px">按姓名搜索</label>
+								<div class="layui-input-inline">
+									<input name="searchKey" placeholder="请输入姓名" class="layui-input" />
+								</div>
+							</div>
+							<div class="layui-inline pane" style="margin-left: 0;">
+								<label class="layui-form-label" style="width:150px">按身份证号搜索</label>
+								<div class="layui-input-inline">
+									<input name="idKey" placeholder="请输入身份证号" class="layui-input" />
+								</div>
+							</div>
+							<div class="layui-inline">
+								<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn">
+                                <i class="layui-icon layui-icon-search"></i>搜索
+                            </button>
+							</div>
+						</div>
+					</form>
+				</div>
+				<!-- 搜索 end -->
+				<!-- 数据列表 -->
+				<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+			</div>
+			<input type="text" hidden id="ess_id">
+		</div>
+
+		<!--查看健康档案图标icon-->
+		<script type="text/html" id="bigdataBar">
+			<a href="javascript:;" class="layui-btn layui-btn-normal layui-btn-xs" layuimini-content-href="/bigdata/page/VH_Records/" data-title="健康档案">
+				<i class="layui-icon layui-icon-username"></i>查看
+			</a>
+		</script>
+
+		<!-- 单行数据操作 -->
+		<script type="text/html" id="currentTableBar">
+			<a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="delTest" style="color: #1594FF;" lay-event="detail">详细信息</a>
+		</script>
+
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js " charset="utf-8 "></script>
+		<script type="text/javascript" src="../../../../js/lay-config.js"></script>
+		<script src="../../../../js/jquery.min.js"></script> 
+		<script type="text/javascript" src="../../../bcxt/login/login.js"></script>
+		<script>
+			layui.use(['layer', 'laytpl', 'miniTab', 'echarts'], function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					miniTab = layui.miniTab,
+					echarts = layui.echarts;
+
+				//调用快捷入口事件
+				miniTab.listen();
+			})
+		</script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'table', 'jquery'], function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					form = layui.form,
+					table = layui.table;
+
+				//加载数据到table
+				table.render({
+					elem: '#currentTableId',
+					url: '/sys_fkcy/essential_information/getPageCustomerRelated.action',
+					cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+					headers: header,
+					defaultToolbar: ['exports'],
+					cols: [
+						[{
+							field: 'id',
+							hide: "true"
+						}, {
+							field: 'full_name',
+							minWidth: 80,
+							title: '姓名',
+							align: "center"
+						}, {
+							field: 'id_card',
+							minWidth: 150,
+							title: '身份证号',
+							align: "center"
+						}, {
+							field: 'phone',
+							minWidth: 130,
+							title: '联系电话',
+							align: "center"
+						}, {
+							field: 'bed',
+							minWidth: 190,
+							title: '床位信息',
+							align: "center"
+						}, {
+							field: 'fam_full_name',
+							minWidth: 80,
+							title: '紧急联系人',
+							align: "center"
+						}, {
+							field: 'fam_phone',
+							minWidth: 130,
+							title: '紧急联系人电话',
+							align: "center"
+						}, {
+							field: 'fam_and_relation',
+							minWidth: 130,
+							title: '关系',
+							align: "center"
+						}, {
+							minWidth: 130,
+							title: '健康档案',
+							align: "center",
+							toolbar: '#bigdataBar'
+						}, {
+							title: '操作',
+							minWidth: 200,
+							toolbar: '#currentTableBar',
+							align: "center",
+							fixed: "right"
+						}]
+					],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 //规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex', //当前页，默认page，
+						limitName: 'pageNum', //页容量，默认limit
+					},
+					parseData: function(res) {
+						return {
+							"code": res.state, //解析接口状态
+							"msg": res.msg, //解析提示文本
+							"count": res.data.numCount,
+							"data": res.data.data //解析数据列表
+						}
+
+					},
+					limits: [5, 10, 15, 20, 25, 50, 100],
+					limit: 10,
+					page: true,
+					skin: 'line',
+				});
+				// 监听搜索操作
+				form.on('submit(data-search-btn)', function(data) {
+					var result = data.field;
+					//执行搜索重载
+					table.reload('currentTableId', {
+						where: {
+							searchKey: result.searchKey,
+							idKey: result.idKey
+						},
+						page: {
+							curr: 1 //默认第一页
+						}
+					});
+					return false;
+				});
+
+				//监听操作栏事件
+				table.on('tool(currentTableFilter)', function(obj) {
+					let data = obj.data;
+					$("#ess_id").val(obj.data.id);
+					// 监听编辑操作
+					if(obj.event === 'edit') {
+						var index = layer.open({
+							title: '编辑客户信息',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true, 
+							area: ['100%', "100%"],
+							content: '../../checkin/basicInfo/edit.html',
+							success: function(layero, index) { //弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							} 
+						});
+						return false;
+						// 监听查看详情操作
+					} else if(obj.event === 'detail') {
+						let data = obj.data;
+						var index = layer.open({
+							title: '查看详情',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['100%', "100%"],
+							content: './detail.html',
+							success: function(layero, index) { //弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							}
+						});
+						return false;
+
+					}
+				});
+			});
+		</script>
+	</body>
+
+</html>

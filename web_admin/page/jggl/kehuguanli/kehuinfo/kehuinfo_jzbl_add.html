@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>登记返回</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+<body>
+	
+	<!--(full_name, out_escort, id_card, out_escort_phone, phone, out_datetime, out_is_equipment,returntime,equipment_id ,out_reason)-->
+	<!--姓名，陪同人，身份证号，陪同人电话， 联系电话， 外出时间， 是否佩戴设备，返回时间， 设备id， 外出原因-->
+	<!--表单 start-->
+	<form class="layui-form" action="">
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">就诊时间：</label>
+					<div class="layui-input-inline">
+				      <input type="text" id='mr_datetime' readonly lay-verify="required" placeholder="请输入就诊时间" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">就诊机构：</label>
+					<div class="layui-input-inline">
+				      <input type="text" id='mr_hospital' lay-verify="required" placeholder="请输入就诊机构" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">就诊科室：</label>
+					<div class="layui-input-inline">
+				      <input type="text" id='mr_department' lay-verify="required" placeholder="请输入就诊科室" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">就诊类别：</label>
+					<input type="radio" id="mr_type" name="bl" value="门诊病历" checked="" title="门诊病历">
+				    <input type="radio" id="mr_type" name="bl" value="住院病历" title="住院病历">
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">诊断：</label>
+					<div class="layui-input-inline">
+					
+					<textarea id="mr_result" lay-verify='required' class="layui-textarea" style="resize: none;"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset2">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+						&nbsp;&nbsp;&nbsp;
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table', 'jquery', 'laydate'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate;
+				table = layui.table;
+		
+			laydate.render({
+				elem: "#mr_datetime",
+				type: 'datetime',
+				max: 0,
+				trigger : 'click',
+			})
+			// 用户id获取 
+            var $ess_id = $("#ess_id",parent.document).val();
+
+			
+			
+		//监听提交
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/melreds/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	                "ess_id": $ess_id,
+	                "mr_datetime": $('#mr_datetime').val(),
+	                "mr_hospital": $('#mr_hospital').val(),
+	                "mr_department": $('#mr_department').val(),
+	                "mr_type": $('input:radio:checked').val(),
+	                "mr_result": $('#mr_result').val()
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        // 监听单选框事件(如果用户选择佩戴智能设备，可以输入设备id，否则不能输入)
+        form.on('radio(layui_dataType)', function(data){
+        	var $e_id = $('#equipment_id');
+		   if(data.value == 'true'){
+		   		$e_id.removeAttr("disabled");
+		   		$e_id.removeClass('layui-disabled layui-radio-disbaled');
+		 		$e_id.attr("placeholder", '请输入设备ID');
+		   }else if(data.value == 'false'){
+		   		$e_id.attr('disabled', "true");
+		   		$e_id.addClass('layui-disabled layui-radio-disbaled');
+		 		$e_id.attr("placeholder", '');
+		   }
+		})
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+        
+       
+	});
+	
+	//得到父级内容(kehuinfo.html)
+    	function child(data){
+    		layui.use('jquery',function(){
+    			var $ = layui.jquery;
+				$('#ess_id').val(data.ess_id);
+    		})
+    	}
+   
+    </script>
+</body>
+
+</html>

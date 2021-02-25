@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>资产入库</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+
+<body>
+	    <!-- 内容 start  -->
+		<div class="layuimini-container">
+	        <div class="layuimini-main">
+	            <!--table数据列表 -->
+	            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter">
+	            </table>
+	        </div>
+	    </div>
+	    <!-- 内容 end -->
+	
+	    <!-- table头部操作 start(搜索框，添加登记)-->
+	    <script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+	            <div class="layui-inline">
+	            </div>
+	            <form class="layui-form layui-form-pane" style="float:left">
+	                <div class="layui-inline">
+	                    <div class="layui-inline">
+	                        <div class="layui-input-inline">
+	                            <input type="text" name="searchKey" placeholder="搜索关键字" lay-search=""
+	                                class="inputTest" maxlength="18" >
+	                        </div>
+	                    </div>
+	                    <div class="layui-inline">
+	                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn"  lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+	                    </div>
+	                    
+	                </div>
+	            </form>
+			</div>
+		</script>
+		<!-- table头部操作 end-->
+	
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+	        // 加载组件
+	        layui.use(['table', 'form','jquery'], function () {
+	        	//定义layui模块变量
+	            var $ = layui.jquery;
+	            var table = layui.table;
+	            var form = layui.form;
+	            var token = Storage.get("token");
+	            var data = [];
+	            var pindex = parent.layer.getFrameIndex(window.name);
+	            
+	            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey	//关键字
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+	            
+	            //数据列表
+	            table.render({
+	                elem: '#currentTableId',
+	                url: '/sys_fkcy/jggl/assets/getPage.action', // 数据接口
+	                toolbar: '#toolbarDemo',	// 渲染对象
+	                cellMinWidth: 100,
+	                headers: header,
+	                text: {
+	                    none: '无数据' //数据为空时的提示文本
+	                },
+	                defaultToolbar: [],
+	                cols: [
+	                [
+	                	{ field: 'id', title:'id',hide: true},
+	                    { field: 'ass_name', title: '资产名称', align:'center'},
+	                    { field: 'ass_type', title: '资产类型', align:'center'},
+	                    { field: 'ass_specifications', title: '型号', align:'center'},
+	                    { field: 'ass_number', title: '资产编号', align:'center'},
+	                    { field: 'department_name', title: '所属部门', align:'center'},
+	                    { field: 'ass_users', title: '使用人', align:'center'},
+	                    { field: 'ass_entry_date', title: '入账时间', align:'center'},
+	                ]
+	                ],
+	                response: {
+	                    statusName: 'code', //规定返回的状态码字段为code
+	                    statusCode: 200 //规定成功的状态码味200
+	                },
+	                request: {
+	                    pageName: 'pageIndex',//当前页，默认page，
+	                    limitName: 'pageNum',//页容量，默认limit
+	                },
+	                parseData: function (res) {
+	                	data.push(res.data.data);
+	                    return {
+	                        "code": res.state, //解析接口状态
+	                        "msg": res.msg, //解析提示文本
+	                        "count": res.data.numCount,
+	                        "data": res.data.data //解析数据列表
+
+	                    }
+	                },
+	                limits: [10, 15, 20, 25, 50, 100],
+	                limit: 15,
+	                page: true,
+	                skin: 'line'
+	            });
+	            
+	            //toolbar监听事件(头部添加操作)
+	            table.on('toolbar(currentTableFilter)', function (obj) {
+	                if (obj.event === 'add') {  // 监听添加操作
+	                    var index = layer.open({
+	                        title: '资产入库',
+	                        type: 2,
+	                        shade: 0.2,
+	                        maxmin: true,
+	                        shadeClose: true,
+	                        area: ['846px', '605px'],
+	                        content: './zcrk_add.html'
+	                    });
+	                    $(window).on("resize", function () {
+	                        layer.full(index);
+	                    });
+	                }
+	            });
+	            
+	            // 监听搜索操作
+				form.on('submit(data-search-btn)', function(data) {
+					var result = data.field;
+					//执行搜索重载
+					table.reload('currentTableId', {
+						where: {
+							searchKey: result.searchKey
+						},
+						page: {
+							curr: 1 //默认第一页
+						}
+					});
+					return false;
+				});
+	            
+	            //row点击事件(父页面传值)
+	            table.on('row(currentTableFilter)', function (obj) {
+	            	var index = parent.layer.getFrameIndex(window.name);
+					parent.layer.close(index);//关闭当前页
+					var parent$ = window.parent.layui.jquery;
+					parent$('#ass_id').val(obj.data.id);
+					parent$('#ass_name').val(obj.data.ass_name);
+					parent$('#ass_type').val(obj.data.ass_type);
+					parent$('#ass_specifications').val(obj.data.ass_specifications);
+					parent$('#ass_number').val(obj.data.ass_number);
+					parent$('#ssbm').val(obj.data.department_name);
+					parent$('#ass_users').val(obj.data.ass_users);
+					parent$('#ass_entry_date').val(obj.data.ass_entry_date);
+					
+	            });
+
+	        });
+
+	        
+	    </script>
+</body>
+
+</html>

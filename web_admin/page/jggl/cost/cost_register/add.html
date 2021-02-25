@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>添加消费登记</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css?date" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css?date" media="all">
+	</head>
+
+	<body>
+		<div class="layui-form layuimini-form">
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">姓名：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline">
+						<input id="full_name" type="text" name="username" onclick="open_child()" lay-verify="required" readonly placeholder="请输入姓名" class="layui-input" lay-reqText="请输入姓名">
+					</div>
+				</div>
+			</div>
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">身份证号：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline">
+						<input type="text" id="id_card" name="id_card" placeholder="请输入身份证号" autocomplete="off" disabled="true" class="layui-input">
+					</div>
+				</div>
+			</div>
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">费用类型：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline">
+						<input id="cost_type" type="text" name="cost_type" placeholder="请输入费用类型" lay-verify="required" class="layui-input" lay-reqText="请输入费用类型">
+					</div>
+				</div>
+			</div>
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">金额：</label>
+				<div class="layui-input-block">
+					<div class="layui-input-inline">
+						<input type="text" class="layui-input dateIcon" id="cost_sum" oninput="value=value.replace(/[^\d]/g,'')" lay-verify="required" lay-reqText="请输入消费金额" placeholder="请输入消费金额" value="">
+					</div>
+				</div>
+			</div>
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">备注：</label>
+				<div class="layui-input-block">
+					<textarea id="cost_remark" name="cost_remark" placeholder="请输入备注" class="layui-textarea"></textarea>
+				</div>
+			</div>
+			<!-- 隐藏属性 -->
+			<input id="ess_id" type="text" style="display: none" readonly="" value=''>
+			<input id="phone" type="text" style="display: none" readonly="" value=''>
+			<div class="layui-form-item">
+				<div class="layui-input-block">
+					<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">登记</button>
+					<button class="layui-btn layui-btn-primary" id="close">取消</button>
+				</div>
+			</div>
+		</div>
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js?date"></script>
+		<script>
+			layui.use(['form'], function() {
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+
+				//是否操作过
+				var is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click", function() {
+					if(!is_caozuo) {
+						//只是关闭
+						var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index); //关闭窗口
+					} else {
+						//关闭并刷新
+						window.parent.location.reload();
+					}
+					return false;
+				});
+
+				//监听提交
+				form.on('submit(saveBtn)', function(data) {
+					$.ajax({
+						url: '/sys_fkcy/jggl/cost_record/saveCostRegister.action',
+						headers: header,
+						context: document.body,
+						type: "POST",
+						// dataType: "data",
+						data: {
+							"ess_id": $("#ess_id").val(),
+							"cost_type": $("#cost_type").val(),
+							"cost_sum": $("#cost_sum").val(),
+							"full_name": $("#full_name").val(),
+							"id_card": $("#id_card").val(),
+							"phone": $("#phone").val(),
+							"cost_remark": $("#cost_remark").val()
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function(data) {
+							if(data.state == 200) {
+								layer.msg(data.msg, {
+									icon: 6, //成功的表情
+									time: 1000 //1秒关闭（如果不配置，默认是3秒）
+								}, function() {
+									window.parent.location.reload();
+								});
+							} else {
+								layer.msg(data.msg, {
+									icon: 5, //失败的表情
+									time: 1000
+								});
+								return;
+							}
+						}
+					});
+					return false;
+				});
+			});
+			// 获取选择姓名页面传来的值
+			function getDataFromSon(data) {
+				var $ = layui.$;
+				$("#ess_id").val(data.id);
+				$("#full_name").val(data.full_name);
+				$("#id_card").val(data.id_card);
+				$("#phone").val(data.phone)
+			}
+
+			// 调用客户选框
+			function open_child() {
+				layui.use(['layer', 'jquery'], function() {
+					var layer = layui.layer;
+					var index = layer.open({
+						title: '客户列表',
+						type: 2,
+						shade: 0.2,
+						maxmin: true,
+						shadeClose: true,
+						area: ['400px', '400px'],
+						content: './choose.html'
+					});
+					layer.full(index);
+				})
+			}
+		</script>
+
+	</body>
+
+</html>

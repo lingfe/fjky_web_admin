@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>退住结算</title>
+	<!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	<link rel="stylesheet" href="../../../../css/public.css" media="all">
+	<link rel="stylesheet" href="../../uncheckin/uncheckin.css" / media="all">
+</head>
+
+<body style="background-color: white;">
+
+	<!-- 数据列表 -->
+	<form class="layui-form layui-bg-gray">
+		<input type="text" id="id" hidden="hidden" />
+		<div class="layui-row" style="padding: 4px;">
+			<div class="layui-col-md3">
+				<div class="layui-form-item">
+					<label class="layui-form-label">姓名：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="full_name" disabled="" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-col-md3">
+				<div class="layui-form-item">
+					<label class="layui-form-label">身份证号：</label>
+					<div class="layui-input-inline">
+						<input type="text" id="id_card" disabled="" autocomplete="off" class="layui-input">
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-col-md3">
+				<div class="layui-form-item">
+					<label class="layui-form-label">结算时间</label>
+					<div class="layui-input-inline">
+						<input type="text" id="js_datetime" class="layui-input" autocomplete="off">
+					</div>
+				</div>
+			</div>
+
+			<div class="layui-col-md3">
+				<div class="layui-form-item">
+					<label class="layui-form-label">出院类型：</label>
+					<div class="layui-input-inline">
+						<select id="se1">
+							<option value="exit_form_101" selected="">退住</option>
+							<option value="exit_form_102">去世</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+
+	<!--表格1 账单情况-->
+	<div class="layui-row" style="padding-top: 50px;text-align: center;margin: auto;">
+		<div class="layui-col-md10 layui-col-md-offset1">
+			<h2 align="center">账单情况</h2>
+			<table class="layui-table">
+				<thead align="center">
+					<tr>
+						<th>日期</th>
+						<th>账单类型</th>
+						<th>折扣(元)</th>
+						<th>已交(元)</th>
+						<th>欠费(元)</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<!--账单情况-->
+				<tbody id="zdqk"></tbody>
+			</table>
+		</div>
+	</div>
+
+	<!--表格2 押金及预存情况-->
+	<div class="layui-row" style="padding-top: 50px;">
+		<div class="layui-col-md10 layui-col-md-offset1">
+			<h2 align="center">押金及预存情况</h2>
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<th>押金(元)</th>
+						<th>预存(元)</th>
+					</tr>
+				</thead>
+				<!--押金预存-->
+				<tbody>
+					<tr>
+						<td id="ap_deposit"></td>
+						<td id="ap_cost_advance"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!--表格3 结算合计-->
+	<div class="layui-row" style="padding-top: 50px;">
+		<div class="layui-col-md10 layui-col-md-offset1">
+			<h2 align="center">结算合计</h2>
+			<table class="layui-table">
+				<thead>
+					<tr>
+						<th>欠费合计</th>
+						<th>其他退费</th>
+						<th>应交(元)</th>
+						<th>应退(元)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--表格标识定义-->
+					<tr>
+						<td id="js_td3"></td>
+						<td id="js_td4"></td>
+						<td id="js_td5"></td>
+						<td id="js_td6"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- 事件按钮-->
+	<div class="layui-row" style="padding-top: 20px;">
+		<div class="layui-col-md4 layui-col-md-offset4">
+			<div class="layui-form-item">
+				<div class="layui-input-inline" style="padding-left: 146.5px;">
+					<button class="layui-btn layui-btn-primary" id="close">取消</button>
+					&nbsp;&nbsp;&nbsp;
+					<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">结算</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 引入js资源 -->
+	<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+	<script src="../../../bcxt/login/login.js"></script>
+	<script charset="utf-8">
+		//加载layui指定组件
+		layui.use(['form', 'table', 'jquery', 'laydate'], function () {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate,
+				table = layui.table;
+			var data = null;
+			var list_cost_re = []
+			var list_exit_form = []
+			var map_ess_info = []
+
+			laydate.render({
+				elem: '#js_datetime', //指定元素
+				value: new Date(),
+				type: 'datetime',
+				max: 0
+			});
+
+			var is_caozuo = false;
+			//关闭或刷新
+			$("#close").on("click", function () {
+				if (!is_caozuo) {
+					//只是关闭
+					var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+					parent.layer.close(index);		//关闭窗口
+				} else {
+					//关闭并刷新
+					window.parent.location.reload();
+				}
+				return false;
+			});
+			//获取退住详情
+			getData();
+			function getData() {
+				$.ajax({
+					url: '/sys_fkcy/jggl/esa/sa_info.action',
+					headers: header,
+					context: document.body,
+					type: "POST",
+					async: false,
+					data: { ess_info_id: $("#id").val() },
+					success: function (data) {
+						if (data.state == 200) {
+							// 得到data
+
+							list_cost_re.push(data.data.list_cost_re);
+							list_exit_form.push(data.data.list_exit_form);
+							map_ess_info.push(data.data.map_ess_info);
+						} else {
+							layer.msg(data.msg, {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return;
+						}
+					}
+				});
+			}
+			// 押金合计
+			var yajin = 0;
+			// 预存合计
+			var yucun = 0;
+			// 押金列表
+			var yj_list = new Array();
+			// 预存列表
+			var yc_list = new Array();
+
+			// 渲染账单情况
+			for (var i in list_cost_re[0]) {
+				str = '';
+				// 预存费用
+				if (list_cost_re[0][i].cost_type === '预存/缴费') {
+					yucun += parseInt(list_cost_re[0][i].cost_sum);
+					yc_list.push(parseInt(list_cost_re[0][i].cost_sum));
+					// 押金费用
+				} else if (list_cost_re[0][i].cost_type === '押金') {
+					yajin += parseInt(list_cost_re[0][i].cost_sum);
+					yj_list.push(parseInt(list_cost_re[0][i].cost_sum));
+					// 除押金和预存
+				} else {
+					// 有cost_date 的数据
+					if (list_cost_re[0][i].cost_date) {
+						var time1 = gettime1(list_cost_re[0][i].cost_date);
+						a = 0;
+						if (list_cost_re[0][i].cost_sum < 0) {
+							a = '欠费' + list_cost_re[0][i].cost_sum;
+						}
+						// 拼接html 表格列
+						str = '<tr><td>' + time1 + '</td><td>' + list_cost_re[0][i].cost_type + '</td><td>0</td><td>' + list_cost_re[0][i].cost_sum + '</td><td>' + a + '</td><td><a style="color:blue;" href="?/id=' + list_cost_re[0][i].id + '">修改账单</a></td></tr>';
+						// 没有cost_data 的数据
+					} else {
+						my_time = gettime(list_cost_re[0][i].crt_date)
+						a = 0;
+						if (list_cost_re[0][i].cost_sum < 0) {
+							a = '欠费' + list_cost_re[0][i].cost_sum;
+						}
+						// 拼接html 表格列
+						str = '<tr><td>' + my_time + '</td><td>' + list_cost_re[0][i].cost_type + '</td><td>0</td><td>' + list_cost_re[0][i].cost_sum + '</td><td>' + a + '</td><td><a style="color:blue;" href="?/id=' + list_cost_re[0][i].id + '">修改账单</a></td></tr>';
+
+					}
+					// 渲染到账单情况
+					$('#zdqk').append(str);
+				}
+			}
+
+			//押金预缴
+			$("#ap_deposit").html(map_ess_info[0].ap_deposit);
+			$("#ap_cost_advance").html(map_ess_info[0].ap_cost_advance);
+
+			// 渲染到结算合计
+			$('#js_td3').html(map_ess_info[0].arrears);
+			$('#js_td4').html(0);
+			$('#js_td5').html(Math.abs(map_ess_info[0].arrears));
+			$('#js_td6').html(map_ess_info[0].return_cost);
+
+			// 处理crt_date
+			function gettime(t) {
+				var _time = new Date(t);
+				var year = _time.getFullYear();
+				var month = _time.getMonth() + 1;
+				var date = _time.getDate();
+				//返回例 2020.11.11
+				return year + "." + month + "." + date;
+			}
+			// 处理cost_date
+			function gettime1(t) {
+				var t = Math.floor(t / 1000000);
+				t = t + '';
+				console.log(t);
+				var my_date = t.slice(0, 4) + '.' + t.slice(4, 6) + '.' + t.slice(6, 8);
+				console.log(my_date);
+				//返回例 2020.11.11
+				return my_date;
+			}
+
+			//监听提交
+			form.on('submit(saveBtn)', function (data) {
+				$.ajax({
+					url: '/sys_fkcy/jggl/esa/settle_accounts_ok.action',
+					headers: header,
+					context: document.body,
+					type: "POST",
+					data: {
+						"dd_id": $("#se1").val(),
+						"exit_time": $("#js_datetime").val(),
+						"ess_info_id": $('#id').val()
+					},
+					xhrFields: {
+						withCredentials: true
+					},
+					success: function (data) {
+						if (data.state == 200) {
+
+							layer.msg(data.msg, {
+								icon: 6,//成功的表情
+								time: 1000 //1秒关闭（如果不配置，默认是3秒）
+							}, function () {
+								window.parent.location.reload();
+							});
+						}
+						else {
+							layer.msg(data.msg, {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return;
+						}
+					}
+				});
+				return false;
+			});
+
+		});
+
+		// 获取父级数据
+		function child(data) {
+			// 设置佩戴状态
+			$ = layui.$;
+			$('#id').val(data.id);
+			$('#full_name').val(data.full_name);
+			$('#id_card').val(data.id_card);
+		}
+	</script>
+</body>
+
+</html>

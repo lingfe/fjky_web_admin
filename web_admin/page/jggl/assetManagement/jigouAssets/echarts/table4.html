@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 引入 echarts.js -->
+		<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+		<script src="../../../../../js/jquery.min.js"></script>
+		<script src="../../../../bcxt/login/login.js"></script>
+	</head>
+
+	<body>
+		<div id="table1" style="height: 376px;width: 550px;"></div>
+		<script type="text/javascript">
+			var result = null,
+				titles = null;
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/institution/statisticsOfRegisteredElderly.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					console.log(data);
+					result = data.data.data;
+					titles = data.data.titles;
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+
+		</script>
+
+		<script type="text/javascript">
+			var uploadedDataURL = '../../../../../images/gnrk_img/title.png';
+			var my_echarts = echarts.init(document.getElementById('table1'));
+			option = {
+				title: {
+					text: '登记老人数量统计(近一个月)',
+					textStyle: {
+						fontSize: 20,
+						fontWeight: 'normal',
+						color: '#2C55FF',
+					},
+					y: '12px',
+					x: '39px'
+				},
+				graphic: [{
+					z: 4,
+					type: 'image',
+					id: 'logo',
+					left: '5%',
+					top: '4.2%',
+					z: -10,
+					bounding: 'raw',
+					rotation: 0, //旋转
+					origin: [64.5, 32.5], //中心点
+					scale: [1.0, 1.0], //缩放
+					style: {
+						image: uploadedDataURL,
+						opacity: 1
+					}
+				}],
+				backgroundColor: "#fff",
+				tooltip: {},
+				grid: {
+					top: '25%',
+					left: '5%',
+					right: '1%',
+					bottom: '8%',
+					containLabel: true,
+				},
+				legend: {
+					itemGap: 50,
+					data: ['登记老人数量统计(近一个月)'],
+					textStyle: {
+						color: '#d3d3d3',
+						borderColor: '#fff'
+					},
+				},
+				xAxis: [{
+					type: 'category',
+					boundaryGap: true,
+					axisLine: { //坐标轴轴线相关设置。数学上的x轴
+						show: true,
+						lineStyle: {
+							color: '#d3d3d3'
+						},
+					},
+					axisLabel: { //坐标轴刻度标签的相关设置
+						textStyle: {
+							color: '#000',
+							margin: 15,
+						},
+					},
+					axisTick: {
+						show: false,
+					},
+					data: titles,
+				}],
+				yAxis: [{
+					name: "人",
+					type: 'value',
+					min: 0,
+					minInterval: 1,
+					splitNumber: 7,
+					splitLine: {
+						show: true,
+						lineStyle: {
+							color: '#d3d3d3'
+						}
+					},
+					axisLine: {
+						show: false,
+					},
+					axisLabel: {
+						margin: 20,
+						textStyle: {
+							color: '#000',
+
+						},
+					},
+					axisTick: {
+						show: false,
+					},
+				}],
+				series: [{
+					name: '注册总量',
+					type: 'line',
+					smooth: true, //是否平滑曲线显示
+					// 			symbol:'circle',  // 默认是空心圆（中间是白色的），改成实心圆
+					showAllSymbol: false,
+					symbol: 'emptyCircle',
+					symbolSize: 6,
+					lineStyle: {
+						normal: {
+							color: "#C480FF", // 线条颜色
+						},
+						borderColor: '#f0f'
+					},
+					label: {
+						show: true,
+						position: 'top',
+						textStyle: {
+							color: '#000',
+						}
+					},
+					itemStyle: {
+						normal: {
+							color: "#C480FF",
+
+						}
+					},
+					tooltip: {
+						show: false
+					},
+
+					data: result
+				}]
+			};
+			my_echarts.setOption(option);
+		</script>
+	</body>
+
+</html>

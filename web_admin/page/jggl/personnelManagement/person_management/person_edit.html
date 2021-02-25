@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑人员信息</title>
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" / media="all">
+
+</head>
+<style>
+    .list {
+        margin: 20px;
+    }
+</style>
+
+<body style="background-color: #ffffff; margin: 0;">
+    <form class="layui-form" action="">
+        <!-- 隐藏域 -->
+        <input type="hidden" id="id" />
+        <div class="layui-form-item list">
+            <label class="layui-form-label">人员姓名：</label>
+            <div class="layui-input-inline"> 
+                <input type="text" id='ename' lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+
+            <label class="layui-form-label">职位：</label>
+            <div class="layui-input-inline">
+                <input onclick="open_job()" type="text" id='job_title' lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item list">
+            <label class="layui-form-label">身份证号：</label>
+            <div class="layui-input-inline">
+                <input type="text" id='id_card' lay-verify="required|identity" maxlength="18" autocomplete="off" class="layui-input">
+            </div>
+
+            <label class="layui-form-label">等级：</label>
+            <div class="layui-input-inline">
+                <input type="text" onclick="open_grade()" id='grade_name' lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item list">
+            <label class="layui-form-label">联系电话：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="phone" name="phone" maxlength="11" autocomplete="off" lay-verify="required|phone" class="layui-input">
+            </div>
+            <label class="layui-form-label">所属部门：</label>
+            <div class="layui-input-inline">
+                <input type="text" lay-verify="required" readonly name="department_id" id="department_id" placeholder="请选择部门" value="" class="layui-input"></div>
+        </div>
+        </div>
+        <div class="layui-row">
+            <div class="layui-col-xs-offset6">
+                <div class="layui-form-item"> 
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!--表单 end-->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery', 'laydate', 'layer'], function() {
+
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                laydate = layui.laydate;
+            table = layui.table;
+
+
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/staff/updateWhereId.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "id": $("#id").val(), // id
+                        "ename": $("#ename").val(), // 姓名
+                        "id_card": $("#id_card").val(), // 身份证号
+                        "phone": $("#phone").val(), // 联系电话
+                        "job_title": $("#job_title").val(), // 职位
+                        "department_name": $("#department_id").val(), // 等级
+                        "grade_name": $("#grade_name").val(), // 部门
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+
+                        }
+
+                    }
+                });
+                return false;
+            });
+
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+        });
+        // 获取父级数据
+        function child(data) {
+            $ = layui.$;
+            console.log(data);
+            $('#id').val(data.id);
+            $('#ename').val(data.ename);
+            $('#id_card').val(data.id_card);
+            $('#phone').val(data.phone);
+            $('#job_title').val(data.job_title);
+            $('#department_id').val(data.department_name);
+            $('#grade_name').val(data.grade_name);
+        }
+        // 部门选择框
+        function open_child() {
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '请选择部门',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chooseDepartment.html'
+                });
+
+            })
+        }
+
+          // 职位选择框
+          function open_job() {
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+                var index = layer.open({
+                    title: '请选择职位', 
+                    type: 2, 
+                    shade: 0.2,
+                    maxmin: true, 
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chice/chooseJob.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+                    }
+                });
+            })
+        } 
+
+
+        // 等级选择框
+        function open_grade() {
+            // console.log("testasdfa");
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+                var index = layer.open({
+                    title: '请选择等级',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './chice/chooseGrade.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+                    }
+                });
+            }) 
+        }
+    </script>
+</body>
+
+</html>

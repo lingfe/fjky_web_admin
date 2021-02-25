@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑套餐管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+
+        <!-- 单行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐名称：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input dateIcon" id="nt_level_cost" placeholder="请输入套餐名称" value="">
+            </div>
+        </div>
+        <!-- 单行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐价格：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input dateIcon" id="nt_level_cost" placeholder="请输入套餐价格" value="">
+            </div>
+        </div>
+        <!-- 单行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">包月价格：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input dateIcon" id="nt_level_cost" placeholder="请输入包月价格" value="">
+            </div>
+        </div>
+        <!-- 单行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">适用人群：</label>
+            <div class="layui-input-block">
+                <input type="text" class="layui-input dateIcon" id="nt_level_cost" placeholder="请输入适用人群" value="">
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐描述：</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea" placeholder="请输入套餐描述" name="bed_describe"></textarea>
+            </div>
+        </div>
+        <!-- 隐藏属性 -->
+        <input id="id" type="text" style="display: none" readonly="" value=''>
+        <!-- 操作 -->
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/nursing_task/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#id").val(),
+                        "nt_level": $("#nt_level").val(),
+                        "hea_vision": $("#hea_vision").val(),
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        // 获取父级数据
+        function child(data) {
+            $("#id").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>缴费信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../js/lay-module/step-lay/step.css" media="all">
+</head>
+
+<body>
+    <!-- 分布表单-start -->
+    <div class="layui-fluid">
+        <div class="layui-card" style="height: 700px;">
+            <div class="layui-card-body" style="padding-top: 20px;">
+                <!-- 家属信息 -->
+                <div>
+                    <form class="layui-form" style="margin: 0 auto;max-width: 750px;padding-top: 20px;">
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label">押&#12288;&#12288;金：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_deposit"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入押金" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label required">套餐费用：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_cost_meal_package"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入套餐费用" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label">床位费用：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_cost_bed"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入床位费用" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label required">应缴费用：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_cost_payable"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入应缴费用" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label">预缴费用：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_cost_advance"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入预缴费用" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                            <label class="layui-input-label required">实缴费用：</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input dateIcon" id="ap_cost_total"
+                                            oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入实缴费用" value=""
+                                            style="width: 240px;">
+                            </div>
+                        </div>
+                        <input id="family_id" type="text" style="display: none" readonly="" value=''>
+                        <div class="layui-form-item" style="margin-top: 20px;margin-left: 12%;">
+                            <div class="layui-input-block">
+                                <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                                <button class="layui-btn" lay-submit lay-filter="save2">
+                                    &emsp;保存&emsp;
+                                </button>
+                                <button class="layui-btn layui-btn-primary" lay-submit lay-filter="formStep2">
+                                    下一步
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- 家属列表 -->
+                    <div style="width: 80%;margin: auto;">
+                        <script type="text/html" id="toolbarDemo">
+                            <div class="layui-btn-container">
+                                <!-- 表头操作 -->
+                                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 新增 </button>
+                                    <span class="layui-btn layui-btn-primary pre" style="margin-left:42%;border:0">客户家属列表</span>
+                            </div>
+                        </script>
+                        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+                        <input id="family_yw_id" type="text" style="display: none;" readonly="" value=''>
+                        <!-- 列表操作 -->
+                        <script type="text/html" id="currentTableBar">
+                            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete"
+                            lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    <!-- 分布表单-end -->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件资源
+        layui.use(['form', 'table', 'layer'], function () {
+            var $ = layui.$;
+            form = layui.form,
+                layer = layui.layer,
+                table = layui.table,    //表格格式
+                laydate = layui.laydate;//日期格式
+            var tree = layui.tree;
+            var treetable = layui.treetable;
+            step = layui.step;  //分布表单
+            var token = Storage.get("token");
+            let qiId = $("#jbid").val();//父级id
+        });
+
+
+
+        // 获取父级id
+        function child(data) {
+            $("#jbid").val(data.id);
+        }
+        // 获取第二个子页面传来的值并修改
+        function getDataFromSon(data) {
+            $("#bed").val(data.floor_tung_name + '-' + data.floor_layer + '-' + data.room_number + '-' + data.bed_number);
+            $("#bedid").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

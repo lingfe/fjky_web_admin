@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>体检报告</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+<body>
+	
+	<!--(full_name, out_escort, id_card, out_escort_phone, phone, out_datetime, out_is_equipment,returntime,equipment_id ,out_reason)-->
+	<!--姓名，陪同人，身份证号，陪同人电话， 联系电话， 外出时间， 是否佩戴设备，返回时间， 设备id， 外出原因-->
+	<!--表单 start-->
+	<form class="layui-form" action="">
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">体检时间<span style="color: red;">*</span></label>
+					<div class="layui-input-inline">
+				      <input type="text" id='pex_datetime' lay-verify="required" placeholder="请输入体检时间" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">体检医院<span style="color: red;">*</span></label>
+					<div class="layui-input-inline">
+				      <input type="text" id='pex_hospital' lay-verify="required" placeholder="请输入体检医院" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">体检结果<span style="color: red;">*</span></label>
+					<div class="layui-input-inline">
+				      <input type="text" id='pex_result' lay-verify="required" placeholder="请输入体检结果" autocomplete="off"  class="layui-input">
+				    </div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row" style="padding-top: 20px;">
+			<div class="layui-col-xs-offset2">
+				<div class="layui-form-item">
+					<label class="layui-form-label">体检报告<span style="color: red;">*</span></label>
+					<button type="button" class="layui-btn" id="file">
+					  <i class="layui-icon">&#xe67c;</i>上传报告
+					</button>
+				    <i id="file_name">请先上传文件</i>
+				</div>
+			</div>
+			<div class="layui-col-xs-offset5">
+				<input type="hidden" id="file_id" lay-verify="file_id"/>
+			</div>
+		</div>
+		
+	  	<div class="layui-row"  style="padding-top: 50px;">
+        	<div class="layui-col-xs-offset2">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+						&nbsp;&nbsp;&nbsp;
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table', 'jquery', 'laydate', 'upload'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate;
+				table = layui.table,
+				upload = layui.upload;
+		
+			laydate.render({
+				elem: "#pex_datetime",
+				type: 'datetime',
+				max: 0,
+				trigger : 'click',
+			})
+			// 用户id获取
+            var $ess_id = $("#ess_id",parent.document).val();
+   
+			  //体检报告上传
+				var uploadInst = upload.render({
+					elem: '#file',
+			    	url: '/sys_fkcy/files/upload.action', //上传接口  
+			    	accept: 'file',
+					headers:header,
+					done: function(res, index, upload){
+						console.log(res);
+						if(res.state==200){
+							$("#file_id").val(res.data.id);
+							$('#file_name').text(res.data.file_old_name);
+							layer.msg(res.msg, {icon : 6, time : 1000 });
+						}else{
+							layer.msg(res.msg, {icon : 5, time : 1000 });
+						}
+						console.log(res);                     
+					},
+					error:function(res){
+						console.log(res);
+					}
+				});
+
+		form.verify({
+		    file_id: function (value, item) { // 可4个空格，非空，可以有特殊字符
+		        if (!value) {
+		            return "请上传文件后保存";
+		        }
+		    },
+		})
+		
+			
+			
+		//监听提交
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/phyexa/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	                "ess_id": $ess_id,
+	                "pex_datetime": $('#pex_datetime').val(),
+	                "pex_hospital": $('#pex_hospital').val(),
+	                "pex_result": $('#pex_result').val(),
+	                "file_id": $('#file_id').val()
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+        
+       
+	});
+	
+	//得到父级内容(kehuinfo.html)
+    	function child(data){
+    		layui.use('jquery',function(){
+    			var $ = layui.jquery;
+				$('#ess_id').val(data.ess_id);
+    		})
+    	}
+   
+    </script>
+</body>
+
+</html>

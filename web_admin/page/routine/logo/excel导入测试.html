@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>excel导入测试</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css?date" media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<div class="layui-form" style="width:96%;margin:0;margin-top:15px;">
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">key</label>
+				<div class="layui-input-block">
+					<input id="key_name" type="text"
+						placeholder="请输入key" class="layui-input">
+				</div>
+			</div>
+			
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label required">选择excel文件</label>
+					<div class="layui-input-block">
+						<button type="button" class="layui-btn" id="logoUpload">
+							<i class="layui-icon layui-icon-upload"></i>上传
+						</button>
+					</div>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+		</div>
+		<!-- 表单 end -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js?date" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form','upload'], function () {
+				//定义layui组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					upload = layui.upload,
+					$ = layui.$;
+				
+				//logo上传
+				var uploadInst = upload.render({
+					elem : '#logoUpload',
+					url :'http://192.168.124.25/sys_fkcy/device/importDevice.action',//'http://192.168.124.8/sys_fkcy/excel/importExcel',
+					headers : header,
+					accept:'file',
+					exts: 'xls|xlsx',
+					field:'file',//设定文件域的字段名,默认file
+					
+					done : function(res, index, upload) {
+						if(res.state==200){
+							$("#logo_image").attr("src", res.data.imgUrl);
+							layer.msg(res.msg, {icon : 6, time : 1000 });
+						}else{
+							layer.msg(res.msg, {icon : 5, time : 1000 });
+						}  
+					},
+					error : function(res) {
+						console.log(res);
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

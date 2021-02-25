@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>机构信息编辑</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+
+    <!-- 表单 -->
+    <div class="layui-form layuimini-form">
+
+        <!-- 并列一行 start -->
+        <div class="layui-form-item">
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">机构名称</label>
+                <div class="layui-input-block">
+                    <input id="ins_name" type="text" name="" lay-verify="required" lay-reqtext="机构名称不能为空"
+                        placeholder="请输入机构名称" value="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">服务电话</label>
+                <div class="layui-input-block">
+                    <input id='ins_service_phone' name="ins_service_phone" lay-verify="required" lay-reqtext="服务电话不能为空"
+                        placeholder="请输入服务电话" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 end -->
+
+        <div class="layui-form-item" id="ins_address">
+            <div class="layui-inline">
+                <div class="layui-form-label required">机构地址</div>
+                <div class="layui-input-inline" style="width: 140px;">
+                    <select id="province" name="province" class="province-selector" lay-verify="required"
+                        lay-reqtext="请选择省" data-value="贵州省" lay-filter="province-1">
+                        <option value="" id="province">请选择省</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline" style="width: 140px;">
+                    <select id="city" name="city" class="city-selector" lay-verify="required" lay-reqtext="请选择市"
+                        data-value="铜仁市" lay-filter="city-1">
+                        <option value="">请选择市</option>
+                    </select>
+                </div>
+                <div class="layui-input-inline" style="width: 140px;">
+                    <select id="county" name="county" class="county-selector" lay-verify="required" lay-reqtext="请选择区"
+                        data-value="碧江区" lay-filter="county-1">
+                        <option value="">请选择区</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline" style="width: 97%;">
+                <label class="layui-form-label">详细地址</label>
+                <div class="layui-input-block">
+                    <input type="text" id="ins_address_detailed" name="ins_address_detailed" placeholder="请输入机构详细地址"
+                        value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- 并列一行 start -->
+        <div class="layui-form-item">
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">负责人</label>
+                <div class="layui-input-block">
+                    <input id='ins_prf_name' name="ins_prf_name" lay-verify="required" lay-reqtext="负责人不能为空"
+                        placeholder="请输入机构负责人" value="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">负责人电话</label>
+                <div class="layui-input-block">
+                    <input id="ins_prf_phone" type="text" name="" lay-verify="tellphone" lay-reqtext="负责人电话不能为空"
+                        placeholder="请输入负责人电话" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 end -->
+
+        <!-- 并列一行 start -->
+        <div class="layui-form-item">
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">法人代表</label>
+                <div class="layui-input-block">
+                    <input id='ins_corporation' name="ins_corporation" lay-verify="required" lay-reqtext="法人代表不能为空"
+                        placeholder="请输入法人代表" value="" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline"style="width: 30%;">
+                <label class="layui-form-label required">法人电话</label>
+                <div class="layui-input-block">
+                    <input id="ins_corporation_phone" type="text" name="" lay-verify="tellphone"
+                        lay-reqtext="法人代表电话不能为空" placeholder="请输入法人代表电话" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 end -->
+
+        <!-- 并列一行 start -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">机构类型</label>
+                <div class="layui-input-block" id="ins_type">
+                    <input type="radio" name="ins_type" value="自理型" title="自理型">
+                    <input type="radio" name="ins_type" value="护理型" title="护理型">
+                    <input type="radio" name="ins_type" value="综合型" title="综合型">
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 end -->
+
+        <!-- 并列一行 start -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label required">营业执照</label>
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn" id="test1"><i
+                            class="layui-icon layui-icon-upload"></i>上传图片</button>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label"><img class="comm_img" style="width:auto;height:50px;" id="comm_img"
+                        src="" alt="" /></label>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn"
+                    style="margin-left:23%">确认保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">关闭</button>
+            </div>
+        </div>
+        <input id="qiId" type="text" style="display: none" readonly="" value=''>
+    </div>
+
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../lib/jq-module/zyupload/zyupload-1.0.0.min.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer', 'layarea', "upload"], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var layarea = layui.layarea;
+            var token = Storage.get("token");
+            var upload = layui.upload;
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //验证电话号码或座机号码
+            var mobile = /^1[3|4|5|7|8]\d{9}$/, phone = /^0\d{2,3}-?\d{7,8}$/;
+            form.verify({
+                tellphone: function (value) {
+                    var flag = mobile.test(value) || phone.test(value);
+                    if (!flag) {
+                        return '请输入正确座机号码或手机号';
+                    }
+                }
+            });
+            // 图片上传
+            var uploadInst = upload.render({
+                elem: '#test1',
+                url: '/sys_fkcy/images/imageUpload.action',
+                headers: header,
+                done: function (res, index, upload) {
+                    $("#comm_img").attr("src", res.data.imgUrl);
+                    layer.msg(res.msg, {
+                        icon: 6,//成功的表情
+                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                    }, function () {
+                    });
+                    console.log(res);
+                },
+                error: function (res) {
+                    console.log(res);
+                }
+            });
+            layarea.render({
+                elem: '#ins_address',
+                change: function (res) {
+                    //选择结果
+                    var ins_address = console.log(res);
+                }
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/institution/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#qiId").val(),
+                        "ins_name": $("#ins_name").val(),
+                        "ins_address": $("#province").val() + "," + $("#city").val() + "," + $("#county").val(),
+                        "ins_address_detailed": $("#ins_address_detailed").val(),
+                        "ins_corporation_phone": $("#ins_corporation_phone").val(),
+                        "ins_service_phone": $("#ins_service_phone").val(),
+                        "ins_prf_name": $("#ins_prf_name").val(),
+                        "ins_prf_phone": $("#ins_prf_phone").val(),
+                        "ins_corporation": $("#ins_corporation").val(),
+                        "ins_corporation_phone": $("#ins_corporation_phone").val(),
+                        "ins_business_license_img": $("#comm_img").attr("src"),
+                        "ins_type":  $("#ins_type input:checked").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+
+        });
+        // 获取父级数据
+        function child(data) {
+            $ = layui.$;
+            var ss = data.ins_address.split(",");// 在每个逗号(,)处进行分解  ["abc", "abcd", "aaa"]
+            var province = ss[0];
+            var city = ss[1];
+            var county = ss[2];
+            $("#province").val(province),
+            $("#city").val(city),
+            $("#county").val(county),
+            $("#ins_name").val(data.ins_name),
+            $("#ins_address_detailed").val(data.ins_address_detailed),
+            $("#ins_corporation_phone").val(data.ins_corporation_phone),
+            $("#ins_service_phone").val(data.ins_service_phone),
+            $("#ins_prf_name").val(data.ins_prf_name),
+            $("#ins_prf_phone").val(data.ins_prf_phone),
+            $("#ins_corporation").val(data.ins_corporation),
+            $("#comm_img").attr("src", data.ins_business_license_img);
+            $("#ins_corporation_phone").val(data.ins_corporation_phone),
+            $("#ins_type").val(data.ins_type)
+            $("#qiId").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

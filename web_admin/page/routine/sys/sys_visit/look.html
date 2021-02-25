@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>查看详情</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 内容 start -->
+		<div class="layui-form layuimini-form">
+			<div class="layui-form-item">
+				<label class="layui-form-label">访问id</label>
+				<div class="layui-input-block">
+					<input id="path" type="text" name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">业务id</label>
+				<div class="layui-input-block">
+					<input type="text" id="yw_id" name="" readonly="true" laceholder="" value="" class="layui-input">
+
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">访问ip</label>
+				<div class="layui-input-block">
+					<input id="ip" type="text" name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">访问角色</label>
+				<div class="layui-input-block">
+					<input id="visit_role" type="text" name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">浏览器名称</label>
+				<div class="layui-input-block">
+					<input id='browser_name' name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">浏览器版本</label>
+				<div class="layui-input-block">
+					<input id="browser_version" type="text" name="" readonly="true" placeholder="" value=""
+						class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">设备类型</label>
+				<div class="layui-input-block">
+					<input id="device_type" type="text" name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">操作系统</label>
+				<div class="layui-input-block">
+					<input id='ope_sys' name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">操作系统名称</label>
+				<div class="layui-input-block">
+					<input id="ope_sys_name" type="text" name="" readonly="true" placeholder="" value=""
+						class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">操作系统版本</label>
+				<div class="layui-input-block">
+					<input id='ope_sys_version' name="" readonly="true" placeholder="" value="" class="layui-input">
+				</div>
+			</div>
+		</div>
+		<!-- 内容 start -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载组件
+			layui.use(['form', 'table', 'jquery'], function () {});
+			
+			// 父窗体调用传值
+			function child(data) {
+				var $ = layui.$;
+				$("#path").val(data.path);
+				$("#yw_id").val(data.yw_id);
+				$("#ip").val(data.ip);
+				$("#visit_role").val(data.visit_role);
+				$("#browser_name").val(data.browser_name);
+				$("#browser_type").val(data.browser_type);
+				$("#browser_version").val(data.browser_version);
+				$("#device_type").val(data.device_type);   //qiId    
+				$("#ope_sys").val(data.ope_sys);
+				$("#ope_sys_name").val(data.ope_sys_name);
+				$("#ope_sys_version").val(data.ope_sys_version);
+			}
+		</script>
+	</body>
+</html>

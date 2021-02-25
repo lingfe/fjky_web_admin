@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在售商品管理</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css">
+    <link rel="stylesheet" href="../css/goods.css">
+</head>
+<style type="text/css">
+    .layui-table-cell {
+        height: auto;
+    }
+</style>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!--table数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+    <!-- 内容 end -->
+
+    <!-- table头部操作 start(搜索框，添加登记)-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <div class="layui-inline">
+                <span class="input_span">分类</span>
+                <select id="g_category" lay-ignore class="inputTest"  maxlength="18">
+                    <option></option>
+                    <option value="蔬菜">蔬菜</option>
+                    <option value="水果">水果</option>
+                    <option value="海鲜">海鲜</option>
+                    <option value="肉蛋">肉蛋</option>
+                </select>  
+                <span class="input_span">供应商</span>
+                <select id="g_supplier" name="g_supplier" lay-ignore class="inputTest" maxlength="18">
+                    <option></option>
+                </select> 
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="saixuan">筛选</button>
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="sold_out"> <i class="layui-icon layui-icon-edit"></i>批量下架</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>多项删除</button>
+            </div>
+            <form class="layui-form layui-form-pane" style="float:right">
+                <div class="layui-inline">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="searchKey" placeholder="请输入商品名称" lay-search="" class="inputTest" maxlength="18">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </script>
+    <!-- table头部操作 end-->
+
+    <!-- 列表操作 start(编辑， 删除) -->
+    <script type="text/html" id="currentTableBar">
+        <a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+        <a class="dengjiTest" lay-event="goods_out"><i class="layui-icon layui-icon-edit"></i>下架</a>
+        <a class="delTest" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    </script>
+    <!-- 列表操作 end -->
+
+    <!-- 价格处理 -->
+    <script type="text/html" id="to_price">
+        <span>￥</span>{{d.goods_price}}
+        {{#  if(d.goods_vprice !=null){ }}
+        <br>
+           <span>会员价：</span> <span>￥</span>{{d.goods_vprice}}
+        {{#  } }}
+    </script>
+
+    <!-- 验证logo图片 -->
+    <script type="text/html" id="id_goods_img">
+			{{# if (d.goods_img != null&&d.goods_img!=undefined&&d.goods_img!='') { }}
+				<div class=''><img src='{{d.goods_img}}'/></div>
+			{{# }else { }}
+				<div class=''><img src='https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg'/></div>
+			{{# } }}
+	</script>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+        // 加载组件
+        layui.use(['table', 'form'], function () {
+            //定义layui模块变量
+            var $ = layui.jquery;
+            var table = layui.table;
+            var form = layui.form;
+            var token = Storage.get("token");
+
+            //动态赋值供应商下拉框
+            $.ajax({
+                url: '/sys_fkcy/app/goods/getPage.action',
+                dataType: 'json',
+                headers: header,
+                type: 'get',
+                success: function (res) {
+                    var html = '';
+                    if (res.data.length == 0) {
+                        html += "<option value=''>请添加供应商</option>";
+                        $("#g_supplier").empty().append(html);
+                    } else {
+                        html += "<option value=''>"+"</option>"
+                        $.each(res.data.data, function (index, value) {
+                            html += "<option value='" + value.supplier+ "'>" + value.supplier + "</option>"
+                        })
+                      
+                        $("#g_supplier").empty().append(html);
+                    }
+                    layui.form.render("select");//重新渲染 固定写法
+                }
+            })
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey //关键字
+                    },
+                    page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/app/goods/getPage.action', // 数据接口
+                toolbar: '#toolbarDemo', // 渲染对象
+                cellMinWidth: 100,
+                headers: header,
+                text: {
+                    none: '无数据' //数据为空时的提示文本
+                },
+                defaultToolbar: ['exports'],
+                cols: [
+                    [{
+                        type: "checkbox"
+                    }, {
+                        field: 'id',
+                        title: 'id',
+                        hide: 'true'
+                    }, {
+                        field: 'goods_img',
+                        title: '',
+                        width: 100,
+                        toolbar: '#id_goods_img',
+                        align: "center",
+                    }, {
+                        field: 'goods_name',
+                        title: '商品名称',
+                    }, {
+                        field: 'goods_price',
+                        title: '价格',
+                        templet: '#to_price',
+                        align: "center",
+                    }, {
+                        field: 'goods_category',
+                        title: '分类',
+                        align: "center",
+                    }, {
+                        field: 'goods_stock',
+                        title: '库存',
+                        align: "center",
+                    }, {
+                        field: 'sales_volume',
+                        title: '总销量',
+                        align: "center",
+                    }, {
+                        field: 'supplier',
+                        title: '供应商',
+                        align: "center",
+                    }, {
+                        title: '操作',
+                        minWidth: 250,
+                        toolbar: '#currentTableBar',
+                        align: "center",
+                        fixed: "right"
+                    }]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+
+            //toolbar监听头部操作事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                let ooo = obj.data;
+                // 监听添加操作
+                if (obj.event === 'sold_out') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认下架吗？', {
+                            title: "批量下架提示",
+                            icon: 3
+                        }, function (index) {
+                            for (var i = 0; i < data.length; i++) {
+                                $.ajax({
+                                    url: '/sys_fkcy/app/goods/sold_out.action?id=' + data[i].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function (data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                            }, function () {
+                                                location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function () {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg('请先选择您要下架的数据！', {
+                            icon: 5
+                        }); //失败的表情
+                        return;
+                    }
+                    // 监听批量删除操作
+                } else if (obj.event === 'saixuan') {
+                    var g_category = $("#g_category").val();
+                    var g_supplier = $("#g_supplier").val();
+                    //执行搜索重载
+                    table.reload('currentTableId', {
+                        where: {
+                            g_category: g_category,//关键字
+                            g_supplier: g_supplier
+                        },
+                        page: {
+                            curr: 1 //默认第一页
+                        }
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认删除选择内容吗？该操作不可恢复!', {
+                            title: "批量删除提示",
+                            icon: 3
+                        }, function (index) {
+                            for (var i = 0; i < data.length; i++) {
+                                $.ajax({
+                                    url: '/sys_fkcy/app/goods/deleteWhereId.action?id=' + data[i].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function (data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                            }, function () {
+                                                location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function () {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg('请先选择您要删除的数据！', {
+                            icon: 5
+                        }); //失败的表情
+                        return;
+                    }
+                }
+            });
+
+
+            //监听操作事件(列表编辑，列表删除)
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    var index = layer.open({
+                        title: '编辑商品信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['100%', '100%'],
+                        content: './goods_edit.html',
+                        success: function (layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                        }
+                    });
+                    return false;
+                } else if (obj.event === 'goods_out') {
+                    layer.confirm('确认下架吗？', {
+                        title: "提示",
+                        icon: 3
+                    }, function (index) {
+                        $.ajax({
+                            url: '/sys_fkcy/app/goods/sold_out.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function () {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', {
+                        title: "提示",
+                        icon: 3
+                    }, function (index) {
+                        obj.del();
+                        $.ajax({
+                            url: '/sys_fkcy/app/goods/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function () {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>企业详情</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+		<style>
+			.container_body {
+				margin-left: 6%;
+				margin-top: 80px;
+				height: 328px;
+				width: 1504px;
+				border-left: 1px solid rgb(220, 220, 200);
+				border-right: 1px solid rgb(220, 220, 200);
+				border-top: 1px solid rgb(220, 220, 200);
+			}
+			
+			.container_body p {
+				font-size: 14px;
+				text-align: center;
+				position: relative;
+				top: 48px;
+			}
+			
+			.container_body .small_box {
+				width: 200px;
+				height: 108px;
+				float: left;
+				background-color: #E2E2E2;
+				border-bottom: 1px solid rgb(220, 220, 200);
+			}
+			
+			.container_body .big_box {
+				width: 552px;
+				height: 108px;
+				border-bottom: 1px solid rgb(220, 220, 200);
+				float: left;
+			}
+			
+			#img_logo{
+				padding-top: 4%;
+				padding-left: 35%;
+				cursor: pointer;
+			}
+			
+		</style>
+	</head>
+
+	<body style="background-color: white;">
+
+		<p style="font-size: 22px; margin-top: 93px;margin-left: 110px;">企业详情:</p>
+		
+		<div class="layui-card">
+		<div class="container_body">
+
+			<div class="small_box">
+				<p>企业名称：</p>
+			</div>
+			<div class="big_box">
+				<p id="ent_name">加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>企业法人：</p>
+			</div>
+			<div class="big_box">
+				<p id='ent_legal_person'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>登记机关：</p>
+			</div>
+			<div class="big_box">
+				<p id='ent_registration_authority'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>所属行业：</p>
+			</div>
+			<div class="big_box">
+				<p id='ent_industry'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>联系电话：</p>
+			</div>
+			<div class="big_box">
+				<p id='ent_phone'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>企业logo：</p>
+			</div>
+			<div class="big_box">
+
+				<img id="img_logo" width="166px" height="66px" onclick="open_img()"/>
+
+			</div>
+
+		</div>
+		</div>
+		
+		<!--表单 start-->
+		<form class="layui-form" style="padding-top: 115px;">
+			<input type="hidden" id="id" />
+			<div class="layui-row">
+				<div class="layui-col-xs-offset8">
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button class="layui-btn layui-btn-primary" id="close">关闭</button>
+							<button class="layui-btn layui-btn-danger" lay-submit lay-filter="saveBtn1">驳回申请</button>
+							<button class="layui-btn " lay-submit lay-filter="saveBtn">审核通过</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+		<!--表单 end-->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js " charset="utf-8"></script>
+		<script type="text/javascript" src="../../../bcxt/login/login.js"></script>
+		<script type="text/javascript">
+			// 加载组件
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/enterprise/toExamine.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    data: {
+                        "id": $("#id").val(),	// id
+                        "state": 0
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+
+                            return;
+                        } else {
+                            layer.msg('审核通过', {
+                                icon: 6,//成功的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+            
+            //监听提交
+            form.on('submit(saveBtn1)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/enterprise/toExamine.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    data: {
+                        "id": $("#id").val(),	// id
+                        "state": 2
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+
+                            return;
+                        } else {
+                            layer.msg('驳回申请成功', {
+                                icon: 5,//失败的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+        });
+			var img_src = null;
+			// 获取父级数据
+			function child(data) {
+				layui.use(['form', 'jquery'], function() {
+					var $ = layui.$;
+					$('#id').val(data.id);
+					$('#ent_name').text(data.ent_name);
+					$('#ent_legal_person').text(data.ent_legal_person);
+					$('#ent_registration_authority').text(data.ent_registration_authority);
+					$('#ent_industry').text(data.ent_industry);
+					$('#ent_phone').text(data.ent_phone);
+					if(data.ent_logo){
+						$('#img_logo').attr('src', data.ent_logo);						
+					}else{
+						$('#img_logo').attr('src', 'https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg');
+					}
+					img_src = data.ent_logo;
+				})
+			}
+			
+			function open_img(){
+				if(img_src){
+					window.open(img_src);					
+				}else{
+					alert('暂无图片');
+				}
+			}
+		</script>
+	</body>
+
+</html>

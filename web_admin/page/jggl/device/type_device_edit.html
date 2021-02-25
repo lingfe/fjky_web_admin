@@ -1,0 +1,146 @@
+<!--
+创建者:qiuyuling
+时间：2021-2-4
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>编辑设备类型</title>
+	<!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+</head>
+
+<body>
+	<!-- 表单 start -->
+	<div class="layui-form" style="width:96%;margin:0;margin-top:15px;">
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">类型名称</label>
+			<div class="layui-input-block">
+				<input id="dtype_name" type="text" name="dtype_name" placeholder="请输入设备类型名称" value=""
+					class="layui-input">
+			</div>
+		</div>
+
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">描述</label>
+			<div class="layui-input-block">
+				<input id='dtype_explain' name="dtype_explain" placeholder="请输入角色描述" value="" class="layui-input">
+			</div>
+		</div>
+
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">图片</label>
+			<div class="layui-input-block">
+				<img id='img' src="" alt="" style='width:200px;height: 200px;'>
+				<!-- <input id='role_explain' name="_explain" placeholder="请输入角色描述" value="" class="layui-input"> -->
+			</div>
+		</div>
+
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<input id="qiId" type="text" hidden="true" />
+			<div class="layui-input-block">
+				<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+			</div>
+		</div>
+	</div>
+	<!-- 表单 end -->
+
+	<!-- 引入js资源 -->
+	<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+	<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+	<script charset="utf-8">
+		//加载layui指定组件 
+		var id_c = "" ; //当前修改的id
+		layui.use(['form', 'layer','upload'], function () {
+			//定义layui组件变量
+			var form = layui.form,
+				layer = layui.layer,
+				$ = layui.$;
+			var	upload = layui.upload; 
+			var imgurl= "";
+			//监听提交
+			form.on('submit(saveBtn)', function (data) {
+				$.ajax({
+					url: '/sys_fkcy/device_types/updateWhereId.action',
+					context: document.body,
+					headers: header,
+					type: "POST",
+					data: {
+						"id": id_c,
+						"dtype_name": $("#dtype_name").val(),
+						"dtype_explain": $("#dtype_explain").val(),
+						"dtype_icon":imgurl
+					},
+					xhrFields: {
+						withCredentials: true
+					},
+					success: function (data) { 
+						if (data.state == 200) {
+							layer.msg(data.msg, {
+								icon: 6,//成功的表情
+								time: 1000 //1秒关闭（如果不配置，默认是3秒） 
+							}, function () {
+								window.parent.location.reload();
+							});
+						}
+						else {
+							layer.msg(data.msg, {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return;
+						}
+					}
+				});
+				return false;
+			});
+
+			// 图片上传
+			var uploadInst = upload.render({
+				elem: '#img',
+				url: '/sys_fkcy/images/imageUpload.action',
+				headers: header,
+				before: function (obj) {
+					//预读本地文件示例，不支持ie8
+					obj.preview(function (index, file, result) {
+						$('#img').attr('src', result); //图片链接（base64）
+					});
+				},
+				done: function (res, index, upload) {
+					imgurl = res.data.imgUrl;
+					$("#img").attr("src", res.data.imgUrl);
+					layer.msg(res.msg, {
+						icon: 6,//成功的表情
+						time: 1000 //1秒关闭（如果不配置，默认是3秒）
+					}, function () {
+						//location.reload();
+					});
+					console.log(res);
+				},
+				error: function (res) {
+					console.log(res);
+				}
+			});
+		});
+
+		// 父窗体调用传值
+		function child(data) {
+			console.log("123hhh");
+			var $ = layui.$;
+			$("#dtype_name").val(data.dtype_name);
+			$("#dtype_explain").val(data.dtype_explain);
+			$("#img").attr("src", data.dtype_icon);
+			id_c = data.id;
+			console.log(id_c);
+			// $("img").attr("src","test.jpg");
+		}
+	</script>
+</body>
+
+</html>

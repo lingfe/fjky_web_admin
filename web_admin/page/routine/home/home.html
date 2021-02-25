@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>主页信息</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 内容 start -->
+		<div class="layuimini-container">
+			<div class="layuimini-main">
+				<!-- tab数据列表 -->
+				<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+			</div>
+		</div>
+		<!-- 内容 end -->
+		
+		<!-- 默认home标记 -->
+		<script type="text/html" id="id_title">
+			{{#if (d.yw_id.indexOf(d.id)!=-1 ) { }}
+				<div class='layui-btn layui-btn-xs layui-btn-danger'>默认</div>
+				<div class='layui-btn layui-btn-xs'>{{d.title}}</div>
+			{{# }else { }}
+				{{ d.title }}
+			{{# } }}
+		</script>
+		
+		<!-- 头部 start -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon"></i>添加 </button>
+				<button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>多项删除 </button>
+			</div>
+		</script>
+		<!-- 头部 end -->
+		
+		<!-- 操作 start -->
+		<script type="text/html" id="currentTableBar">
+			<a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+		</script>
+		<!-- 操作 end -->
+				
+		<!-- 加载js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			// 加载layui指定组件
+			layui.use(['form', 'table'], function () {
+				//定义组件变量
+				var $ = layui.jquery,
+					form = layui.form,
+					table = layui.table;
+				
+				//请求通行证
+				var token = Storage.get("token");
+
+				//数据列表
+				table.render({
+					elem: '#currentTableId',
+					url: '/sys_fkcy/home/getPage.action', //数据接口
+					toolbar: '#toolbarDemo',
+					cellMinWidth: 150,//全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+					headers: header,
+					cols: [[
+						{ type: "checkbox" },
+						{ field: 'id', minWidth: 100,width: 100, title: 'ID编号', align: "left" },
+						{ field: 'yw_id', minWidth: 100,width: 100, title: '业务ID', align: "left" },
+						{ field: 'title', minWidth: 150, title: '页面名称', align: "left" ,toolbar:'#id_title'},
+						{ field: 'describe_info', minWidth: 150, title: '页面描述', align: "left" },
+						{ field: 'icon', minWidth: 120,width: 120,  title: '页面图标', align: "left" },
+						{ field: 'href', title: '跳转地址', align: "left" },
+						{ title: '操作',width: 200, toolbar: '#currentTableBar', align: "center", fixed: "right"  }
+					]],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 //规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex',//当前页，默认page，
+						limitName: 'pageNum',//页容量，默认limit
+					},
+					parseData: function (res) {
+						return {
+							"count": res.count + 1,
+							"code": res.state, //解析接口状态
+							"msg": res.data.msg, //解析提示文本
+							"data": res.data.data //解析数据列表
+						}
+					},
+					limits: [5,10, 15, 20, 25, 50, 100],
+					limit: 5,
+					page: true,
+					skin: 'rows'
+				});
+
+				//toolbar监听事件
+				table.on('toolbar(currentTableFilter)', function (obj) {
+					if (obj.event === 'add') {  // 监听添加操作
+						var index = layer.open({
+							title: '添加主页',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['500px', '505px'],
+							content: './add.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+						$(window).on("resize", function () {
+							layer.full(index);
+						});
+					} else if (obj.event === 'delete') {  // 监听删除操作
+						var checkStatus = table.checkStatus('currentTableId')
+							, data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认删除吗?', {title: "提示",icon: 3},function (index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url: '/sys_fkcy/home/deleteWhereId.action?id=' + data[i].id,
+										type: 'post',
+										headers: header,
+										success: function (data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, { icon: 5 });//失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon: 6,//成功的表情
+													time: 1000 //1秒关闭（如果不配置，默认是3秒）
+												}, function () {
+													obj.del();
+													location.reload();
+												});
+											}
+										},
+										complete: function () {
+											layer.close(this.layerIndex);
+										},
+									});
+								}
+							});
+						} else {
+							layer.msg("请先选择您要删除的数据", {
+								icon: 5
+							});//失败的表情
+							return;
+						}
+					}
+				});
+
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function (obj) {
+					console.log(obj)
+				});
+
+				//监听操作事件
+				table.on('tool(currentTableFilter)', function (obj) {
+					var data = obj.data;
+					if (obj.event === 'edit') {//监听编辑操作
+						var index = layer.open({
+							title: '编辑主页',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['500px', '500px'],
+							content: './edit.html',
+							success: function (layero, index) {//弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+								layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+
+							}
+						});
+						return false;
+					} else if (obj.event === 'delete') {//监听删除操作
+						layer.confirm('确认删除吗？',{title: "提示",icon: 3}, function (index) {
+							$.ajax({
+								url: '/sys_fkcy/home/deleteWhereId.action?id=' + data.id,
+								type: 'post',
+								headers: header,
+								success: function (data) {
+									if (data.state == 401) {
+										window.location.href = "../login/login.html";
+									} else if (data.state == 200) {
+										layer.msg(data.msg, {
+											icon: 6,//成功的表情
+											time: 1000, //1秒关闭（如果不配置，默认是3秒）
+										}, function () {
+											obj.del();
+										});
+									} else {
+										layer.msg(data.msg, { icon: 5 });//失败的表情
+										return;
+									}
+								},
+								complete: function () {
+									layer.close(this.layerIndex);
+								},
+							});
+							layer.close(index);
+						});
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>layui</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	</head>
+
+	<body>
+		<!-- 搜索 start -->
+		<fieldset class="table-search-fieldset">
+			<legend>模糊搜索</legend>
+			<div style="margin: 10px;">
+				<form class="layui-form layui-form-pane">
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">关键字</label>
+							<div class="layui-input-inline">
+								<input type="text" name="searchKey" placeholder="请输入关键字点击搜索" lay-search="" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-inline">
+							<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i>搜索</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</fieldset>
+		<!-- 搜索 end -->
+		
+		<!-- 数据列表 -->
+		<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+		
+		<!-- 图片放大 -->
+		<div id="fangda" style="position:fixed;left:10%;top:10%;z-index:999;">
+			<img style="max-width:500px;max-height:500px;" />
+		</div>
+		
+		<!-- 单行数据操作 -->
+		<script type="text/html" id="currentTableBar">
+			<a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>   
+		</script>
+		
+		<!-- table头部操作 -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon-add-1"></i>添加</button>
+				<button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>批量删除</button>
+			</div>
+		</script>
+		
+		<!-- 金额处理 -->
+		<script type="text/html" id="to_comm_price">
+			{{# if (d.comm_price == ''|| d.comm_price==undefined) { }}
+				<span style="color:red;">0</span>/元
+			{{# }else { }}
+				<span style="color:red;">{{d.comm_price}}</span>/元
+			{{# } }}
+		</script>
+		
+		<!-- 验证logo图片 -->
+		<script type="text/html" id="id_comm_img">
+			{{# if (d.comm_img != null&&d.comm_img!=undefined&&d.comm_img!='') { }}
+				<div class=''><img src='{{d.comm_img}}'/></div>
+			{{# }else { }}
+				<div class=''><img src='https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg'/></div>
+			{{# } }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use([ 'form', 'table', 'jquery' ], function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					form = layui.form,
+					table = layui.table;
+		
+				//加载数据到table
+				table.render({
+					elem : '#currentTableId',
+					url : '/sys_fkcy/commodity/getPage.action',
+					toolbar : '#toolbarDemo',
+					cellMinWidth : 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+					headers : header,
+					cols : [ [
+						{
+							type : "checkbox"
+						},
+						{
+							field : 'id',
+							title : '编号',
+							sort : true
+						},
+						{
+							field : 'comm_name',
+							title : '商品名称'
+						},
+						{
+							field : 'comm_price',
+							title : '商品价格/元',
+							toolbar:'#to_comm_price',
+							sort : true
+						},
+						{
+							field : 'yw_name',
+							title : '业务名称'
+						},
+						{
+							field : 'comm_describe',
+							title : '商品描述'
+						},
+						{
+							field : 'user_name',
+							title : '创建人'
+						},
+						{
+							field : 'comm_img',
+							title : '商品图片',
+							toolbar:'#id_comm_img'
+						},
+						{
+							title : '操作',
+							minWidth : 150,
+							toolbar : '#currentTableBar',
+							align : "center",
+							fixed : "right"
+						}
+					] ],
+					response : {
+						statusName : 'code', //规定返回的状态码字段为code
+						statusCode : 200 //规定成功的状态码味200
+					},
+					request : {
+						pageName : 'pageIndex', //当前页，默认page，
+						limitName : 'pageNum', //页容量，默认limit
+					},
+					parseData : function(res) {
+						return {
+							"code" : res.state, //解析接口状态
+							"msg" : res.msg, //解析提示文本
+							"count" : res.data.numCount,
+							"data" : res.data.data //解析数据列表
+						}
+					},
+					limits : [ 5,10, 15, 20, 25, 50, 100 ],
+					limit : 10,
+					page : true,
+					skin : 'line,row',
+				});
+		
+				//图片放大
+				$("#currentTableId").next().on('mouseover mouseout', 'img', function(e) {
+					let $box = $("#fangda img");
+					if (e.type == "mouseover") {
+						$box.attr('src', $(this)[0].src).show();
+					} else if (e.type == "mouseout") {
+						$box.hide();
+					}
+				})
+		
+				// 监听搜索操作
+				form.on('submit(data-search-btn)', function (data) {
+					var result = data.field;
+					//执行搜索重载
+					table.reload('currentTableId', {
+						where: {
+							searchKey: result.searchKey	//关键字
+						}
+						, page: {
+							curr: 1 //默认第一页
+						}
+					});
+					return false;
+				});
+				
+				//toolbar监听头部操作事件
+				table.on('toolbar(currentTableFilter)', function(obj) {
+					let ooo = obj.data;
+					// 监听添加操作
+					if (obj.event === 'add') { 
+						var index = layer.open({
+							title : '添加商品',
+							type : 2,
+							shade : 0.2,
+							maxmin : true,
+							shadeClose : true,
+							area : [ '40%',"375px"],
+							content : './add.html',
+						});
+					// 监听批量删除操作
+					} else if (obj.event === 'delete') { 
+						var checkStatus = table.checkStatus('currentTableId'),
+							data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认删除选择内容吗？该操作不可恢复!', {
+								title : "批量删除提示",
+								icon : 3
+							}, function(index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url : '/sys_fkcy/commodity/deleteWhereId.action?id=' + data[i].id,
+										type : 'post',
+										headers : header,
+										success : function(data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, {
+													icon : 5
+												}); //失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon : 6, //成功的表情
+													time : 1000 //1秒关闭（如果不配置，默认是3秒）
+												}, function() {
+													location.reload();
+												});
+											}
+										},
+										complete : function() {
+											layer.close(this.layerIndex);
+										},
+									});
+								}
+							});
+						} else {
+							layer.msg('请先选择您要删除的数据！', {
+								icon : 5
+							}); //失败的表情
+							return;
+						}
+					}
+				});
+		
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function(obj) {
+					console.log(obj)
+				});
+		
+				//监听操作栏事件
+				table.on('tool(currentTableFilter)', function(obj) {
+					let data = obj.data;
+					// 监听编辑操作
+					if (obj.event === 'edit') {
+						var index = layer.open({
+							title : '编辑商品',
+							type : 2,
+							shade : 0.2,
+							maxmin : true,
+							shadeClose : true,
+							area : [ '40%',"375px"],
+							content : './edit.html',
+							success : function(layero, index) { //弹出层打开后的回调函数
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+		
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							}
+						});
+						return false;
+					// 监听删除操作
+					} else if (obj.event === 'delete') {
+						layer.confirm('确认删除吗', {
+							title : "删除提示",
+							icon : 3
+						}, function(index) {
+							$.ajax({
+								url : '/sys_fkcy/commodity/deleteWhereId.action?id=' + data.id,
+								type : 'post',
+								headers : header,
+								success : function(data) {
+									if (data.state != 200) {
+										layer.msg(data.msg, {
+											icon : 5
+										}); //失败的表情
+										return;
+									} else {
+										layer.msg(data.msg, {
+											icon : 6, //成功的表情
+											time : 1000 //1秒关闭（如果不配置，默认是3秒）
+										}, function() {
+											obj.del();
+										});
+									}
+								},
+								complete : function() {
+									layer.close(this.layerIndex);
+								},
+							});
+							layer.close(index);
+						});
+					}
+				});
+			});
+		</script>
+	</body>	
+</html>

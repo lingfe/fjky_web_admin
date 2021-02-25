@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>食堂信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 start -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- 搜索 start -->
+            <fieldset class="table-search-fieldset">
+                <legend>模糊搜索</legend>
+                <div style="margin: 10px;">
+                    <form class="layui-form layui-form-pane">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">关键字</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="searchKey" placeholder="请输入关键字点击搜索" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i>搜索</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+            <!-- 搜索 end -->
+
+            <!-- tab数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+    <!-- 内容 end -->
+
+    <!-- 头部 start -->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> <i class="layui-icon layui-icon"></i>创建食堂</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> <i class="layui-icon layui-icon-delete"></i>多项删除</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-distribution-btn" lay-event="distribution"><i class="layui-icon layui-icon-star"></i>初始化</button>
+        </div>
+    </script>
+    <!-- 头部 end -->
+
+    <!-- 操作 start -->
+    <script type="text/html" id="currentTableBar">
+        <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event='join'>加食码</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="tData">今日数据</a>
+    </script>
+    <!-- 操作 end -->
+
+    <!-- 状态 -->
+    <script type="text/html" id="id_state">
+        {{# if (d.state == 0) { }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-radius">正常</button> {{# }else if(d.state == 1){ }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius">审核中</button> {{# }else if(d.state == 2){ }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius">审核不通过</button> {{# } }}
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        // 加载组件
+        layui.use(['form', 'table'], function() {
+
+            //定义组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function(data) {
+                var result = data.field;
+
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey //关键字
+                    },
+                    page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/enterprise_canteen/getPage.action', //数据接口
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+                headers: header,
+                defaultToolbar: ['filter', 'exports', 'print', {
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [
+                    [{
+                        type: "checkbox"
+                    }, {
+                        field: 'cant_name',
+                        width: 100,
+                        title: '食堂名称'
+                    }, {
+                        field: 'state',
+                        width: 120,
+                        title: '状态',
+                        align: 'center',
+                        toolbar: '#id_state'
+                    }, {
+                        field: 'cant_address',
+                        width: 100,
+                        title: '食堂地址'
+                    }, {
+                        field: 'cant_phone',
+                        width: 100,
+                        title: '联系电话'
+                    }, {
+                        field: 'cant_open_date',
+                        minWidth: 130,
+                        title: '开放时间',
+                        sort: true
+                    }, {
+                        field: 'cant_shut_date',
+                        minWidth: 130,
+                        title: '关闭时间',
+                        sort: true
+                    }, {
+                        field: 'cant_report_date',
+                        minWidth: 180,
+                        title: '最晚报备时间',
+                        sort: true
+                    }, {
+                        field: 'crt_date',
+                        width: 100,
+                        title: '创建时间',
+                        sort: true,
+                        templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>"
+                    }, {
+                        title: '操作',
+                        minWidth: 290,
+                        toolbar: '#currentTableBar',
+                        align: "center",
+                        fixed: "right"
+                    }]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function(obj) {
+                // 监听添加操作
+                if (obj.event === 'add') {
+                    var index = layer.open({
+                        title: '添加食堂',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['40%', '500px'],
+                        content: './add.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    // 监听批量删除操作
+                } else if (obj.event === 'delete') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认删除吗？该操作不可恢复!', {
+                            title: "批量删除提示",
+                            icon: 3
+                        }, function(index) {
+                            for (var i = 0; i < data.length; i++) {
+                                $.ajax({
+                                    url: '/sys_fkcy/enterprise_canteen/deleteWhereId.action?id=' + data[i].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function(data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                            }, function() {
+                                                location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function() {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg('请先选择您要删除的数据！', {
+                            icon: 5
+                        }); //失败的表情
+                        return;
+                    }
+                    // 监听初始化操作
+                } else if (obj.event === 'distribution') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认初始化吗？', function(index) {
+                            if (data.length == 1) {
+                                $.ajax({
+                                    url: '/sys_fkcy/enterprise_canteen/initialize.action?id=' + data[0].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function(data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+                                            }, function() {
+                                                window.parent.location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function() {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            } else if (data.length > 1) {
+                                layer.msg("不可同时操作多个食堂！只能选择一个！", {
+                                    icon: 5
+                                }); //失败的表情
+                            }
+                        });
+                    } else {
+                        layer.msg("请先选择您要初始化的企业", {
+                            icon: 5
+                        }); //失败的表情
+                    }
+                    return;
+                    //监听审核操作
+                }
+            });
+
+            //监听表格复选框选择
+            table.on('checkbox(currentTableFilter)', function(obj) {
+                console.log(obj)
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function(obj) {
+                var data = obj.data;
+                //监听修改操作
+                if (obj.event === 'edit') {
+                    var index = layer.open({
+                        title: '编辑食堂',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['40%', '500px'],
+                        content: './edit.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    return false;
+
+                    //监听删除操作
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', {
+                        title: "删除提示",
+                        icon: 3
+                    }, function(index) {
+                        $.ajax({
+                            url: '/sys_fkcy/enterprise_canteen/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function(data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function() {
+                                        obj.del();
+
+                                    });
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function() {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+
+                    //加入食堂
+                } else if (obj.event === 'join') {
+                    layer.open({
+                        type: 1,
+                        title: false //不显示标题栏
+                            ,
+                        closeBtn: false,
+                        area: '250;',
+                        shade: 0.8,
+                        id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                            ,
+                        btn: ['在线扫码', '下载二维码', '取消'],
+                        btnAlign: 'c',
+                        moveType: 1 //拖拽模式，0或者1
+                            ,
+                        content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 500;">请选择下列扫码方式</div>',
+                        success: function(layero) {
+                            var btn = layero.find('.layui-layer-btn');
+                            btn.find('.layui-layer-btn0').attr({
+                                href: '/sys_fkcy/enterprise_canteen/generateJoinCode?canteen_id=' + data.id,
+                                target: '_blank'
+                            });
+                            btn.find('.layui-layer-btn1').attr({
+                                href: '/sys_fkcy/enterprise_canteen/generateJoinCode?canteen_id=' + data.id + '&&is_download=true',
+                                target: '_blank'
+                            });
+                        }
+                    });
+
+                    //今日数据
+                } else if (obj.event === 'tData') {
+                    layer.open({
+                        type: 1,
+                        title: false //不显示标题栏
+                            ,
+                        closeBtn: false,
+                        area: '250;',
+                        shade: 0.8,
+                        id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                            ,
+                        btn: ['在线扫码', '下载二维码', '取消'],
+                        btnAlign: 'c',
+                        moveType: 1 //拖拽模式，0或者1
+                            ,
+                        content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">请选择下列扫码方式</div>',
+                        success: function(layero) {
+                            var btn = layero.find('.layui-layer-btn');
+                            btn.find('.layui-layer-btn0').attr({
+                                href: '/sys_fkcy/enterprise_canteen/generateCanteenAuntCode?canteen_id=' + data.id,
+                                target: '_blank'
+                            });
+                            btn.find('.layui-layer-btn1').attr({
+                                href: '/sys_fkcy/enterprise_canteen/generateJoinCode?canteen_id=' + data.id + '&&is_download=true',
+                                target: '_blank'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

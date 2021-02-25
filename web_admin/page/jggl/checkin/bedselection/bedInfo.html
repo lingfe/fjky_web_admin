@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>选择床位</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+	</head>
+
+	<body>
+		<!-- 楼房管理--left -->
+		<div class="layui-col-md3">
+			<div class="layui-card">
+				<div class="layui-card-body">
+					<div id="bedAll" class="demo-tree-more"></div>
+				</div>
+			</div>
+		</div>
+	
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			// 加载组件
+			layui.use(["tree", 'treetable', 'form'], function () {
+				var $ = layui.jquery;
+				var form = layui.form;
+				var tree = layui.tree;
+				var treetable = layui.treetable;
+				var token = Storage.get("token");
+				
+				//床位信息-树结构
+				var renderTable = function (data) {
+					tree.render({
+						elem: '#bedAll'
+						, text: {
+							defaultNodeName: '未命名' //节点默认名称
+							, none: '无数据' //数据为空时的提示文本
+						}
+						, data: data
+						, isopen: true   //加载完毕后的展开状态，默认值：true
+						, checkChirld: false
+						, showLine: true  //是否开启连接线
+						, url: '/sys_fkcy/bed_info/getAll.action'
+						, showCheckbox: false  //是否显示复选框
+						, id: 'demoId1'
+						, isJump: false //是否允许点击节点时弹出新窗口跳转
+						, click: function (obj) {
+							var dataId = obj.data.id;  //获取当前点击的节点数据
+							var dataPid = obj.data.pid;
+							$.data = obj.data;
+							if (obj.data.data_type == '床') {
+								//验证是否已被绑定
+								if(obj.data.title.indexOf("已绑定")!=-1){
+									layer.msg("该床位已被绑定，请重新选择!", {
+										icon: 5,//失败的表情
+										time: 1000
+									});
+									return;
+							　　}else{
+									//验证床位类型是否关联
+									if(obj.data.mapBedType==null){
+										layer.msg("未关联床位类型,不可用!", { icon: 5, time: 1000 });
+										return;
+									}else{
+										// 修改成功后把subData的值传给第一个子页面
+										sendToParent(obj.data)
+										var index = parent.layer.getFrameIndex(window.name);
+										parent.layer.close(index); //关闭当前弹框
+									}
+								}
+							} else {
+								layer.msg("请选择具体床位号", {
+									icon: 5,//失败的表情
+									time: 1000
+								});
+								return;
+							}
+
+						},
+					});
+				}
+
+				//获取数据
+				getData();
+				function getData() {
+					// // 渲染表格
+					$.ajax({
+						url: '/sys_fkcy/bed_info/getAll.action',
+						headers: { //通过 request 头传递
+							token: token
+						},
+						type: 'post',
+						dataType: 'json',
+						success: function (res) {
+							if (res.state == 401) {
+								window.location.href = '../../bcxt/login/login.html';
+							} else {
+								renderTable(res.data);
+							}
+						}
+					});
+				}
+				
+				// 定义向父级页面传值函数
+				function sendToParent(data) {
+					parent.getDataFromSon(data); 
+					var index = parent.layer.getFrameIndex(window.name);
+					parent.layer.close(index);
+				}
+			});
+		</script>
+	</body>
+</html>

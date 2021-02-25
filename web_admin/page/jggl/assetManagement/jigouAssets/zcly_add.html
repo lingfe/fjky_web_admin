@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>资产领用登记</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+<body>
+	
+	<!--表单 start-->
+	<form class="layui-form" action="">
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产名称<span style="color:red">*</span></label> 
+		      	<div class="layui-input-inline">
+		      		<input type="hidden" id="ass_id" lay-verify="required">
+		      		<input type="text" id="ass_name" readonly lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+		      		
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产类型<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_type" readonly lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">型号<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_specifications" readonly lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产编号<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_number" lay-verify="required" readonly onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">数量<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      	<input type="text" id="collect_num" onchange="change_num()" lay-verify="required|number" placeholder="请输入数量" autocomplete="off" class="layui-input">
+		      		<div class="layui-form-mid layui-word-aux">剩余<span id="AssNum">0</span>件</div>
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">使用人<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_users" readonly lay-verify="required" onclick="open_child()"  placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">所属部门<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="department_name" readonly lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">入账日期<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" readonly id="ass_entry_date" onclick="open_child()" lay-verify="required" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">存放位置<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<!--仓库id-->
+                	<input type="hidden" id="warehouse_id" lay-verify="required">
+                    <input type="text" id="warehouse_name" readonly class="layui-input" onclick="open_child()" placeholder="请选择" lay-verify="required" value="" autocomplete="off">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">领用人<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="hidden" id="staff_id">
+		      		<input type="text" id="staff_name" readonly onclick="open_child1()" lay-verify="required" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+
+
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">领用日期<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" readonly id="collect_date" lay-verify="required|datetime" placeholder="请输入领用时间" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">备注:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="collect_remark" placeholder="请输入备注" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		
+	  	
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset7">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table', 'laydate'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate,
+				table = layui.table;
+			
+			
+			laydate.render({
+				elem: "#collect_date",
+				type: 'datetime',
+				trigger : 'click',
+			})
+
+		//监听提交 搜索功能实现
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/assets_collect/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {
+	            	// 表单提交事件
+	            	"id": $("#id").val(),	// id
+	            	"ass_id": $("#ass_id").val(),	// 资产id
+	                "staff_id": $("#staff_id").val(),	// 员工id 领用人id
+	                "staff_name": $("#staff_name").val(),	// 员工姓名 领用人姓名
+	                "collect_date": $("#collect_date").val(),	// 领用时间
+	                "collect_remark": $("#collect_remark").val(),	// 领用备注
+	                "collect_num": $("#collect_num").val()	// 领用数量
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+        
+       
+	});
+   
+   	// 调用资产选框
+   	function open_child(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+   				
+			var index = layer.open({
+            	title: '请选择资产',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['700px', '500px'],
+                content: './click/zcrk_click.html'
+           });
+
+   		})
+   	}
+   	
+   	// 调用员工选框
+   	function open_child1(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+   				
+			var index = layer.open({
+            	title: '请选择领用人',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['700px', '500px'],
+                content: './click/person_click.html'
+           });
+
+   		})
+   	}
+   	
+   	// 库存判断
+   	function change_num(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var $ = layui.jquery;
+   			var va = Number($('#collect_num').val());
+	   		var val = Number($('#AssNum').text());
+	   		console.log(va, val);
+	   		if(va > val){
+	   			$('#collect_num').val(val);
+	   			layer.msg('超过库存量', {
+				  icon: 2,
+				  time: 1000 //2秒关闭（如果不配置，默认是3秒）
+				}); 
+	   		}else if(va < 0){
+	   			$('#collect_num').val('');
+	   		}
+   		})
+   	}
+   
+    </script>
+</body>
+
+</html>

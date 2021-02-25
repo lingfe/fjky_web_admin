@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>消费登记</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">
+                <div class="layui-inline">
+                    <label class="layui-form-label">姓名：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="full_name" class="layui-input dateIcon" id="full_name"
+                            style="border:0px;width: 300px;">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">身份证号：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="id_card" class="layui-input dateIcon" id="id_card"
+                            style="border:0px;width: 300px;">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">结算时间：</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="exit_time" name="exit_time" lay-verify="date" placeholder="yyyy-MM-dd"
+                            autocomplete="off" class="layui-input" style="width:240px">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">出院形式：</label>
+                    <div class="layui-input-inline">
+                        <select id="exit_form" name="exit_form" lay-verify="required" lay-reqtext="请选择出院形式"
+                            class="layui-input" style="width: 150px;">
+                            <option value="退住">退住</option>
+                            <option value="退住">去世</option>
+                        </select>
+                    </div>
+                </div>
+                <input id="id" type="text" style="display: none" readonly="" value=''>
+            </div>
+            <div class="layui-card-body">
+                <!-- 账单数据列表 -->
+                <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+                <!-- 押金预存情况数据列表 -->
+                <table class="layui-hide" id="2" lay-filter="currentTableFilter1"></table>
+                <!-- 结算合计数据列表 -->
+                <table class="layui-hide" id="3" lay-filter="currentTableFilter2"></table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['table', 'jquery', 'laydate'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                table = layui.table;
+            var laydate = layui.laydate;
+            //退住时间
+            laydate.render({
+                elem: '#exit_time'
+                , type: 'datetime'
+            });
+
+            // 根据id获取相关信息
+            getdata();
+            function getdata() {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/esa/sa_info.action?ess_info_id=' + $("#id").val(),
+                    headers: { //通过 request 头传递
+                        token: token
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (res) {
+                        //得到数据
+                        var list_exit_form = res.data.list_exit_form;
+                        var map_ess_info = res.data.map_ess_info;
+                        var list_cost_re = res.data.list_cost_re;
+                        //出院形式
+                        exitTable(list_exit_form);
+                        //基本信息
+                        essTable(map_ess_info);
+                        //费用记录
+                        costTable(list_cost_re);
+                    }
+                });
+                return false;
+            }
+         
+        });
+        function child(data) {
+            var $ = layui.$;
+            $("#id").val(data.id);
+            $("#full_name").val(data.full_name);
+            $("#id_card").val(data.id_card);
+            $("#balance").val(data.balance);
+        }
+    </script>
+</body>
+
+</html>

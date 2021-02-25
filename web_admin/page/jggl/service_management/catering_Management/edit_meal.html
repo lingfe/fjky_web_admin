@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>修改套餐</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css?date" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css?date" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐名称：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="sm_name" type="text" name="sm_name" lay-verify="required" lay-reqtext="请输入套餐名称"
+                        placeholder="请输入套餐名称" value="" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐价格：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="sm_price" type="text" name="sm_price" lay-verify="required" lay-reqtext="请输入套餐价格"
+                        placeholder="请输入套餐价格" value="" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">元</div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">包月价格：</label>
+            <div class="layui-input-block">
+                <div class="layui-input-inline">
+                    <input id="sm_price_baoyue" type="text" name="sm_price_baoyue" lay-verify="required"
+                        lay-reqtext="请输入包月价格" placeholder="请输入包月价格" value="" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">元</div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">适用人群：</label>
+            <div class="layui-input-block">
+                <textarea id="sm_intended_for" name="sm_intended_for" placeholder="请输入适用人群"
+                    class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐描述：</label>
+            <div class="layui-input-block">
+                <textarea id="sm_describe" name="sm_describe" placeholder="请输入套餐描述" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 隐藏属性 -->
+        <input id="id" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js?date"></script>
+    <script>
+        layui.use(['form'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/setMeal/updateWhereId.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#id").val(),
+                        "sm_name": $("#sm_name").val(),
+                        "sm_price": $("#sm_price").val(),
+                        "sm_price_baoyue": $("#sm_price_baoyue").val(),
+                        "sm_intended_for": $("#sm_intended_for").val(),
+                        "sm_describe": $("#sm_describe").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        // 获取父级数据
+        function child(data) {
+            var $ = layui.$;
+            $("#id").val(data.id);
+            $("#sm_name").val(data.sm_name);
+            $("#sm_price").val(data.sm_price);
+            $("#sm_price_baoyue").val(data.sm_price_baoyue);
+            $("#sm_intended_for").val(data.sm_intended_for);
+            $("#sm_describe").val(data.sm_describe);
+        }
+    </script>
+
+</body>
+
+</html>

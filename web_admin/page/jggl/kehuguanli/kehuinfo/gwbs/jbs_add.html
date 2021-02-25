@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>疾病史</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../../css/public.css" media="all">
+		<link rel="stylesheet" href="../../../uncheckin/uncheckin.css" / media="all">
+	</head>
+
+	<body>
+
+		<div class="layui-tab-content" style="height: 100px;">
+			<!--疾病史表单-->
+			<div class="layui-tab-item layui-show">
+				<form class="layui-form">
+					<input type="hidden" id='dh_type' value="疾病史" />
+					<div class="layui-form-item">
+						<label class="layui-form-label">患病时间：</label>
+						<div class="layui-input-block">
+							<input type="text" id="dh_datetime" readonly required lay-verify="required" placeholder="请输入患病时间" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">疾病名称：</label>
+						<div class="layui-input-block">
+							<input type="text" id="dh_name" required lay-verify="required" placeholder="请输入疾病名称" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">治愈情况：</label>
+						<div class="layui-input-block">
+							<input type="text" id="dh_cure_situation" required lay-verify="required" placeholder="请输入治愈情况" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-row" style="padding-top: 40px;">
+						<div class="layui-col-xs-offset2">
+							<div class="layui-form-item">
+								<div class="layui-input-block">
+									<button class="layui-btn layui-btn-primary" id="close">取消</button> &nbsp;&nbsp;&nbsp;
+									<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn_jbs">保存</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- 引入js资源 -->
+		<script src="../../../../../lib/layui-v2.5.5/layui.js" charset="UTF-8"></script>
+		<script src="../../../../bcxt/login/login.js" charset="UTF-8"></script>
+		<!--layui操作-->
+		<script charset="utf-8">
+			//加载layui指定组件
+
+			layui.use(['form', 'table', 'jquery', 'laydate', 'element'], function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					form = layui.form,
+					laydate = layui.laydate,
+					table = layui.table,
+					element = layui.element;
+
+				// 表单日期渲染
+				laydate.render({
+					elem: "#dh_datetime",
+					type: 'date',
+					max: 0,
+					trigger: 'click',
+				})
+				// 用户id获取
+				var $ess_id = $("#ess_id", parent.document).val();
+
+				//监听提交
+				form.on('submit(saveBtn_jbs)', function(data) {
+					$.ajax({
+						url: '/sys_fkcy/jggl/dishis/save.action',
+						headers: header,
+						context: document.body,
+						type: "POST",
+						data: {
+							"ess_id": $ess_id,
+							"dh_type": $('#dh_type').val(),
+							"dh_datetime": $('#dh_datetime').val(),
+							"dh_name": $('#dh_name').val(),
+							"dh_cure_situation": $('#dh_cure_situation').val()
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function(data) {
+							if(data.state == 200) {
+
+								layer.msg(data.msg, {
+									icon: 6, //成功的表情
+									time: 1000 //1秒关闭（如果不配置，默认是3秒）
+								}, function() {
+									window.parent.location.reload();
+								});
+							} else {
+								layer.msg(data.msg, {
+									icon: 5, //失败的表情
+									time: 1000
+								});
+								return;
+							}
+						}
+					});
+					return false;
+				});
+
+				var is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click", function() {
+					if(!is_caozuo) {
+						//只是关闭
+						var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index); //关闭窗口
+					} else {
+						//关闭并刷新
+						window.parent.location.reload();
+					}
+					return false;
+				});
+
+			});
+
+			//得到父级内容(kehuinfo.html)
+			function child(data) {
+				layui.use('jquery', function() {
+					var $ = layui.jquery;
+					$('#ess_id').val(data.ess_id);
+				})
+			}
+		</script>
+	</body>
+
+</html>

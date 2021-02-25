@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>添加系统管理员</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<div class="layui-form" style="width:96%;margin:0;margin-top:15px;">
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">真实姓名</label>
+					<div class="layui-input-block">
+						<input id="admin_cname" type="text" name="admin_cname" lay-reqtext="请输入真实姓名" placeholder="请输入真实姓名"
+							value="" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">英文名</label>
+					<div class="layui-input-block">
+						<input type="text" id="admin_ename" name="admin_ename" lay-reqtext="请输入英文名" placeholder="请输入英文名"
+							value="" class="layui-input">
+					</div>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label required">登录名称</label>
+				<div class="layui-input-block">
+					<input type="text" id="login_name" name="login_name" lay-reqtext="登录名不能为空" lay-verify="required"
+						placeholder="请输入登录名" value="" class="layui-input">
+
+				</div>
+			</div>
+			
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">登录密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="login_pwd" name="password" lay-reqtext="密码不能为空" lay-verify="required"
+							placeholder="请输入密码" value="" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">确认密码</label>
+					<div class="layui-input-block">
+						<input id='repw' name="repw" type="password" lay-verify="required" lay-reqtext="required|confirmPass"
+							placeholder="请再次输入密码" value="" class="layui-input">
+					</div>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">联系电话</label>
+				<div class="layui-input-block">
+					<input type="text" id="admin_phone" name="admin_phone" oninput="value=value.replace(/[^\d]/g,'')"
+						placeholder="请输入联系电话" value="" class="layui-input">
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<div class="layui-input-block">
+					<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+					<button class="layui-btn layui-btn-primary" id="close">关闭</button>
+				</div>
+			</div>
+		</div>
+		<!-- 表单 end -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载组件
+			layui.use(['form'], function () {
+				//定义组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+				
+				//是否操作过
+				var	is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click",function(){
+					if(!is_caozuo){
+						//只是关闭
+						var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index);		//关闭窗口
+					}else{
+						//关闭并刷新
+						window.parent.location.reload();
+					} 
+					return false;
+				});
+				
+				//监听提交
+				form.on('submit(saveBtn)', function (data) {
+					//是否通过验证
+					if (checkpassword()) {
+						sentAjax()
+					}
+					
+					//验证参数
+					function checkpassword() {
+						var reg = /^1[3456789]\d{9}$/;
+						if ($("#login_pwd").val() !== $("#repw").val()) {
+							layer.msg('两次密码不一致', {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return;
+						}
+						if (!reg.test($("#admin_phone").val())) {
+							layer.msg('请输入正确的电话格式！！', {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return false;
+						}
+						return true;
+					}
+					
+					//请求保存
+					function sentAjax() {
+						$.ajax({
+							url: '/sys_fkcy/admin/save.action',
+							headers: header,
+							context: document.body,
+							type: "POST",
+							data: {
+								"admin_cname": $("#admin_cname").val(),
+								"admin_ename": $("#admin_ename").val(),
+								"login_name": $("#login_name").val(),
+								"login_pwd": $("#login_pwd").val(),
+								"admin_phone": $("#admin_phone").val()
+							},
+							xhrFields: {
+								withCredentials: true
+							},
+							success: function (data) {
+								if (data.state == 200) {
+									is_caozuo=true;//操作过
+									layer.msg(data.msg, {
+										icon: 6,//成功的表情
+										time: 1000 //1秒关闭（如果不配置，默认是3秒）
+									});
+								}
+								else {
+									layer.msg(data.msg, {
+										icon: 5,//失败的表情
+										time: 1000
+									});
+									return;
+								}
+							}
+						});
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

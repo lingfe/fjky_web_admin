@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>首页三</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../../css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /*.top-panel > .layui-card-body{
+            height: 60px;
+        }*/
+        .top-panel-number {
+            line-height: 60px;
+            font-size: 30px;
+            border-right: 1px solid #eceff9;
+        }
+
+        .top-panel-tips {
+            line-height: 30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+
+<body>
+    <!--<div class="layuimini-container">-->
+    <div class="layuimini-main">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md3">
+                <div class="layui-card top-panel">
+                    <div class="layui-card-header">总访问量</div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space5">
+                            <div id="visit_count" class="layui-col-xs9 layui-col-md9 top-panel-number">
+                            </div>
+                            <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                                比昨天 <a style="color: #1aa094">▲0.12</a><br>
+                                比七日 <a style="color: #bd3004">▼0.06</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md3">
+                <div class="layui-card top-panel">
+                    <div class="layui-card-header">使用人数</div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space5">
+                            <div id="user_count" class="layui-col-xs9 layui-col-md9 top-panel-number">
+                            </div>
+                            <div class="panel-content">
+								<h1 class="no-margins" >23</h1>
+								<small></small>
+							</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md3">
+                <div class="layui-card top-panel">
+                    <div class="layui-card-header">入驻量</div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space5">
+                            <div id="enterprise_count" class="layui-col-xs9 layui-col-md9 top-panel-number">
+                            </div>
+                            <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                                比昨天 <a style="color: #1aa094">▲0.00</a><br>
+                                比七日 <a style="color: #bd3004">▼0.00</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="layui-col-xs12 layui-col-md3">
+
+                <div class="layui-card top-panel">
+                    <div class="layui-card-header">用餐报备</div>
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space5">
+                            <div id="report_count" class="layui-col-xs9 layui-col-md9 top-panel-number">
+                            </div>
+                            <div class="layui-col-xs3 layui-col-md3 top-panel-tips">
+                                比昨天 <a style="color: #1aa094">▲0.12</a><br>
+                                比七日 <a style="color: #bd3004">▼0.06</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md9">
+                <div id="echarts-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md3">
+                <div id="echarts-pies" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+            </div>
+        </div>
+
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-xs12 layui-col-md6">
+                <div id="echarts-dataset" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
+            </div>
+            <div class="layui-col-xs12 layui-col-md6">
+                <div id="echarts-map" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
+            </div>
+        </div>
+
+
+    </div>
+    <!--</div>-->
+    <script src="../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../bcxt/login/login.js"></script>
+    <script>
+        layui.use(['layer', 'echarts'], function () {
+            var $ = layui.jquery,
+                layer = layui.layer,
+                echarts = layui.echarts;
+            var token = Storage.get("token");
+
+
+            //3秒请求一次刷新数据
+            window.reloadView = function () {
+                getdata();
+            }
+
+            // setInterval('reloadView()', 1000);
+
+            getdata();
+            function getdata() {
+                $.ajax({
+                    url: '/sys_fkcy/home/data_bcxt',
+                    headers: { //通过 request 头传递
+                        token: token
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (res) {
+                        $("#visit_count").html(res.data.visit_count);
+                        $("#enterprise_count").html(res.data.enterprise_count);
+                        $("#user_count").html(res.data.user_count);
+                        $("#report_count").html(res.data.report_count)
+                    }
+                });
+            }
+
+            /**
+             * 报表功能
+             */
+            var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+
+            var optionRecords = {
+                title: {
+                    text: '各项指标-周报表'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                legend: {
+                    data: ['总访问量', '使用人数', '入驻量', '用餐报备']
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: '总访问量',
+                        type: 'line',
+                        stack: '总量',
+                        areaStyle: {},
+                        data: [203, 132, 101, 134, 90, 230, 210]
+                    },
+                    {
+                        name: '使用人数',
+                        type: 'line',
+                        areaStyle: {},
+                        data: [11, 12, 10, 7, 9, 10, 8]
+                    },
+                    {
+                        name: '入驻量',
+                        type: 'line',
+                        stack: '总量',
+                        areaStyle: {},
+                        data: [1, 0, 0, 0, 0, 0, 0]
+                    },
+                    {
+                        name: '用餐报备',
+                        type: 'line',
+                        stack: '总量',
+                        areaStyle: {},
+                        data: [12, 11, 8, 14, 12, 8, 7]
+                    }
+
+
+                ]
+            };
+            echartsRecords.setOption(optionRecords);
+
+
+            /**
+             * 玫瑰图表
+             */
+            var echartsPies = echarts.init(document.getElementById('echarts-pies'), 'walden');
+            var optionPies = {
+                title: {
+                    text: '其他业务-玫瑰图',
+                    left: 'left'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    top: '25px',
+                    data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+                },
+                series: [
+                    {
+                        name: '指标统计',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '60%'],
+                        roseType: 'radius',
+                        data: [
+                            { value: 335, name: '直接访问' },
+                            { value: 310, name: '邮件营销' },
+                            { value: 234, name: '联盟广告' },
+                            { value: 135, name: '视频广告' },
+                            { value: 368, name: '搜索引擎' }
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            echartsPies.setOption(optionPies);
+
+
+            /**
+             * 柱状图
+             */
+            var echartsDataset = echarts.init(document.getElementById('echarts-dataset'), 'walden');
+
+            var optionDataset = {
+                title: {
+                    text: '未来3年预测数据',
+                    left: 'left'
+                },
+                legend: {},
+                tooltip: {},
+                dataset: {
+                    dimensions: ['product', '2020', '2021', '2022'],
+                    source: [
+                        { product: '总访问量', '2020': 43.3, '2021': 185.8, '2022': 1930.7 },
+                        { product: '使用人数', '2020': 83.1, '2021': 173.4, '2022': 1550.1 },
+                        { product: '入驻量', '2020': 86.4, '2021': 165.2, '2022': 1820.5 },
+                        { product: '用餐报备', '2020': 72.4, '2021': 153.9, '2022': 1390.1 }
+                    ]
+                },
+                xAxis: { type: 'category' },
+                yAxis: {},
+                // Declare several bar series, each will be mapped
+                // to a column of dataset.source by default.
+                series: [
+                    { type: 'bar' },
+                    { type: 'bar' },
+                    { type: 'bar' }
+                ]
+            };
+
+            echartsDataset.setOption(optionDataset);
+
+
+            /**
+             * 中国地图
+             */
+            var echartsMap = echarts.init(document.getElementById('echarts-map'), 'walden');
+
+
+            var optionMap = {
+                title: {
+                    text: '最近6年统计数据',
+                    left: 'left'
+                },
+                legend: {},
+                tooltip: {
+                    trigger: 'axis',
+                    showContent: false
+                },
+                dataset: {
+                    source: [
+                        ['year', '2015', '2016', '2017', '2018', '2019', '2020'],
+                        ['总访问量', 141.1, 180.4, 25650.1, 6530.3, 14830.8, 12598.7],
+                        ['使用人数', 1086.5, 292.1, 385.7, 1483.1, 573.4, 655.1],
+                        ['入驻量', 1024.1, 267.2, 3749.5, 486.4, 565.2, 682.5],
+                        ['用餐报备', 155.2, 267.1, 369.2, 1472.4, 553.9, 639.1]
+                    ]
+                },
+                xAxis: { type: 'category' },
+                yAxis: { gridIndex: 0 },
+                grid: { top: '55%' },
+                series: [
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    { type: 'line', smooth: true, seriesLayoutBy: 'row' },
+                    {
+                        type: 'pie',
+                        id: 'pie',
+                        radius: '30%',
+                        center: ['50%', '25%'],
+                        label: {
+                            formatter: '{b}: {@2012} ({d}%)'
+                        },
+                        encode: {
+                            itemName: 'product',
+                            value: '2012',
+                            tooltip: '2012'
+                        }
+                    }
+                ]
+            };
+
+            echartsMap.setOption(optionMap);
+
+
+            // echarts 窗口缩放自适应
+            window.onresize = function () {
+                echartsRecords.resize();
+            }
+
+        });
+    </script>
+</body>
+
+</html>

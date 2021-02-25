@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>登记返回</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" / media="all">
+</head>
+
+<body>
+
+    <!--(full_name, out_escort, id_card, out_escort_phone, phone, out_datetime, out_is_equipment,returntime,equ_id ,out_reason)-->
+    <!--姓名，陪同人，身份证号，陪同人电话， 联系电话， 外出时间， 是否佩戴设备，返回时间， 设备id， 外出原因-->
+    <!--表单 starst-->
+    <form class="layui-form" action="">
+        <input type="hidden" id="id" />
+        <div class="layui-form-item">
+            <label class="layui-form-label">客户姓名：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id='full_name' lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+
+            <label class="layui-form-label">陪同人：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id='out_escort' lay-verify="required" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">身份证号码：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id="id_card" maxlength="18" lay-verify="required|identity" autocomplete="off" class="layui-input">
+            </div>
+
+            <label class="layui-form-label">陪同人电话：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id="out_escort_phone" maxlength="11" lay-verify="required|phone" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id="phone" name="phone" maxlength="11" autocomplete="off" lay-verify="required|phone" class="layui-input">
+            </div>
+
+            <label class="layui-form-label">外出时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id="out_datetime" name="title" autocomplete="off" lay-verify="required|datetime" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">智能设备：</label>
+            <div class="layui-input-inline">
+                <input id="equipment" lay-filter="layui_dataType" class="layui-disabled layui-radio-disbaled" type="radio" name="out_is_equipment" value="true" title="已佩戴" disabled>
+                <input id="equipment" lay-filter="layui_dataType" class="layui-disabled layui-radio-disbaled" type="radio" name="out_is_equipment" value="false" title="未佩戴" disabled>
+            </div>
+
+
+            <label class="layui-form-label">返回时间：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="returntime" lay-verify="datetime" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备ID：</label>
+            <div class="layui-input-inline">
+                <input type="text" readonly="true" class="layui-input layui-disabled layui-unselect" id="equ_id" name="equ_id" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">外出原因：</label>
+            <div class="layui-input-block">
+                <textarea id='out_reason' readonly="true" class="layui-textarea layui-disabled layui-unselect" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <input id="state" type="text" style="display: none" readonly="" value='1'>
+        <div class="layui-row" style="padding-top: 20px;">
+            <div class="layui-col-xs-offset6">
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <!--表单 end-->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery', 'laydate', 'layer'], function() {
+
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                laydate = layui.laydate;
+            table = layui.table;
+
+            // 渲染返回日期
+            laydate.render({
+                elem: "#returntime",
+                type: 'datetime',
+                position: 'fixed',
+                trigger: 'click'
+            })
+
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                var state = 1;
+                $.ajax({
+                    url: '/sys_fkcy/jggl/out_register/updateWhereId.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "id": $("#id").val(), // id
+                        "full_name": $("#full_name").val(), // 姓名
+                        "id_card": $("#id_card").val(), // 身份证号
+                        "phone": $("#phone").val(),
+                        "out_escort": $("#out_escort").val(), // 陪同人姓名
+                        "out_escort_phone": $("#out_escort_phone").val(), // 陪同人电话
+                        "out_datetime": $("#out_datetime").val(), // 外出时间
+                        "out_is_equipment": $("#out_is_equipment").val(), // 是否佩戴智能设备
+                        "out_reason": $("#out_reason").val(), // 外出原因
+                        "returntime": $("#returntime").val(), // 返回时间
+                        "state": $("#state").val() // 状态
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                ime: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+        });
+        // 获取父级数据
+        function child(data) {
+            // 设置佩戴状态
+            $ = layui.$;
+
+            layui.use(['form'], function() {
+                var form = layui.form;
+                if (data.out_is_equipment == 'true') {
+                    $('input[name="out_is_equipment"]').eq(0).prop("checked", 'checked');
+                    $('input[name="out_is_equipment"]').eq(1).attr("checked", false);
+                    form.render();
+                }
+                if (data.out_is_equipment == 'false') {
+                    $('input[name="out_is_equipment"]').eq(1).prop("checked", 'checked');
+                    $('input[name="out_is_equipment"]').eq(0).attr("checked", false);
+                    form.render()
+                }
+            })
+            $('#id').val(data.id);
+            $('#full_name').val(data.full_name);
+            $('#id_card').val(data.id_card);
+            $('#phone').val(data.phone);
+            $('#out_escort').val(data.out_escort);
+            $('#out_escort_phone').val(data.out_escort_phone);
+            $('#out_datetime').val(data.out_datetime);
+            $('#out_is_equipment').val(data.out_is_equipment);
+            $('#out_reason').val(data.out_reason);
+            $('#returntime').val(data.returntime);
+            $('#equ_id').val(data.equ_id);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>消费登记</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css" media="all">
+</head>
+
+<body>
+
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+
+    <!-- table头部操作 -->
+    <script type="text/html" id="toolbarDemo">
+		<div class="layui-btn-container">
+            <div class="layui-inline">
+            </div>
+            <form class="layui-form layui-form-pane" style="float:left">
+                <div class="layui-inline">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="searchKey" placeholder="请输入客户姓名或身份证号" lay-search=""
+                                class="inputTest" >
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn"  lay-submit
+                            lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+		</div>
+    </script>
+
+    <!-- 金额处理 -->
+    <script type="text/html" id="to_balance">
+		{{# if (d.balance >0) { }}
+			<span style="color:red;">{{d.balance}}</span>
+			<span style="color:green;">/元</span>
+		{{# }else { }}
+            <span style="color:red;">0</span>
+			<span style="color:green;">/元</span>
+		{{# } }}
+    </script>
+
+    <!-- 欠费处理 -->
+    <script type="text/html" id="id_balance">
+		{{# if (d.balance >0) { }}
+			<span style="color:red;">0</span>
+			<span style="color:green;">/元</span>
+		{{# }else { }}
+            <span style="color:red;">-{{d.balance}}</span>
+			<span style="color:green;">/元</span>
+		{{# } }}
+    </script>
+
+    <!-- 操作 start -->
+    <script type="text/html" id="currentTableBar">
+        <a class="dengjiTest" lay-event="payment"><i class="layui-icon layui-icon-edit"></i>预存 / 缴费</a>
+		<a class="dengjiTest" lay-event="query">查看账单</a>   
+    </script>
+    <!-- 操作 end -->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+
+            //加载数据到table
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/exit_record/getPage.action',
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                cols: [[
+                    { field: 'full_name', width: 150, title: '姓名' },
+                    { field: 'id_card', width: 250, title: '身份证号', align: "center" },
+                    { field: 'bed', width: 250, title: '床位', align: "center" },
+                    { field: 'balance', width: 180, title: '账户余额', toolbar: '#to_balance', align: "center" },
+                    { field: 'balance', width: 180, title: '欠费', toolbar: '#id_balance', align: "center" },
+                    { title: '操作', minWidth: 80, toolbar: '#currentTableBar', align: "center", fixed: "right" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: true,
+                skin: 'line',
+            });
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: result.searchKey	//关键字
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'payment') {
+                    var index = layer.open({
+                        title: '预存费用',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['550px', '500px'],
+                        content: './add.html',
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    return false;
+                } else if (obj.event === 'query') {
+                    var index = layer.open({
+                        title: '查看账单',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['100%', '100%'],
+                        content: './query.html',
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

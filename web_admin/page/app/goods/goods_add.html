@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增商品信息</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../../css/public.css">
+    <!-- <link rel="stylesheet" href="../css/hospital.css"> -->
+</head>
+<style>
+    #test1 {
+        position: absolute;
+        left: 20%;
+        margin-top: -20px;
+        width: 70px;
+        height: 70px;
+        background-color: #F6F6F6;
+        border-radius: 7px;
+        border: 0px;
+    }
+
+    #test2 {
+        position: absolute;
+        left: 20%;
+        margin-top: -20px;
+        width: 70px;
+        height: 70px;
+        background-color: #F6F6F6;
+        border-radius: 7px;
+        border: 0px;
+    }
+
+    #test3 {
+        position: absolute;
+        left: 20%;
+        margin-top: -20px;
+        width: 70px;
+        height: 70px;
+        background-color: #F6F6F6;
+        border-radius: 7px;
+        border: 0px;
+    }
+</style>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main" style="min-height:700px">
+            <div class="layui-form layuimini-form">
+                <div class="layui-row" style="text-align: center;">
+                    <div class="layui-col-md4">
+                        <div class="grid-demo grid-demo-bg1">
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品名称：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="goods_name" name="goods_name" placeholder="请输入商品名称"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品简介：</label>
+                                <div class="layui-input-block">
+                                    <textarea id="goods_introduce" name="goods_introduce" placeholder="请输入简介"
+                                        lay-verify="required" class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item" style="margin-top: 130px;">
+                                <label class="layui-form-label">添加图片：</label>
+                                <div class="layui-upload">
+                                    <button type="button" id="test1" dis>
+                                        <p style="color:#b8b8b8;;font-size: 30px;">+</p>
+                                        <p style="color: #5f5f5f;">上传图片</p>
+                                    </button>
+                                    <div class="layui-upload-list">
+                                        <img class="comm_img" style="width:auto;height:50px;" id="goods_img" src=""
+                                            alt="">
+                                        <img class="comm_img" hidden style="width:auto;height:50px;" id="goods_imgs" src=""
+                                            alt="">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item" style="margin-top: 50px;">
+                                <label class="layui-form-label">添加视频：</label>
+                                <div class="layui-upload">
+                                    <button type="button" id="test2" dis>
+                                        <p style="color:#b8b8b8;;font-size: 30px;">+</p>
+                                        <p style="color: #5f5f5f;">上传视频</p>
+                                    </button>
+                                    <div class="layui-upload-list" id="demo3"></div>
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item" style="margin-top: 50px;">
+                                <label class="layui-form-label">添加详情：</label>
+                                <div class="layui-upload">
+                                    <button type="button" id="test3" dis>
+                                        <p style="color:#b8b8b8;;font-size: 30px;">+</p>
+                                        <p style="color: #5f5f5f;">上传详情</p>
+                                    </button>
+                                    <div class="layui-upload-list" id="demo33"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md4">
+                        <div class="grid-demo">
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">单价：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="goods_price" name="goods_price" placeholder="请输入单价"
+                                        lay-verify="required" oninput="value=value.replace(/[^\d]/g,'')"
+                                        class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">元</div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">会员价：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="goods_vprice" name="goods_vprice" placeholder="请输入会员价"
+                                        lay-verify="required" oninput="value=value.replace(/[^\d]/g,'')"
+                                        class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">元</div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品分类：</label>
+                                <div class="layui-input-inline">
+                                    <div class="layui-input-inline">
+                                        <select id="goods_category" name="goods_category" lay-verify="required"
+                                            lay-reqtext="请选择民族" class="select_wd120">
+                                            <option value="蔬菜">蔬菜</option>
+                                            <option value="海鲜">海鲜</option>
+                                            <option value="肉蛋">肉蛋</option>
+                                            <option value="水果">水果</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">供应商：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="supplier" name="supplier" placeholder="请输入供应商"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">库存：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="goods_stock" name="goods_stock" placeholder="请输入库存"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md4">
+                        <div class="grid-demo grid-demo-bg1">
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">产地：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="goods_place" name="goods_place" placeholder="请输入产地"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">净含量：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="net_content" name="net_content" placeholder="请输入净含量"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">保质期：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="quality_date" name="quality_date" placeholder="请输入保质期"
+                                        lay-verify="required" class="layui-input">
+                                </div>
+                            </div>
+                            <!-- 单独一行 -->
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">保存条件：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="conditions" name="conditions" placeholder="请输入保存条件"
+                                        class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 操作行 -->
+                <div class="layui-form-item" style="float: right;margin-right: 20%;">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确定</button>
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        //加载layui指定组件
+
+        layui.use(['form', 'table', 'jquery', 'laydate', 'upload'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var upload = layui.upload;
+
+            // 图片上传
+            var uploadInst = upload.render({
+                elem: '#test1',
+                url: '/sys_fkcy/images/imageUpload.action',
+                headers: header,
+                before: function (obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function (index, file, result) {
+                        $('#goods_img').attr('src', result); //图片链接（base64）
+                    });
+                },
+                done: function (res, index, upload) {
+                    $("#goods_imgs").attr("src", res.data.imgUrl);
+                    layer.msg(res.msg, {
+                        icon: 6,//成功的表情
+                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                    }, function () {
+                        //location.reload();
+                    });
+                    console.log(res);
+                },
+                error: function (res) {
+                    console.log(res);
+                }
+            });
+          
+            // 视频上传
+            upload.render({
+                elem: '#test2'
+                , url: '/sys_fkcy/files/upload.action'
+                , headers: header
+                , accept: 'video' //视频
+                , done: function (res) {
+                    layer.msg('上传成功');
+                    console.log(res)
+                }
+            });
+
+            //详情上传
+            upload.render({
+                elem: '#test3'
+                , url: '/sys_fkcy/images/imageUploadList.action'
+                , headers: header
+                , multiple: true
+                , before: function (obj) {
+                    //预读本地文件示例，不支持ie8
+                    obj.preview(function (index, file, result) {
+                        $('#demo33').append('<img style="width:70px;height:70px" src="' + result + '" alt="' + file.name + '" class="layui-upload-img">')
+                    });
+                }
+                , done: function (res) {
+                    //上传完毕
+                }
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/app/goods/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "goods_name": $("#goods_name").val(),
+                        "goods_img": $("#goods_imgs").attr("src"),
+                        "goods_detail": $("#goods_detail").attr("src"),
+                        "goods_introduce": $("#goods_introduce").val(),
+                        "goods_price": $("#goods_price").val(),
+                        "goods_vprice": $("#goods_vprice").val(),
+                        "goods_category": $("#goods_category").val(),
+                        "supplier": $("#supplier").val(),
+                        "goods_stock": $("#goods_stock").val(),
+                        "goods_place": $("#goods_place").val(),
+                        "net_content": $("#net_content").val(),
+                        "quality_date": $("#quality_date").val(),
+                        "conditions": $("#conditions").val(),
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            })
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

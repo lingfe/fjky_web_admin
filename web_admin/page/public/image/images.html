@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>图片信息</title>
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+<style>
+    .layuimini-container .bigimg {
+        position: fixed;
+        width: auto;
+        height: auto;
+        z-index: 90000;
+        margin: auto;
+    }
+</style>
+
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- tab数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+             <!-- 图片放大 -->
+             <div id="fangda" style="position:fixed;left:10%;top:10%;z-index:999;">
+                <img style="max-width:500px;max-height:500px;" />
+            </div> 
+        </div>
+    </div>
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+
+    <script>
+        layui.use(['form', 'table'], function () {
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var token = Storage.get("token");
+
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/images/getPage.action', //数据接口
+                headers: header,
+                cols: [[
+                
+                    { field: 'id', minWidth: 150, title: 'id', align: "center" },
+                    { field: 'full_path', minWidth: 200, title: '完整路径', align: "center" },
+                    { field: 'storage_path', minWidth: 200, title: '储存路径', align: "center" },
+                    { field: 'old_name', minWidth: 130, title: '图片原名', align: "center" },
+                    { field: 'custom_name', minWidth: 200, title: '图片现名称', align: "center" },
+                    {
+                        field: 'imgUrl', minWidth: 100, title: '图片', align: "center", templet: function (d) {
+                            return '<div class=""><img  src=' + d.imgUrl + '></div>'
+                        }
+                    },
+                    { field: 'suffix', width: 80, title: '后缀', align: "center" },
+                    { field: 'crt_date', width: 230, title: '创建时间', templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>" },
+                   
+                    { field: 'imgUrl', minWidth: 130, title: 'url', align: "center" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+
+                request: {
+                    pageName: 'pageIndex',//当前页，默认page，
+                    limitName: 'pageNum',//页容量，默认limit
+                },
+                parseData: function (res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 17,
+                page: true,
+                skin: 'line',
+            });
+
+                //图片放大
+                $("#currentTableId").next().on('mouseover mouseout', 'img', function (e) {
+                let $box = $("#fangda img");
+                if (e.type == "mouseover") {
+                    $box.attr('src', $(this)[0].src).show();
+                } else if (e.type == "mouseout") {
+                    $box.hide();
+                }
+            })
+        });
+    </script>
+</body>
+
+</html>

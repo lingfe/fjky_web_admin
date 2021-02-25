@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>维修申请登记</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+</head>
+<body style="background-color: white;">
+	<div class="layui-container">
+	<div style="padding-top: 75px;">
+
+	</div>
+	<div class="layui-row layui-col-space30" style="padding-top: 10px;">
+		<div class="layui-col-md6 layui-col-sm12">
+			<iframe src="./echarts/table1.html" width="570px" height="330px" style="border: 2px dotted #F6F6F6;padding-left: 0px;" scrolling="no" frameborder="0">
+			</iframe>
+		</div>
+		<div class="layui-col-md6 layui-col-sm12">
+			<iframe src="./echarts/table2.html" width="700px" height="330px" style="border: 2px dotted #F6F6F6;" scrolling="no" frameborder="0">
+			</iframe>
+		</div>
+	</div>
+	
+	<h1 align="center" style="padding-top: 200px;">机构资产管理系统入口/ SYSTEM ENTRY</h1>
+	<div class="layui-row" style="padding-top: 40px;">
+		<div class="layui-col-md10 layui-col-md-offset2">
+			<button class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" style="width: 260px;height: 68px;background-color: #3285ED;" onclick="zcrk()">资产入库</button>	
+			<button class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" style="width: 320px;height: 68px;background-color: #EC7D5D;" onclick="zcly()">资产领用及归还</button>	
+			<button class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" style="width: 260px;height: 68px;background-color: #6674DD;" onclick="zcdb()">资产调拨</button>	
+			<!--<button class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" style="width: 444px;height: 68px;background-color: #CA66DD;" onclick="ewmgl()">二维码管理及扫码查询系统</button>-->	
+		</div>
+
+
+	</div>
+	</div>
+
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8" type="text/javascript">
+    
+    layui.use(['layer'], function(){
+    	var $ = layui.jquery;
+   
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+       })
+    
+    </script>
+    <script type="text/javascript">
+    	function zcrk(){
+			layui.use('layer', function(){
+		    	var layer = layui.layer,
+		    		$ = layui.jquery;
+				var index = layer.open({
+				  title: '资产入库',
+				  type: 2, 
+				  area: ["1000px","500px"],
+				  content: './zcrk.html',
+				  maxmin: true
+				});
+				layer.full(index);
+				$(window).on("resize", function () {
+	                layer.full(index);
+	        	});
+	        	});
+		}
+    	function zcly(){
+			layui.use('layer', function(){
+		    	var layer = layui.layer;
+		    		$ = layui.jquery;
+				var index = layer.open({
+				  title: '资产领用',
+				  type: 2,
+				  area: ["1000px","500px"],
+				  content: './zcly.html',
+				  maxmin: true
+				});
+				layer.full(index);
+			  	$(window).on("resize", function () {
+                	layer.full(index);
+	        	});
+			  	});
+	        	
+		}
+    	function zcdb(){
+			layui.use('layer', function(){
+		    	var layer = layui.layer;
+		    		$ = layui.jquery;
+				var index = layer.open({
+				  title: '资产调拨',
+				  type: 2,
+				  area: ["1000px","500px"],
+				  content: './zcdb.html',
+				  maxmin: true
+				});
+				layer.full(index);
+			  	$(window).on("resize", function () {
+                	layer.full(index);
+	        	});
+			  	});
+		}
+		function ewmgl(){
+			layui.use('layer', function(){
+		    	var layer = layui.layer;
+		    		$ = layui.jquery;
+				var index = layer.open({
+				  title: '二维码管理',
+				  type: 2,
+				  area: ["1000px","500px"],
+				  content: './ewmgl.html',
+				  maxmin: true
+				});
+				layer.full(index);
+			  	$(window).on("resize", function () {
+                	layer.full(index);
+	        	});
+			  	});
+		}
+	</script>
+
+
+</body>
+
+</html>

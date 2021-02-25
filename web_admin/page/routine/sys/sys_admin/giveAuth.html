@@ -1,0 +1,181 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>menu</title>
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <style>
+        .layui-btn:not(.layui-btn-lg ):not(.layui-btn-sm):not(.layui-btn-xs) {
+            height: 34px;
+            line-height: 34px;
+            padding: 0 8px;
+        }
+    </style>
+    <input type="text" value="" id="qiId" style="display: none;" />
+</head>
+<body>
+<div style="padding: 20px; background-color: #F2F2F2;">
+
+  <div class="layui-row layui-col-space15">
+    
+    <div class="layui-col-md9">
+      <div class="layui-card">
+        <div class="layui-card-header">企业授权</div>
+		<div class="layuimini-container">
+			<div class="layuimini-main">
+				<div class="layui-btn-group">                         
+                    <button class="layui-btn" id="shouquan" >授权</button>
+                </div> 					 
+					<!-- <table id="munu-table" class="layui-table" lay-filter="munu-table"></table>		 -->
+                    <div id="test12" class="demo-tree-more"></div>
+				 
+			</div>
+		</div>
+      </div>
+    </div>
+  </div>
+</div> 
+
+		<!-- 操作列 -->
+	 
+		
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.1.min.js" charset="utf-8"></script>
+<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+<script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="../../../bcxt/login/login.js"></script>
+
+                        
+<!-- <script src="./js/look.js"></script> -->
+<script>
+layui.use(['table', "tree",], function () {
+        var $ = layui.jquery;
+        var tree = layui.tree;
+        var token = Storage.get("token");  
+        //treetable =  $.extend(table, {config: {checkName: 'check'}});
+        let qiId =$("#qiId").val();
+         
+    function getData(){
+            // // 渲染栏目         
+         $.ajax({
+            url: '/sys_fkcy/role/seeRoleMenuAction.action?role_id='+qiId,
+            headers: { //通过 request 头传递
+                token: token
+            },
+            type: 'post',
+            dataType: 'json',
+            success: function (res) {
+                if(res.state==401){
+                    window.location.href='../../bcxt/login/login.html';
+                }else{
+                    renderTable(res.data);
+                    eventBind();
+                }
+                
+            }
+         });
+
+        var  renderTable =function(data){
+              tree.render({
+                elem: '#test12'
+                ,text: {
+                  defaultNodeName: '未命名' //节点默认名称
+                  ,none: '无数据' //数据为空时的提示文本
+                } 
+              ,data:data
+              ,checkChirld:false
+                ,url: localurl+'/sys_fkcy/main_menu/getAll?token='+token       
+                ,showCheckbox: true  //是否显示复选框
+                ,id: 'demoId1'
+                ,isJump: true //是否允许点击节点时弹出新窗口跳转
+             
+                ,click: function(obj){
+                  var data = obj.data;  //获取当前点击的节点数据
+                  layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+                }
+                ,oncheck: function(obj){
+                    // console.log(obj.data); //得到当前点击的节点数据
+                    // console.log(obj.checked); //得到当前节点的展开状态：open、close、normal
+                    // console.log(obj.elem); //得到当前节点元素
+                 }
+              }); 
+
+        }
+        
+    }
+
+    function eventBind(){
+        $("#shouquan").on("click",function(){
+            var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+            //let arr =checkedData[0].children;
+            if(!checkedData) return;
+            let str ='';
+            getStr(checkedData);
+            function getStr(arr){
+                for(let i=0;i<arr.length;i++){
+                    str+=arr[i].id+','
+                    if(arr[i].children.length>0){
+                        getStr(arr[i].children);
+                    }
+                }
+                //return str;
+            }
+            str=str.substring(0,str.length-1);
+            sentData(str);
+        })
+    }
+    function sentData(str){///企业栏目权限授权
+            $.ajax({ 
+                url: localurl +'/sys_fkcy/role/addRoleMenuAction.action',
+                 context: document.body, //{'Content-Type':'application/json;charset=utf8','token':Storage.get("token")}
+                 headers:header,
+                 type: "POST",
+                    // dataType: "data",
+                data: { 
+                    "str_menu_id":str,  //菜单id
+                    "role_id":qiId//角色id字符串
+                     
+                 },
+                 xhrFields: {
+                  withCredentials: true
+                 },                                      
+                 success: function(data){
+                    if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                parent.location.reload();
+                            });
+                        }
+                  
+                 }
+            }); 
+        }      
+    getData();
+
+});
+
+
+function child(data){         
+    $("#qiId").val(data.id);
+        //$("#chuanjianshijian").val()
+}
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

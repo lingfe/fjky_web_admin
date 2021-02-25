@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>疾病史</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../../uncheckin/uncheckin.css" / media="all">
+</head>
+
+<body>
+	
+        <!-- 内容 start  -->
+    <div class="layuimini-container" style="height:777px;">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+            <!--存储id-->
+            <input type="hidden" id="ess_id" />
+        </div>
+    </div>
+    
+    <!-- table头部操作 start(搜索框，添加登记)-->
+		<script type="text/html" id="toolbarDemo">
+			<a class="layui-btn layui-btn-normal layui-btn data-count-edit" lay-event="add"><i class="layui-icon layui-icon-add-1"></i>添加疾病史</a>
+		</script>
+		<!-- table头部操作 end-->
+    
+    <!-- 引入js资源 -->
+	<script src="../../../../../lib/layui-v2.5.5/layui.js" charset="UTF-8"></script>
+    <script src="../../../../bcxt/login/login.js" charset="UTF-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['element', 'form', 'table', 'jquery'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+				element = layui.element;
+				var $ess_id = $("#ess_id",parent.document).val();
+                $('#ess_id').val($ess_id);
+                console.log($ess_id);
+			//加载数据到table1
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/dishis/getPage.action',
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                
+                defaultToolbar: false,
+                where: {
+                	'ess_id': $ess_id,
+                	'dh_type': '疾病史'
+                },
+                cols: [
+                    [
+                    {field: 'dh_datetime',title: '患病时间',align: "center"}, 
+                    {field: 'dh_name',title: '疾病名称',align: "center"},
+                    {field: 'dh_cure_situation',title: '治愈情况',align: "center"}, 
+                    ]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.code,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: false,
+                skin: 'line',
+            });
+            
+           	//toolbar监听事件(头部添加操作)
+				table.on('toolbar(currentTableFilter)', function(obj) {
+					if(obj.event === 'add') { // 监听添加操作
+						var index = layer.open({
+							title: '添加疾病史',
+							type: 2,
+							shade: 0.2,
+							maxmin: true,
+							shadeClose: true,
+							area: ['480px', '350px'],
+							content: './jbs_add.html',
+						});
+						$(window).on("resize", function() {
+							layer.full(index);
+						});
+					}
+				});
+
+        });
+        
+    </script>
+</body>
+
+</html>

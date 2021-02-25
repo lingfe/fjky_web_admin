@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>过往病史</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../../uncheckin/uncheckin.css" / media="all">
+    <style>
+    .layui-tab>.layui-tab-title .layui-this {
+        background-color: #1594FF;
+        color: #FFFFFF
+    }
+	</style>
+</head>
+
+<body>
+	<!--选项卡-->
+	<!-- 内容 start  -->
+    <div class="layui-tab" id="demo_to"> 
+        <ul class="layui-tab-title">
+            <li class="demo layui-this" ifdata="./jbs_info.html" lay-id="222">疾病史</li>
+            <li class="demo" lay-id="333" ifdata="./gms_info.html">过敏史</li>
+            <li class="demo" lay-id="444" ifdata="./jzs_info.html">家族史</li>
+            <li class="demo" lay-id="555" ifdata="./sss_info.html">手术史</li>
+            <li class="demo" lay-id="666" ifdata="./yys_info.html">用药史</li>
+        </ul>
+        <!--存储id-->
+        <input type="hidden" id="ess_id" />
+        
+        
+    </div>
+	
+	<iframe src="./jbs_info.html" id="if_id" height="100%" width="100%" marginheight="0" scrolling="auto"
+	    style="min-height: 800px;" allowtransparency="true" name="fm" frameborder="0"></iframe>
+    <!-- 引入js资源 -->
+	<script src="../../../../../lib/layui-v2.5.5/layui.js" charset="UTF-8"></script>
+    <script src="../../../../bcxt/login/login.js" charset="UTF-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['element', 'form', 'table', 'jquery'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table,
+				element = layui.element;
+				var $ess_id = $("#ess_id",parent.document).val();
+                $('#ess_id').val($ess_id);
+                console.log($ess_id);
+                
+                //触发事件
+            $('.demo').on('click', function(res){
+                $("#if_id").attr("src",res.currentTarget.attributes.ifdata.value);
+                //切换到指定Tab项
+				element.tabChange('demo_to', res.currentTarget.attributes['lay-id'].value); //切换到：用户管理
+            });
+        })
+    </script>
+</body>
+
+</html>

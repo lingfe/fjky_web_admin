@@ -1,0 +1,142 @@
+<!--
+创建者:qiuyuling
+时间：2021-2-4
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>添加设备类型</title>
+	<!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+</head>
+
+<body>
+	<!-- 表单 start -->
+	<div class="layui-form" style="width:96%;margin:0;margin-top:15px;">
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">类型名称</label>
+			<div class="layui-input-block">
+				<input type="text" id="dtype_name" name="dtype_name" lay-reqtext="请输入设备名称" lay-verify="required"
+					placeholder="请输入设备名称" value="" class="layui-input">
+
+			</div>
+		</div>
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">图片</label>
+			<div class="layui-input-block">
+				<!-- <input type="text" id="role_explain" name="role_explain" placeholder="上传图片" class="layui-input"> -->
+				<!-- <button type="button" class="layui-btn" class="test1">
+					<i class="layui-icon">&#xe67c;</i>上传图片
+				</button> -->
+				<img id='icon_img' src="../../../images/123.png" alt="" style='width: 50px;height: 50px;' class='test1'>
+			</div>
+		</div>
+
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label">说明</label>
+			<div class="layui-input-block">
+				<input type="text" id="dtype_explain" name="dtype_explain" placeholder="请输入设备类型的说明描述"
+					class="layui-input">
+
+			</div>
+		</div>
+
+
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<div class="layui-input-block">
+				<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+			</div>
+		</div>
+	</div>
+	<!-- 表单 end -->
+
+	<!-- 引入js资源 -->
+	<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+	<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+	<script charset="utf-8">
+		//加载layui指定组件
+		layui.use(['form', 'upload'], function () {
+			//定义layui组件变量
+			var form = layui.form,
+				layer = layui.layer,
+				$ = layui.$;
+			var upload = layui.upload;
+			var imgurl = ""; //存放已经上传到系统内的设备图片的地址
+			//监听提交
+			form.on('submit(saveBtn)', function (data) {
+				$.ajax({
+					url: '/sys_fkcy/device_types/save.action',
+					headers: header,
+					context: document.body,
+					type: "POST",
+					data: {
+						"dtype_name": $("#dtype_name").val(),
+						"dtype_explain": $("#dtype_explain").val(),
+						"dtype_icon":imgurl, 
+					},
+					xhrFields: {
+						withCredentials: true
+					},
+					success: function (data) {
+						if (data.state == 200) {
+							layer.msg(data.msg, {
+								icon: 6,//成功的表情
+								time: 1000 //1秒关闭（如果不配置，默认是3秒）
+							}, function () {
+								window.parent.location.reload();
+							});
+						}
+						else {
+							layer.msg(data.msg, {
+								icon: 5,//失败的表情
+								time: 1000
+							});
+							return;
+						}
+					},
+					complete: function () {
+						layer.close(this.layerIndex);
+					},
+				});
+				return false;
+			});
+
+
+			// 图片上传
+			var uploadInst = upload.render({
+				elem: '.test1',
+				url: '/sys_fkcy/images/imageUpload.action',
+				headers: header,
+				before: function (obj) {
+					//预读本地文件示例，不支持ie8
+					obj.preview(function (index, file, result) {
+						$('#icon_img').attr('src', result); //图片链接（base64）
+					});
+				},
+				done: function (res, index, upload) {
+					imgurl = res.data.imgUrl;
+					$("#icon_img").attr("src", res.data.imgUrl);
+					layer.msg(res.msg, {
+						icon: 6,//成功的表情
+						time: 1000 //1秒关闭（如果不配置，默认是3秒）
+					}, function () {
+						//location.reload();
+					});
+					console.log(res);
+				},
+				error: function (res) {
+					console.log(res);
+				}
+			});
+
+		});
+	</script>
+</body>
+
+</html>

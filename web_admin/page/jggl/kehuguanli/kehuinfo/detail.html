@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>客户信息</title>
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+<style>
+    .base_info div ul li {
+        line-height: 40px;
+    }
+    
+    .base_info div ul li input {
+        background-color: #eee;
+    }
+    
+    .base_info div ul li span:nth-child(1) {
+        display: inline-block;
+        width: 115px;
+        text-align: right;
+        color: #666666;
+    }
+    
+    .avatar {
+        width: 120px;
+        height: 142px;
+        border: 1px solid #f2f2f2;
+    }
+    
+    .primary_info li {
+        height: 30px;
+        line-height: 30px;
+    }
+    
+    .current {
+        color: #01AAED;
+    }
+    
+    .nav li {
+        line-height: 50px;
+    }
+    
+    .nav li a {
+        font-size: 18px;
+    }
+    
+    .nav li a:hover {
+        color: #01AAED;
+    }
+    
+    .center {
+        position: relative;
+        left: 50%;
+        transform: translateX(-35%);
+    }
+</style>
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <div class="layui-row">
+                <!-- 外部内容区域 start -->
+                <div class="layui-col-md2">
+                    <div class="layui-card-body center">
+                        <!-- 头像及主要信息 -->
+                        <div class="avatar"><img id="img" alt="" style="width: 100%;height: 100%;"></div>
+                        <ul class="primary_info">
+                            <li><label style="font-size: 14px;">姓名：</label>
+                                <input type="text" name="" id="full_name" readonly style="border:0px;width: 110px;">
+                            </li>
+                            <li><label>床位：</label>
+                                <input type="text" name="" id="bed" readonly style="border:0px;width: 110px;">
+                            </li>
+                            <li><label>年龄：</label>
+                                <input type="text" name="" id="age" readonly style="border:0px;width: 110px;">  
+                            </li>
+                        </ul>
+                        <!-- 左侧导航区域 -->
+                        <nav style="margin-top: 50px;" class="nav">
+                            <ul>
+                                <li><a href="./customer_info/jcda.html" target="fm" class="current">基础档案</a></li>
+                                <li><a href="./customer_info/richangjiance.html" target="fm">日常监测</a></li>
+                                <li><a href="./kehuinfo_jzbl_info.html" target="fm">就诊病历</a></li>
+                                <li><a href="./gwbs/main.html" target="fm">过往病史</a> </li>
+                                <li><a href="./kehuinfo_tjbg_info.html" target="fm">体检报告</a></li>
+                                <li><a href="./binded_device_list.html" target="fm">已绑设备</a></li>
+                            </ul>
+                        </nav>
+                    </div> 
+                </div>
+                <!-- 外部内容区域 end -->  
+
+                <!-- 内嵌内容区域start -->
+                <div class="layui-col-md10">
+                    <iframe src="./customer_info/jcda.html" id="jbxx" height="100%" width="100%" marginheight="0" scrolling="auto" allowtransparency="true" name="fm" frameborder="0"></iframe>
+                </div>
+                <!-- 内嵌内容区域end -->
+            </div>
+        </div>
+    </div>
+    <!-- 内容 end  -->
+
+    <!-- 存放id -->
+    <input id="ess_id" hidden="true" />
+
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script src="../../../../js/jquery.min.js"></script>
+    <script>
+        $(function() {
+            //  左侧导航栏切换
+            $(".nav li").click(function() {
+                // 排他思想
+                $(this).children().addClass("current");
+                $(this).siblings().children().removeClass("current");
+
+            });
+        });
+
+        // iframe自适应
+        function iframeHeightAuto() {
+            setIframeHeight("jbxx");
+        };
+        window.setInterval("iframeHeightAuto()", 200);
+        //定义函数处理if自适应高度
+        function setIframeHeight(iframeId) {
+            var cwin = document.getElementById(iframeId);
+            if (document.getElementById) {
+                if (cwin && !window.opera) {
+                    if (cwin.contentDocument && cwin.contentDocument.body.offsetHeight) { 
+                        cwin.height = cwin.contentDocument.body.offsetHeight + "px"; //FF NS
+                        // console.log("FF NS cwin.height=" + cwin.height);
+                    } else if (cwin.Document && cwin.Document.body.scrollHeight) {
+                        cwin.height = cwin.Document.body.scrollHeight + "px"; //IE
+                        // console.log("IE cwin.height=" + cwin.height);
+                    }
+                } else if (cwin.contentWindow.document && cwin.contentWindow.document.body.scrollHeight) {
+                    cwin.height = cwin.contentWindow.document.body.scrollHeight + "px"; //Opera
+                }
+            }
+        }
+
+        //接收父级页面基本信息
+        function child(data) { 
+            layui.use(['jquery'], function() {
+                var $ = layui.$;
+                $('#ess_id').val(data.id);
+                $('#full_name').val(data.full_name);
+                $('#age').val(data.age);
+                $('#bed').val(data.bed);
+                if (data.img != null) {
+                    $("#img").attr("src", data.img);
+                } else {
+                    $("#img").attr("src", "https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg");
+                }
+                var bedVal = $('#bed').val();
+                var str = bedVal.replace(/第/g, '');
+                var str2 = str.replace(/号/g, '');
+                var res = str2.replace(/间/g, '');
+                $('#bed').val(res);
+            });
+        }
+        function reloadP(){
+            window.location.reload();
+        }
+
+    </script>
+</body>
+
+</html>

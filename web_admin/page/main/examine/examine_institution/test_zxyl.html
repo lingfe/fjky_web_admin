@@ -1,0 +1,73 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>在线预览测试</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<form class="layui-form" style="width:96%;margin:0;margin-top:15px;">					
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">预览地址</label>
+				<div class="layui-input-block" >
+					<input  id="yl_address"/>
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<!-- 企业id字符串(可能包含多个，”，“隔开) -->
+				<input id="id_str" type="text" hidden="true" />
+				<div class="layui-input-block" style='margin-left:60px;'>
+					<button class="layui-btn layui-btn-green" lay-submit lay-filter="saveBtn"><i class="layui-icon layui-icon-auz"></i>在线预览</button>
+					<button class="layui-btn layui-btn-primary" id="close">取消</button>
+				</div>
+			</div>
+		</form>
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'layer'], function () {
+				//定义layui组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+					
+				//监听提交
+				form.on('submit(saveBtn)', function (data) {
+					$.ajax({
+						url: 'http://dcs.yozosoft.com/onlinefile',
+						type: "GET",
+						data: {
+							downloadUrl: $("#yl_address").val(),
+							convertType: 1,
+							isAsync: 0,
+							sourceFolder: null,
+							isDownload: 0,
+							isSignature: 0,
+						},
+						success: function (data) {
+							if (data.state == 200) {
+								is_caozuo=true;
+								layer.msg(data.msg, {
+									icon : 6, //成功的表情
+									time : 1000 //1秒关闭（如果不配置，默认是3秒）
+								});
+							}else{
+								layer.msg(data.msg, {
+									icon : 5
+								}); //失败的表情
+							}
+						}
+					});
+					return false;
+				});
+			});
+		</script>
+	</body>
+</html>

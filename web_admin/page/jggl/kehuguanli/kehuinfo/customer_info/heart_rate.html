@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>心率</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+</head>
+
+
+<body>
+    <div style="padding: 0px; background-color: #F2F2F2;">
+        <!-- 搜索栏--start -->
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <!-- 并列一行--start-->
+                    <div class="layui-inline">
+                        <button type="button" id="week" name="week" lay-submit lay-filter="data-search-week"
+                            class="layui-btn layui-btn-primary">近一周</button>
+                        <button type="button" id="month" name="month" lay-submit lay-filter="data-search-month"
+                            class="layui-btn layui-btn-primary">近一月</button>
+                        <button type="button" id="month_3" name="month_3" lay-submit lay-filter="data-search-month_3"
+                            class="layui-btn layui-btn-primary">近三月</button>
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" id="start_time" name="start_date" lay-verify="date" placeholder="yyyy-MM-dd"
+                            autocomplete="off" class="layui-input" style="width:240px;float: left;">
+                        <input type="text" style="border:0px;float: left;margin: 10px; width: 20px;" value="至">
+                        <input type="text" id="end_time" name="end_date" lay-verify="date" placeholder="yyyy-MM-dd"
+                            autocomplete="off" class="layui-input" style="width:240px;float: left;">
+                        <button type="submit" class="layui-btn layui-btn-normal data-add-btn" lay-submit
+                            lay-filter="data-search-btn" style="margin-left: 10px;float: left;"><i
+                                class="layui-icon layui-icon-search"></i>搜索</button>
+                        <button class="layui-btn layui-btn-normal data-add-btn" lay-event="add" id="add_hr"
+                            style="float:right"> <i class="layui-icon layui-icon"></i>添加</button>
+                    </div>
+                    <!-- 并列一行--end -->
+                </div>
+            </div>
+        </div>
+        <!-- 搜索栏--end -->
+
+        <div class="layui-col-md12" style="margin-top: 5px;">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-row">
+                        <div class="layui-col-md6">
+                            <div class="grid-demo grid-demo-bg1">
+                                <div class="layui-card-header" style="min-height: 200px;">
+                                    <div id="echarts-pies" class="layui-row layui-col-space10"
+                                        style="min-height:300px;"></div>
+                                </div>
+                                <div class="layui-card-body" style="text-align: center;">
+                                    <div class="layui-col-sm4">
+                                        <div class="grid-demo grid-demo-bg1">
+                                            <p>平均心率</p>
+                                            <p><span id="hr_average" style="color: #0a0a0a;"></span><span style="color: #666;">BMP</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="layui-col-sm4">
+                                        <div class="grid-demo grid-demo-bg1">
+                                            <p>最大心率</p>
+                                            <p><span id="hr_max" style="color: #0a0a0a;"></span><span style="color: #666;">BMP</span></p>
+                                        </div>
+                                    </div>
+                                    <div class="layui-col-sm4">
+                                        <div class="grid-demo grid-demo-bg1">
+                                            <p>最小心率</p>
+                                            <p><span id="hr_min" style="color: #0a0a0a;"></span><span style="color: #666;">BMP</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md6">
+                            <div class="grid-demo grid-demo-bg1">
+                                <div class="layui-card-body" style="text-align: center;">
+                                    <div id="echarts-zhexiantu" class="layui-row layui-col-space10"
+                                        style="min-height:300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="font-size: 18px;">历史数据</div>
+                    <div class="layui-card-body">
+                        <!-- 历史数据列表 -->
+                        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+                    </div>
+                </div>
+            </div>
+            <!--存储id-->
+            <input type="hidden" id="ess_id" />
+        </div>
+    </div>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery', 'laydate', 'echarts'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var laydate = layui.laydate;
+            var echarts = layui.echarts;
+
+            // 取父级id
+            var $ess_id = $("#ess_id", parent.document).val();
+            $('#ess_id').val($ess_id);
+
+            laydate.render({
+                elem: '#start_time'
+                , trigger: 'click'
+            });
+
+            laydate.render({
+                elem: '#end_time'
+                , trigger: 'click'
+            });
+
+            //加载数据到table
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/heart_rate/getPage.action',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                where: {
+                    ess_id: $ess_id
+                },
+                cols: [[
+                    { field: 'measuring_time', width: 200, title: '测量时间', align: "center" },
+                    { field: 'hr_max', title: '最大心率', align: "center" },
+                    { field: 'hr_min', title: '最小心率', align: "center" },
+                    { field: 'hr_average', title: '平均心率', align: "center" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    if (res.data.data.length > 0) {
+                        $("#hr_max").html(res.data.data[0].hr_max);
+                        $("#hr_min").html(res.data.data[0].hr_min);
+                        $("#hr_average").html(res.data.data[0].hr_average);
+                        $("#hr_average").val(res.data.data[0].hr_average);
+                    }
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: true,
+                skin: 'line',
+            });
+
+            // 监听添加事件
+            $("#add_hr").click(function () {
+                var index = layer.open({
+                    title: '记录心率',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['560px', '500px'],
+                    content: './add_hr.html',
+                    success: function (layero, index) {//弹出层打开后的回调函数
+                        layer.iframeAuto(index);
+                        layer.style(index, {
+                            // 重新居中的样式
+                            top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                        })
+                    }
+                });
+            });
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+                var start_date = $("#start_time").val();
+                var end_date = $("#end_time").val();
+                if (!start_date) {
+                    layer.msg("请选择起始时间", {
+                        icon: 5, //失败的表情
+                        time: 1000
+                    });
+                    return;
+                } else if (!end_date) {
+                    layer.msg("请选择截至时间", {
+                        icon: 5, //失败的表情
+                        time: 1000
+                    });
+                    return;
+                } else {
+                    //执行搜索重载,时间段搜索
+                    table.reload('currentTableId', {
+                        where: {
+                            searchKey: 'time_slot'
+                            , start_date: start_date
+                            , end_date: end_date
+                        }
+                        , page: {
+                            curr: 1 //默认第一页
+                        }
+                    });
+                    return false;
+                }
+            });
+            // 近一周
+            form.on('submit(data-search-week)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近一周搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'week'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+            // 近一月
+            form.on('submit(data-search-month)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近一月搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'month'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+            // 近三月
+            form.on('submit(data-search-month_3)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近三月搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'month_3'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            //定时器
+            setTimeout(function () {
+                // 饼状图
+                var echartsPies11 = echarts.init(document.getElementById('echarts-pies'), 'walden');
+                var fontSize = (val) => {
+                    return val
+                }
+                var $ = layui.jquery;
+                var hr_avge = $("#hr_average").val();
+                var option11 = {
+                    title: {
+                        left: 'center',
+                        top: '18%',
+                        // 心率值
+                        text: hr_avge,
+                        textStyle: {
+                            color: '#00b7ee',
+                            fontSize: fontSize(30),
+                        },
+                        subtext: 'BMP',
+                        subtextStyle: {
+                            fontSize: fontSize(18),
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'none',
+                        show: false
+                    },
+
+                    legend: {
+                        show: false
+                    },
+                    series: [{
+                        // 环形图位置
+                        center: [
+                            "50%",
+                            "25%",
+                        ],
+                        name: '',
+                        type: 'pie',
+                        // 环形图大小
+                        radius: ['40%', '35%'],
+                        avoidLabelOverlap: false,
+                        hoverAnimation: false,
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        itemStyle: {},
+                        labelLine: {
+                            show: false
+                        },
+                        data: [{
+                            value: 25,//1/4亮
+                            name: '亮',
+                            itemStyle: {
+                                color: '#ff2671'
+                            }
+                        },
+                        {
+                            value: 10,//3/4暗
+                            name: '暗',
+                            itemStyle: {
+                                color: '#00b7ee',
+                                opacity: 0.05
+                            }
+                        },
+                        ]
+                    }]
+                }
+                echartsPies11.setOption(option11);
+
+                // 折线图
+                var echartsPies22 = echarts.init(document.getElementById('echarts-zhexiantu'), 'walden');
+                var option22 = {
+                    title: {
+                        text: "心率（次/分）",
+                        left: "40px",
+                        top: "0",
+                        textStyle: {
+                            color: "#999",
+                            fontSize: 12,
+                            fontWeight: '400'
+                        }
+                    },
+                    grid: {
+                        left: '30px',
+                        right: '20px',
+                        bottom: '10px',
+                        containLabel: true
+                    },
+                    color: ['#ff2671'],
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'cross',
+                            crossStyle: {
+                                color: '#999'
+                            },
+                            lineStyle: {
+                                type: 'dashed'
+                            }
+                        }
+                    },
+
+                    xAxis: {
+                        type: 'category',
+                        data: ['2020.11.02', '2020.11.03', '2020.11.04', '2020.11.05', '2020.11.06', '2020.11.07', '2020.11.08'],
+                        splitLine: {
+                            show: false
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        axisLine: {
+                            show: false
+                        },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        // max: max_value>=100? max_value + 100: max_value+10,
+                        // max: max_value > 100 ? max_value * 2 : max_value + 10,
+                        // interval: 10,
+                        // nameLocation: "center",
+                        axisLabel: {
+                            color: '#999',
+                            textStyle: {
+                                fontSize: 12
+                            },
+                        },
+                        splitLine: {
+                            show: false,
+                            lineStyle: {
+                                color: '#F3F4F4'
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        axisLine: {
+                            show: false
+                        },
+                    },
+                    series: [{
+                        name: '心率',
+                        type: 'line',
+                        smooth: true,
+                        data: [78, 79, 80, 120, 78, 94, 79]
+                    }
+                    ]
+                };
+                echartsPies22.setOption(option22);
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>

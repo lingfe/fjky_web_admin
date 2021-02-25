@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>护理管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+<style>
+    .layui-tab>.layui-tab-title .layui-this {
+        background-color: #1594FF;
+        color: #FFFFFF
+    }
+</style>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">护理项目</li>
+            <li>护理记录</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <iframe src="./nursing.html" height="100%" width="100%" marginheight="0"
+                    style="min-height: 800px;" scrolling="auto" allowtransparency="true" name="fm"
+                    frameborder="0"></iframe>
+            </div>
+            <div class="layui-tab-item">
+                <iframe src="./nursing_records.html" height="100%" width="100%" marginheight="0" scrolling="auto"
+                    style="min-height: 800px;" allowtransparency="true" name="fm" frameborder="0"></iframe>
+            </div>
+        </div>
+        <!--存储id-->
+        <input type="hidden" id="ess_id" />
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['element'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery
+                , element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+            // 取父级id
+            var $ess_id = $("#ess_id", parent.document).val();
+            $('#ess_id').val($ess_id);
+
+            $(".layui-this").click(function () {
+                $(window.parent.document).find("iframe")[0].contentWindow.location.reload(true);
+            })
+            function setIframeHeight(iframeId) {
+                var cwin = document.getElementById(iframeId);
+                if (document.getElementById) {
+                    if (cwin && !window.opera) {
+                        if (cwin.contentDocument && cwin.contentDocument.body.offsetHeight) {
+                            cwin.height = cwin.contentDocument.body.offsetHeight + "px"; //FF NS
+                            console.log("FF NS cwin.height=" + cwin.height);
+                        } else if (cwin.Document && cwin.Document.body.scrollHeight) {
+                            cwin.height = cwin.Document.body.scrollHeight + "px"; //IE
+                            console.log("IE cwin.height=" + cwin.height);
+                        }
+                    } else if (cwin.contentWindow.document && cwin.contentWindow.document.body.scrollHeight) {
+                        cwin.height = cwin.contentWindow.document.body.scrollHeight + "px"; //Opera
+                    }
+                }
+                console.log("cwin.height=" + cwin.height);
+            };
+        });
+    </script>
+</body>
+
+</html>

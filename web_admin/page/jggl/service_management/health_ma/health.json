@@ -1,0 +1,27 @@
+{
+    "data": {
+     "pageIndex": 1,
+     "pageCount": 1,
+     "pageNum": 10,
+     "numCount": 10,
+     "data": [
+      {
+         "id": 1,
+          "a": "王建国",
+          "b": "522221199109212611",
+          "c": "3栋1楼101房1号床",
+          "d": "自理",
+          "e":""
+       }
+     ],
+     "frist": 1,
+     "shang": 1,
+     "xia": 1,
+     "last": 1,
+     "status": 0
+    },
+    "count": 0,
+    "msg": "请求成功!",
+    "state": 200,
+    "code": 0
+   }

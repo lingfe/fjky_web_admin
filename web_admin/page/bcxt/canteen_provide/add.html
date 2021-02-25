@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>添加食堂提供</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css?date" media="all">
+    <link rel="stylesheet" href="../../../css/public.css?date" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">提供名称</label>
+            <div class="layui-input-block">
+                <input type="radio" name="pro_name" lay-verify="required" lay-reqtext="请选择提供名称" value="早餐" title="早餐"
+                    checked="">
+                <input type="radio" name="pro_name" lay-verify="required" lay-reqtext="请选择提供名称" value="中餐" title="中餐">
+                <input type="radio" name="pro_name" lay-verify="required" lay-reqtext="请选择提供名称" value="晚餐" title="晚餐">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">提供描述</label>
+            <div class="layui-input-block">
+                <textarea id="pro_explain" name="" placeholder="请输入提供描述" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <input id="canteenId" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">关闭</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js?date"></script>
+    <script>
+        layui.use(['form'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/canteen_provide/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "yw_id": $("#canteenId").val(),
+                        "pro_name": $("input[name='pro_name']:checked").val(),
+                        "pro_explain": $("#pro_explain").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+                            return;
+                        } else {
+                            //提交过并且成功!
+                            is_caozuo = true;
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            });
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        //  获取父级数据
+        function child(data) {
+            var $ = layui.jquery;
+            $("#canteenId").val(data);
+        }
+    </script>
+
+</body>
+
+</html>

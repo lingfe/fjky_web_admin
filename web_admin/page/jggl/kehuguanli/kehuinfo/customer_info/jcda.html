@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础档案</title>
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../../uncheckin/uncheckin.css">
+</head>
+<style>
+    .base_info div ul li {
+        line-height: 40px;
+    }
+
+    .base_info div ul li input {
+        background-color: rgba(255, 255, 255, 0);
+    }
+
+    .base_info div ul li span:nth-child(1) {
+        display: inline-block;
+        width: 115px;
+        text-align: right;
+        color: #666666;
+    }
+
+    .avatar {
+        width: 120px;
+        height: 142px;
+        border: 1px solid #f2f2f2;
+    }
+
+    .primary_info li {
+        height: 30px;
+        line-height: 30px;
+    }
+
+    .current {
+        color: #01AAED;
+    }
+
+    nav li {
+        line-height: 50px;
+    }
+
+    nav li a {
+        font-size: 18px;
+    }
+
+    nav li a:hover {
+        color: #01AAED;
+    }
+
+    .layui-table-header thead tr th {
+        background-color: #F9F9FA !important;
+    }
+
+    .layui-table-body .layui-table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0);
+    }
+
+    #set_body thead tr th,
+    #set_body tbody tr td {
+        text-align: center;
+    }
+</style>
+
+<body style="padding-bottom: 50px;background: #ffffff;">
+    <!--startprint1-->
+
+    <!--打印内容开始-->
+    <div class="layui-card" id="sty">
+
+        <!-- 头部 -->
+        <div class="layui-card-header " style="font-size: 18px;color: #222222!important;background-color: #eff1f5;">
+            基础档案
+            <i class="layui-icon layui-icon-export" type="button" name='button_export' title='打印1' onclick=preview(1)
+                value=打印1 style="float: right;font-size: 18px;"> </i>
+        </div>
+        <!-- 表单 -->
+        <form class="layui-form" lay-filter="essential_info">
+            <div class="layui-card-body base_info" style="background-color: #F9F9FA;">
+                <div class="layui-row ">
+                    <!-- 基本信息 start -->
+                    <div style="font-size: 18px;color: #222222;">基本信息
+                        <a href="javascript:;" style="color: #01AAED;font-size: 14px;" onclick="open_base()"
+                            class="edit"><i class="layui-icon layui-icon-face-smile layui-icon-edit"></i>编辑</a>
+                        <!-- <button type="submit">编辑</button> -->
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div class="layui-col-md4">
+                            <ul>
+                                <li><span>姓名：</span> <input type="text" name="full_name" id="full_name" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>身份证号：</span> <input type="text" name="id_card" id="id_card" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>联系电话：</span> <input type="text" name="phone" id="phone" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>家庭住址：</span> <input type="text" name="permanent_address"
+                                        id="permanent_address" readonly style="border:0px;width: 200px;"></li>
+                                <li><span>民族：</span> <input type="text" name="nation" id="nation" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <input style="display: none" id="jb_id" name="id" type="text" />
+                            </ul>
+                        </div>
+                        <div class="layui-col-md4">
+                            <ul>
+                                <li><span>性别：</span> <input type="text" name="gender" id="gender" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>生日：</span> <input type="text" name="birthday" id="birthday" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>爱好：</span> <input type="text" name="hobby" id="hobby" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>自理情况：</span> <input type="text" name="hea_zili_situation"
+                                        id="hea_zili_situation" readonly style="border:0px;width: 200px;"></li>
+                                <li><span>饮食禁忌：</span> <input type="text" name="diet_taboo" id="diet_taboo" readonly
+                                        style="border:0px;width: 200px;"></li>
+                            </ul>
+                        </div>
+                        <div class="layui-col-md4">
+                            <ul>
+                                <li><span>主治医院：</span> <input type="text" name="hea_zhuzhi_hospital"
+                                        id="hea_zhuzhi_hospital" readonly style="border:0px;width: 200px;"></li>
+                                <li><span>医院电话：</span> <input type="text" name="hea_hospital_phone"
+                                        id="hea_hospital_phone" readonly style="border:0px;width: 200px;"></li>
+                                <li><span>主要疾病：</span> <input type="text" name="hea_medical_history"
+                                        id="hea_medical_history" readonly style="border:0px;width: 200px;"></li>
+                                <li><span>护理级别：</span> <input type="text" name="nt_level" id="nt_level" readonly
+                                        style="border:0px;width: 200px;"></li>
+                                <li><span>过敏药物：</span> <input type="text" name="hea_allergy_medicine"
+                                        id="hea_allergy_medicine" readonly style="border:0px;width: 200px;"></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- 基本信息 end -->
+                </div>
+            </div>
+        </form>
+
+        <!-- 家属信息表 -->
+        <!-- 身体参数start -->
+        <div style="font-size: 18px;padding: 30px 15px 0px 15px;">家属信息
+        </div>
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <!-- 身体参数start -->
+        <div style="font-size: 18px;padding: 30px 15px 0px 15px;">身体参数
+            <a href="javascript:;" style="color: #01AAED;font-size: 14px;display: inline-block" onclick="open_body()"
+                class="edit">
+                <i class="layui-icon layui-icon-face-smile layui-icon-edit"></i> 编辑
+            </a>
+        </div>
+
+        <table class="layui-table" id="set_body">
+            <colgroup>
+                <col width="200">
+                <col width="200">
+                <col width="200">
+                <col width="200">
+                <col width="200">
+                <col width="200">
+            </colgroup>
+            <thead>
+                <tr style="background-color: #F9F9FA;">
+                    <th>身高（cm）</th>
+                    <th>体重（kg）</th>
+                    <th>BMI</th>
+                    <th>腰围（cm）</th>
+                    <th>臀围（cm）</th>
+                    <th>腰臀比</th>
+                </tr>
+            </thead>
+            <tbody style="background-color: #ffffff;">
+                <tr>
+                    <td id="ess_stature"></td>
+                    <td id="ess_weight"></td>
+                    <td id="ess_bmi"></td>
+                    <td id="ess_waistline"></td>
+                    <td id="ess_hipline"></td>
+                    <td id="ess_wh_than"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+    <!--打印内容结束-->
+
+    <!--endprint1-->
+    <!-- 家属信息头部 start -->
+    <script type="text/html" id="toolbarDemo">
+        <div style="font-size: 18px;padding: 0px 15px 0px 0px;">家属信息
+        </div>
+    </script>
+    <!-- 家属信息列表操作 -->
+    <script type="text/html" id="currentTableBar">
+        <a style="color: #01AAED;font-size: 14px;display: inline-block"  class="edit" lay-event="edit">
+            <i class="layui-icon layui-icon-face-smile layui-icon-edit"></i> 编辑
+        </a>
+    </script>
+
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js"></script>
+    <script>
+        layui.use(['table', 'form', 'layer'], function () {
+            var $ = layui.$;
+            var table = layui.table;
+            var table2 = layui.table;
+            var form = layui.form;
+            var token = Storage.get("token");
+            var layer = layui.layer;
+
+            // 取父级id
+            var ess_id = $("#ess_id", parent.document).val();
+
+            //调用
+            getdata();
+
+            // 定义函数获取客户详情
+            function getdata() {
+                $.ajax({
+                    url: '/sys_fkcy/essential_information/getWhereId',
+                    data: {
+                        id: ess_id
+                    },
+                    type: 'post',
+                    // 解决跨域
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (res) {
+                        //得到数据
+                        var data = res.data;
+                        //得到数据
+                        var essential_info = data.essential_info;
+                        var nursing_info = data.nursing_info;
+                        var healthy_info = data.healthy_info;
+                        var healthy_info = data.healthy_info;
+                        //给表单赋值
+                        form.val("essential_info", essential_info); //基本信息
+                        form.val("essential_info", nursing_info); //护理信息
+                        form.val("essential_info", healthy_info); //健康信息
+                        $("#jb_state").val(essential_info.state);
+                        $("#jb_id").val(ess_id);
+                        //编辑保存身体参数 
+                        if (essential_info.ess_stature == undefined) {
+                            document.getElementById("ess_stature").innerText = "- -";
+                            document.getElementById("ess_waistline").innerText = "- -";
+                            document.getElementById("ess_hipline").innerText = "- -";
+                            document.getElementById("ess_wh_than").innerText = "- -";
+                            document.getElementById("ess_bmi").innerText = "- -";
+                            document.getElementById("ess_weight").innerText = "- -";
+                        } else {
+                            //document.getElementById("ess_stature").innerText  =  essential_info.ess_stature;
+                            $("#ess_stature").html(essential_info.ess_stature);
+                            //体重
+                            $("#ess_weight").html(essential_info.ess_weight);
+                            //腰围
+                            $("#ess_waistline").html(essential_info.ess_waistline);
+                            //臀围
+                            $("#ess_hipline").html(essential_info.ess_hipline);
+                            //腰臀比
+                            $("#ess_wh_than").html(essential_info.ess_wh_than);
+                            //bmi
+                            $("#ess_bmi").html(essential_info.ess_bmi);
+                        }
+                    }
+                });
+                return false;
+            }
+
+            if (ess_id == '' || ess_id == null) {
+                layer.msg('加载异常！', {
+                    icon: 5, //失败的表情
+                    time: 3000
+                });
+                return;
+            } else {
+                // 家属信息
+                table.render({
+                    elem: '#currentTableId',
+                    url: '/sys_fkcy/essential_information/getWhereId', //数据接口
+                    // toolbar: '#toolbarDemo',
+                    headers: header,
+                    title: '家属信息',
+                    where: {
+                        id: ess_id
+                    },
+                    cols: [
+                        [{
+                            field: 'full_name',
+                            title: '姓名',
+                            align: "center",
+                        }, {
+                            field: 'phone',
+                            title: '联系电话',
+                            align: "center"
+                        }, {
+                            field: 'contact_address',
+                            title: '联系地址',
+                            align: "center",
+                            width: 280
+                        }, {
+                            field: 'and_relation',
+                            title: '关系',
+                            align: "center"
+                        }, {
+                            field: 'is_guardian',
+                            title: '是否监护人',
+                            align: "center"
+                        }, {
+                            title: '操作',
+                            minWidth: 150,
+                            toolbar: '#currentTableBar',
+                            align: "center",
+                            fixed: "right"
+                        }]
+                    ],
+                    response: {
+                        statusName: 'code', //规定返回的状态码字段为code
+                        statusCode: 200 //规定成功的状态码为200
+                    },
+                    parseData: function (res) {
+                        return {
+                            "count": res.count + 1,
+                            "code": res.state, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "data": res.data.family_info //解析数据列表
+                        }
+                    },
+                    limits: [10, 15, 20, 25, 50, 100],
+                    limit: 15,
+                    // page: true,
+                    skin: 'line'
+                });
+
+                // 身体参数
+                table.render({
+                    elem: '#currentTableId2',
+                    url: '/sys_fkcy/essential_information/getWhereId', //数据接口
+                    toolbar: '#toolbarDemo2',
+                    headers: header,
+                    where: {
+                        id: ess_id
+                    },
+                    cols: [
+                        [
+                            {
+                                field: 'id',
+                                title: 'id',
+                                align: "center",
+                            }, {
+                                field: 'ess_stature',
+                                title: '身高',
+                                align: "center",
+                            }, {
+                                field: 'ess_weight',
+                                title: '体重',
+                                align: "center"
+                            }, {
+                                field: 'ess_waistline',
+                                title: '腰围',
+                                align: "center",
+                                width: 280
+                            }, {
+                                field: 'ess_hipline',
+                                title: '臀围',
+                                align: "center"
+                            }, {
+                                field: 'ess_wh_than',
+                                title: '腰臀比',
+                                align: "center"
+                            }, {
+                                field: 'ess_bmi',
+                                title: 'BMI',
+                                align: "center"
+                            }, {
+                                title: '操作',
+                                minWidth: 150,
+                                toolbar: '#currentTableBar',
+                                align: "center",
+                                fixed: "right"
+                            }]
+                    ],
+                    response: {
+                        statusName: 'code', //规定返回的状态码字段为code
+                        statusCode: 200 //规定成功的状态码为200
+                    },
+                    parseData: function (res) {
+                        return {
+                            "count": res.count + 1,
+                            "code": res.state, //解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "data": res.data.essential_info //解析数据列表
+                        }
+                    },
+                    limits: [10, 15, 20, 25, 50, 100],
+                    limit: 15,
+                    // page: true,
+                    skin: 'line'
+                });
+            }
+
+            // 编辑家属信息
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    var index = layer.open({
+                        title: '编辑家属信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['760px', '400px'],
+                        content: '../../../checkin/familyinfo/family_edit.html',
+                        success: function (layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            var body = layer.getChildFrame("body", index);
+                            if (result.is_guardian == '是') {
+                                body.find("input[name=is_guardian][value='是']").attr("checked", true);
+                            } else {
+                                body.find("input[name=is_guardian][value='否']").attr("checked", true);
+                            }
+                            // 更新表单
+                            iframe.layui.form.render();
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            //自适应高度
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+        // 基本信息设置
+        function open_base() {
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+                var $ = layui.$;
+                // var array = [$("#jb_id").val(), $("#full_name").val(), $("#id_card").val(), $("#phone").val(), $("#permanent_address").val(), $("#nation").val(), $("#gender").val(), $("#birthday").val(), $("#hobby").val(), $("#diet_taboo").val()];
+                $.ajax({
+                    url: '/sys_fkcy/essential_information/getWhereId',
+                    data: {
+                        id: $("#jb_id").val()
+                    },
+                    type: 'post',
+                    // 解决跨域
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (res) {
+                        //得到数据
+                        var data = res.data;
+                        //得到数据
+                        var essential_info = data.essential_info;
+                        var index = layer.open({
+                            title: '编辑基本信息',
+                            type: 2,
+                            shade: 0.2,
+                            maxmin: true,
+                            shadeClose: true,
+                            area: ['100%', '100%'],
+                            content: '../../../checkin/basicInfo/edit.html',
+                            success: function (layero, index) { //弹出层打开后的回调函数
+                                result = JSON.stringify(essential_info);
+                                result = $.parseJSON(result);
+                                var iframe = window['layui-layer-iframe' + index];
+                                // 更新表单
+                                iframe.layui.form.render();
+                                // 向子页面的全局函数child传参
+                                iframe.child(result);
+
+                            }
+                        });
+                    }
+                });
+                // var data = $("#ess_id", parent.document).val();
+
+                return false;
+            })
+        }
+        // 身体参数设置
+        function open_body() {
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+                var $ = layui.$;
+                // var data = $("#ess_id", parent.document).val();
+                var index = layer.open({
+                    title: '编辑身体参数',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['800px', '400px'],
+                    content: './edit_body.html',
+                    success: function (layero, index) { //弹出层打开后的回调函数
+                        result = JSON.stringify($("#jb_id").val());
+                        result = $.parseJSON(result);
+                        var iframe = window['layui-layer-iframe' + index];
+                        // 向子页面的全局函数child传参
+                        iframe.child(result);
+                        //自适应高度
+                        layer.iframeAuto(index);
+                        layer.style(index, {
+                            // 重新居中的样式
+                            top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                        })
+                    }
+                });
+                return false;
+            })
+        }
+    </script>
+    <!-- 打印功能 -->
+    <script language="javascript">
+        function preview(oper) {
+            if (oper < 10) {
+                //绑定数据
+                bindData()
+                bdhtml = window.document.body.innerHTML;//获取当前页的html代码
+                sprnstr = "<!--startprint" + oper + "-->";//设置打印开始区域
+                eprnstr = "<!--endprint" + oper + "-->";//设置打印结束区域
+                prnhtml = bdhtml.substring(bdhtml.indexOf(sprnstr) + 18); //从开始代码向后取html
+                prnhtml = prnhtml.substring(0, prnhtml.indexOf(eprnstr));//从结束代码向前取html
+                window.document.body.innerHTML = prnhtml;
+                window.print();
+                window.document.body.innerHTML = bdhtml;
+                window.location.reload()
+            } else {
+                window.print();
+                window.location.reload()
+            }
+            //将表单中手动填写的数据进行绑定，便于html()的时候获取到
+            function bindData() {
+                var $ = layui.$;
+                //搞定 type=text, 同时如果checkbox,radio,select>option的值有变化, 也绑定一下, 这里忽略button
+                $("input,select option").each(function () {
+                    $(this).attr('value', $(this).val());
+                });
+            }
+
+        }
+    </script>
+</body>
+
+</html>

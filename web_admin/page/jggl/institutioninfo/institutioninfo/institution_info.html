@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>机构信息</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+		<style>
+			.my_card {
+				/*机构信息统计 卡片*/
+				width: 300px;
+				height: 120px;
+				background: #B066FF;
+				margin-left: 15%;
+				border-radius: 15px;
+			}
+			.my_card p {
+				/*机构信息统计 文字标题*/
+				color: white;
+				padding-top: 20px;
+			}	
+			.my_card .p1 {
+				/*机构信息统计 数量*/
+				color: white;
+				padding-top: 5px;
+				font-size: 30px;
+			}
+			.layui-card-body .my_p {
+				/*主标题*/
+				padding-top: 30px;
+				font-size: 20px;
+				color: #2C55FF;
+				margin-left: 0.5%;
+			}
+			.layui-card-body .card1 {
+				/*快捷入口 卡片*/
+				margin-left: 62px;
+				margin-top: 20px;
+				height: 119px;
+			}
+			.my_col a:hover {
+				/*快捷入口 选中样式*/
+				color: orange;
+			}
+			.my_col p{
+				/*快捷卡片 文字标题*/
+				padding-top: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!--机构信息统计 start -->
+		<div class="layui-card">
+			<div class="layui-card-body" style="padding-bottom: 40px;">
+				<!--主标题-->
+				<p class="my_p"><img src="../../../../images/gnrk_img/title.png" style="padding-right: 10px;margin-top: -4px;"/>机构信息统计：</p>
+				<div class="layui-row" style="padding-top: 20px;">
+					<div class="layui-col-md3 layui-col-sm6">
+							<div class="my_card" style="background-image: url(../../../../images/gnrk_img/cwsl.png);">
+								<p align="center">床位数量</p>
+								<p align="center" class="p1" id="cwsl">0</p>
+							</div>
+					</div>
+					<div class="layui-col-md3 layui-col-sm6">
+							<div class="my_card" style="background-image: url(../../../../images/gnrk_img/rzrs.png);">
+								<p align="center">入住人数</p>
+								<p align="center" class="p1" id="rzrs">0</p>
+							</div>
+					</div>
+					<div class="layui-col-md3 layui-col-sm6">
+							<div class="my_card" style="background-image: url(../../../../images/gnrk_img/hgsl.png);">
+								<p align="center">护工数量</p>
+								<p align="center" class="p1" id="hgsl">0</p>
+							</div>
+					</div>
+					<div class="layui-col-md3 layui-col-sm6">
+							<div class="my_card" style="background-image: url(../../../../images/gnrk_img/zcsl.png);">
+								<p align="center">资产数量</p>
+								<p align="center" class="p1" id="zcsl">0</p>
+							</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--机构信息统计 end -->
+		
+		<!--服务功能入口  start -->
+		<div class="layui-card">
+			<div class="layui-card-body" style="padding-bottom: 15px;">
+				<p class="my_p"><img src="../../../../images/gnrk_img/title.png"/ style="padding-right: 10px;margin-top: -3px;">服务功能入口：</p>
+				<div class="layui-row">
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4">
+						<div class="my_col" align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/checkin/checking.html" data-title="入住登记">
+								<img src="../../../../images/gnrk_img/rzdj.png" />
+								<p>入住登记</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/bedManagement/bed_set/bed_set.html" data-title="床位设置">
+								<img src="../../../../images/gnrk_img/cwgl.png" style="padding-top: 9px;" />
+								<p>床位管理</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/kehuguanli/out_regist/out_regist.html" data-title="外出登记">
+								<img src="../../../../images/gnrk_img/wcdj.png" />
+								<p>外出登记</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/service_management/health_ma/health.html" data-title="健康管理">
+								<img src="../../../../images/gnrk_img/jkgl.png" />
+								<p>健康管理</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/cost/cost_record/cost_record.html" data-title="费用流水">
+								<img src="../../../../images/gnrk_img/fyls.png" style="padding-top: 5px;" />
+								<p>费用流水</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/personnelManagement/person_management/person_detail.html" data-title="人员管理">
+								<img src="../../../../images/gnrk_img/rygl.png" style="padding-top: 2px;" />
+								<p>人员管理</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+							<a href="javascript:;" layuimini-content-href="page/jggl/assetManagement/jigouAssets/zcrk.html" data-title="资产入库">
+								<img src="../../../../images/gnrk_img/zcrk.png" />
+								<p>资产入库</p>
+							</a>
+						</div>
+					</div>
+					<div class="layui-col-md1 card1 layui-col-sm2 layui-col-xs4 my_col">
+						<div align="center">
+						<a href="javascript:;" layuimini-content-href="page/jggl/assetManagement/repairManagement/repair.html" data-title="维修管理">
+							<img src="../../../../images/gnrk_img/wxgl.png" />
+							<p>维修管理</p>
+						</a>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		<!--服务功能入口  end -->
+		
+		<!--数据报表  start -->
+		<div class="layui-row layui-col-space10" style="margin-top: -12px;margin-left: -12px;margin-right: -10px;">
+			<div class="layui-col-md4">
+				<!--入住人口统计-->
+				<iframe width="100%" frameborder="0 " height="376px" scrolling="no" src="../../assetManagement/jigouAssets/echarts/table3.html "></iframe>
+			</div>
+			<div class="layui-col-md4">
+				<!--登记老人数量统计-->
+				<iframe width="100%" frameborder="0 " height="376px " scrolling="no" src="../../assetManagement/jigouAssets/echarts/table4.html "></iframe>
+			</div>
+			<div class="layui-col-md4">
+				<!--已登记老人年龄比例分布图-->
+				<iframe width="100%" frameborder="0 " height="376px " scrolling="no" src="../../assetManagement/jigouAssets/echarts/table5.html "></iframe>
+			</div>
+		</div>
+		<!--数据报表  end -->
+		
+
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js " charset="utf-8 "></script>
+		<script type="text/javascript" src="../../../../js/lay-config.js"></script>
+		<script src="../../../../js/jquery.min.js"></script>
+		<script type="text/javascript" src="../../../bcxt/login/login.js"></script>
+		<script>
+			layui.use(['layer', 'laytpl', 'miniTab', 'echarts'], function() {
+				//定义layui组件变量
+				var $ = layui.jquery,
+					miniTab = layui.miniTab,
+					echarts = layui.echarts;
+
+				//调用快捷入口事件
+				miniTab.listen();
+			})
+		</script>
+		<script type="text/javascript">
+			// 获取基础数据
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/institution/insInfoStatisticsData.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					// 渲染到指定位置
+					$('#cwsl').text(data.data.bed_count);
+					$('#rzrs').text(data.data.ess_count);
+					$('#hgsl').text(data.data.staff_count);
+					$('#zcsl').text(data.data.ass_count);
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>企业详情</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../../css/public.css" media="all">
+		<style>
+			.container_body {
+				margin-left: 6%;
+				margin-top: 80px;
+				height: 328px;
+				width: 1504px;
+				border-left: 1px solid rgb(220, 220, 200);
+				border-right: 1px solid rgb(220, 220, 200);
+				border-top: 1px solid rgb(220, 220, 200);
+			}
+			
+			.container_body p {
+				font-size: 14px;
+				text-align: center;
+				position: relative;
+				top: 48px;
+			}
+			
+			.container_body .small_box {
+				width: 200px;
+				height: 108px;
+				float: left;
+				background-color: #E2E2E2;
+				border-bottom: 1px solid rgb(220, 220, 200);
+			}
+			
+			.container_body .big_box {
+				width: 552px;
+				height: 108px;
+				border-bottom: 1px solid rgb(220, 220, 200);
+				float: left;
+			}
+			
+			#img_logo {
+				padding-top: 4%;
+				padding-left: 35%;
+			}
+		</style>
+	</head>
+
+	<body style="background-color: white;">
+
+		<p style="font-size: 22px; margin-top: 93px;margin-left: 110px;">食堂详情:</p>
+
+		<div class="container_body">
+
+			<div class="small_box">
+				<p>食堂名称：</p>
+			</div>
+			<div class="big_box">
+				<p id="cant_name">加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>审核状态：</p>
+			</div>
+			<div class="big_box">
+				<p id='state'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>食堂地址：</p>
+			</div>
+			<div class="big_box">
+				<p id='cant_address'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>联系电话：</p>
+			</div>
+			<div class="big_box">
+				<p id='cant_phone'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>创建时间：</p>
+			</div>
+			<div class="big_box">
+				<p id='crt_date'>加载失败</p>
+			</div>
+			<div class="small_box">
+				<p>最晚关闭时间：</p>
+			</div>
+			<div class="big_box">
+				<p id='cant_shut_date'>加载失败</p>
+			</div>
+
+		</div>
+
+		<!--表单 start-->
+		<form class="layui-form" style="padding-top: 115px;">
+			<input type="hidden" id="id" />
+			<div class="layui-row">
+				<div class="layui-col-xs-offset8">
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button class="layui-btn layui-btn-primary" id="close">关闭</button>
+							<button class="layui-btn layui-btn-danger" lay-submit lay-filter="saveBtn1">驳回申请</button>
+							<button class="layui-btn " lay-submit lay-filter="saveBtn">审核通过</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</form>
+		<!--表单 end-->
+
+		<!-- 引入js资源 -->
+		<script src="../../../../lib/layui-v2.5.5/layui.js " charset="utf-8"></script>
+		<script type="text/javascript" src="../../../bcxt/login/login.js"></script>
+		<script type="text/javascript">
+			// 加载组件
+			layui.use(['form', 'layer'], function() {
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+				var token = Storage.get("token");
+
+				//是否操作过
+				var is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click", function() {
+					if(!is_caozuo) {
+						//只是关闭
+						var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index); //关闭窗口
+					} else {
+						//关闭并刷新
+						window.parent.location.reload();
+					}
+					return false;
+				});
+
+				//监听提交
+				form.on('submit(saveBtn)', function(data) {
+					$.ajax({
+						url: '/sys_fkcy/enterprise_canteen/toExamine.action',
+						context: document.body,
+						headers: header,
+						type: "POST",
+						data: {
+							"id": $("#id").val(), // id
+							"state": 0
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function(data) {
+							if(data.state != 200) {
+								layer.msg(data.msg, {
+									icon: 5
+								}); //失败的表情
+
+								return;
+							} else {
+								layer.msg('审核通过', {
+									icon: 6, //成功的表情
+									time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+								}, function() {
+									window.parent.location.reload();
+								});
+							}
+
+						}
+					});
+					return false;
+				});
+
+				//监听提交
+				form.on('submit(saveBtn1)', function(data) {
+					$.ajax({
+						url: '/sys_fkcy/enterprise_canteen/toExamine.action',
+						context: document.body,
+						headers: header,
+						type: "POST",
+						data: {
+							"id": $("#id").val(), // id
+							"state": 2
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function(data) {
+							if(data.state != 200) {
+								layer.msg(data.msg, {
+									icon: 5
+								}); //失败的表情
+
+								return;
+							} else {
+								layer.msg('驳回申请成功', {
+									icon: 5, //失败的表情
+									time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+								}, function() {
+									window.parent.location.reload();
+								});
+							}
+
+						}
+					});
+					return false;
+				});
+			});
+
+			// 获取父级数据
+			function child(data) {
+				layui.use(['form', 'jquery'], function() {
+					var $ = layui.$;
+					$('#id').val(data.id);
+					console.log(data);
+					$('#cant_name').text(data.cant_name);
+					if(data.state == 0) {
+						$('#state').text('审核未通过');
+					} else if(data.state == 1) {
+						$('#state').text('审核中');
+					} else if(data.state == 2) {
+						$('#state').text('审核通过');
+					}
+					$('#cant_address').text(data.cant_address);
+					$('#cant_phone').text(data.cant_phone);
+					var my_date = getMyDate(data.crt_date);
+					$('#crt_date').text(my_date);
+					$('#cant_shut_date').text(data.cant_shut_date);
+				})
+			}
+
+			function getMyDate(str) {
+				var oDate = new Date(str),
+					oYear = oDate.getFullYear(),
+					oMonth = oDate.getMonth() + 1,
+					oDay = oDate.getDate(),
+					oHour = oDate.getHours(),
+					oMin = oDate.getMinutes(),
+					oSen = oDate.getSeconds(),
+					oTime = oYear + '-' + getzf(oMonth) + '-' + getzf(oDay) + ' ' + getzf(oHour) + ':' + getzf(oMin) + ':' + getzf(oSen); //最后拼接时间
+				return oTime;
+			};
+			
+			//补0操作
+			function getzf(num) {
+				if(parseInt(num) < 10) {
+					num = '0' + num;
+				}
+				return num;
+			}
+		</script>
+	</body>
+
+</html>

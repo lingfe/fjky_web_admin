@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>机构信息管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- tab数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+    <!-- 内容 end  -->
+
+    <!-- 图片放大 -->
+    <div id="fangda" style="position:fixed;left:10%;top:10%;z-index:999;">
+        <img style="max-width:500px;max-height:500px;" />
+    </div>
+
+    <!-- 头部-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon layui-icon-addition"></i>创建子机构</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-distribution-btn" lay-event="distribution"><i class="layui-icon layui-icon-star"></i>初始化</button>
+        </div>
+    </script>
+
+    <!-- 操作 start -->
+    <script type="text/html" id="currentTableBar">
+		{{# if (d.state == 0) { }}
+			<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+		{{# }else if(d.state == 1){ }}
+			审核中，无任何操作
+		{{# } }}
+    </script>
+    <!-- 操作 end -->
+
+    <!-- 验证营业执照图片 -->
+    <script type="text/html" id="id_img">
+        {{# if (d.ins_business_license_img != null && d.ins_business_license_img != '') { }}
+        <div class=''><img src='{{d.ins_business_license_img}}' /></div>
+        {{# }else { }}
+        <div class=''><img src='https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg' /></div>
+        {{# } }}
+    </script>
+
+    <!-- 处理状态 -->
+    <script type="text/html" id="id_state">
+        {{# if (d.state == 0) { }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-radius">正常</button> {{# }else if(d.state == 1){ }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius">审核中</button> {{# }else if(d.state == 2){ }}
+        <button type="button" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius">审核不通过</button> {{# } }}
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        // 加载layui指定组件
+        layui.use(['form', 'table'], function() {
+            //定义组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/institution/getPage.action', //数据接口
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+                headers: header,
+                defaultToolbar: ['filter', 'exports', 'print', {
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [
+                    [{
+                        type: "checkbox",
+                        width: 50
+                    }, {
+                        field: 'ins_name',
+                        width: 180,
+                        title: '机构名称',
+                        align: "center"
+                    }, {
+                        field: 'state',
+                        title: '状态',
+                        toolbar: "#id_state",
+                        align: "center"
+                    }, {
+                        field: 'ins_address',
+                        width: 180,
+                        title: '机构地址',
+                        align: "center"
+                    }, {
+                        field: 'ins_service_phone',
+                        width: 100,
+                        title: '服务电话',
+                        align: "center"
+                    }, {
+                        field: 'ins_prf_phone',
+                        width: 110,
+                        title: '负责人电话',
+                        align: "center"
+                    }, {
+                        field: 'ins_corporation_phone',
+                        width: 110,
+                        title: '法人代表电话',
+                        align: "center"
+                    }, {
+                        field: 'ins_business_license_img',
+                        title: '营业执照',
+                        width: 120,
+                        toolbar: '#id_img',
+                        align: "center",
+                    }, {
+                        field: 'ins_type',
+                        width: 80,
+                        title: '类型',
+                        align: "center"
+                    }, {
+                        field: 'crt_date',
+                        width: 160,
+                        title: '创建时间',
+                        align: "center",
+                        templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>"
+                    }, {
+                        title: '操作',
+                        minWidth: 180,
+                        toolbar: '#currentTableBar',
+                        align: "center",
+                        fixed: "right"
+                    }]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "count": res.count + 1,
+                        "code": res.state, //解析接口状态
+                        "msg": res.data.msg, //解析提示文本
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line,row',
+            });
+
+            //图片放大
+            $("#currentTableId").next().on('mouseover mouseout', 'img', function(e) {
+                let $box = $("#fangda img");
+                if (e.type == "mouseover") {
+                    $box.attr('src', $(this)[0].src).show();
+                } else if (e.type == "mouseout") {
+                    $box.hide();
+                }
+            })
+
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function(obj) {
+                if (obj.event === 'add') { // 监听添加操作
+                    var index = layer.open({
+                        title: '添加机构信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['100%', '100%'],
+                        content: './institution_add.html',
+                    });
+                  // 监听初始化操作
+                } else if (obj.event === 'distribution') {
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认初始化-[' + data[0].ins_name + ']-该机构吗？', {
+                            title: "初始化提示",
+                            icon: 3
+                        }, function(index) {
+                            if (data.length == 1) {
+								if(data[0].state==0){
+									$.ajax({
+										url: '/sys_fkcy/institution/initialize.action?id=' + data[0].id,
+										type: 'post',
+										headers: header,
+										success: function(data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, {
+													icon: 5
+												}); //失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon: 6, //成功的表情
+													time: 1000, //1秒关闭（如果不配置，默认是3秒）
+												}, function() {
+													window.parent.location.reload();
+												});
+											}
+										},
+										complete: function() {
+											layer.close(this.layerIndex);
+										},
+									});
+								}else{
+									layer.msg("审核中，无任何操作！", {
+										icon: 5
+									}); //失败的表情	
+								}
+                            } else if (data.length > 1) {
+                                layer.msg("不可同时操作多个机构！只能选择一个！", {
+                                    icon: 5
+                                }); //失败的表情
+                            }
+                        });
+                    } else {
+                        layer.msg("请先选择您要初始化的机构!", {
+                            icon: 5
+                        }); //失败的表情
+                    }
+                }
+            });
+
+            //监听表格复选框选择
+            table.on('checkbox(currentTableFilter)', function(obj) {
+                console.log(obj)
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function(obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    var index = layer.open({
+                        title: '编辑机构信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['100%', '100%'],
+                        content: './institution_edit.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            var body = layer.getChildFrame("body", index);
+                            if (result.ins_type == '自理型') {
+                                body.find("input[name=ins_type][value='自理型']").attr("checked", true);
+                            } else if (result.ins_type == '护理型') {
+                                body.find("input[name=ins_type][value='护理型']").attr("checked", true);
+                            } else {
+                                body.find("input[name=ins_type][value='综合型']").attr("checked", true);
+                            }
+                            // 更新表单
+                            iframe.layui.form.render();
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                        }
+                    });
+                    $(window).on("resize", function() {
+                        layer.full(index);
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', {
+                        title: "提示",
+                        icon: 3
+                    }, function(index) {
+                        obj.del();
+                        $.ajax({
+                            url: '/sys_fkcy/institution/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function(data) {
+                                if (data.state != 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function() {
+                                        obj.del();
+                                    });
+                                }
+                            },
+                            complete: function() {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

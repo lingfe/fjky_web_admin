@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>食堂报备信息编辑</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 -->
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">报餐日期：</label>
+            <div class="layui-input-block">
+                <input type="text" id="rep_date" name="rep_date" value="" placeholder="yyyy-MM-dd" autocomplete="off"
+                    class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label ">报餐类型：</label>
+            <div class="layui-input-block">
+                <input type="radio" name="rep_type" value="早餐" title="早餐" checked="">
+                <input type="radio" name="rep_type" value="中餐" title="中餐">
+                <input type="radio" name="rep_type" value="晚餐" title="晚餐">
+
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label ">报餐数量：</label>
+            <div class="layui-input-block">
+                <input type="text" id="rep_num" name="rep_num" placeholder="请输入报餐数量" value="" class="layui-input"
+                    oninput="value=value.replace(/[^\d]/g,'')">
+            </div>
+        </div>
+        <!-- 报餐订单id -->
+        <input id="qiId" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">关闭</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../login/login.js"></script>
+    <script>
+        // 加载资源
+        layui.use(['form', 'layer', 'laydate'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            laydate = layui.laydate;
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新父窗体
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //日期
+            laydate.render({
+                elem: '#rep_date',
+
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: localurl + '/sys_fkcy/canteen_report/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#qiId").val(),
+                        "rep_date": $("#rep_date").val(),
+                        "rep_type": $("input[name='rep_type']:checked").val(),
+                        "rep_num": $("#rep_num").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                    }
+                });
+                return false;
+            });
+
+        });
+        // 加载父级资源
+        function child(data) {
+            $("#rep_date").val(data.rep_date);
+            $("#rep_type").val(data.rep_type);
+            $("#rep_num").val(data.rep_num);
+            $("#qiId").val(data.id);
+        }
+    </script>
+
+
+</body>
+
+</html>

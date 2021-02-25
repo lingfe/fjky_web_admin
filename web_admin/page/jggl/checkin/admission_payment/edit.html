@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑入院缴费</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 入院缴费 -->
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">押&#12288;&#12288;金</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="ap_deposit" type="text" name="ap_deposit" lay-verify="required"
+                    lay-reqtext="押金" oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入押金">
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">预缴费用</label>
+            <div class="layui-input-block">
+                <input class="layui-input" id="ap_cost_advance" type="text" lay-verify="required" lay-reqtext="请输入预缴费用"
+                    name="ap_cost_advance" oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入预缴费用">
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">套餐费用</label>
+            <div class="layui-input-block">
+                <input class="layui-input" disabled type="text" id="ap_cost_meal_package"
+                    oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入套餐费用" />
+            </div>
+        </div>
+
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">床位费用</label>
+            <div class="layui-input-block">
+                <input class="layui-input" disabled type="text" id="ap_cost_bed"
+                    oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入床位费用" />
+            </div>
+        </div>
+
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">应缴费用</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" id="ap_cost_payable" disabled type="text" name="ap_cost_payable"
+                    oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入应缴费用" />
+            </div>
+            <div class="layui-form-mid layui-word-aux">护理+套餐+床位</div>
+        </div>
+
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">实缴费用</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" id="ap_cost_total" disabled type="text" name="ap_cost_total"
+                    oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入实缴费用" />
+            </div>
+            <div class="layui-form-mid layui-word-aux">押金+预缴+应缴</div>
+        </div>
+
+        <input id="family_id" type="text" style="display: none" readonly="" value=''>
+        <!-- 隐藏属性 -->
+        <input id="id" type="text" style="display: none" readonly="" value=''>
+        <div class="layui-form-item" style="float: right;">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            //入院缴费-押金输入框的值改变时触发
+            $("#ap_deposit").on("input", function (e) {
+                ruyuanjfe_jshs();
+            });
+
+            //入院缴费-预存输入框的值改变时触发
+            $("#ap_cost_advance").on("input", function (e) {
+                ruyuanjfe_jshs();
+            });
+            //入院缴费-计算函数
+            function ruyuanjfe_jshs() {
+                //得到押金
+                var ap_deposit = $("#ap_deposit").val();
+                if (ap_deposit == "" || ap_deposit == null || ap_deposit == 'undefined') {
+                    ap_deposit = 0;
+                }
+                //得到预缴
+                var ap_cost_advance = $("#ap_cost_advance").val();
+                if (ap_cost_advance == "" || ap_cost_advance == null || ap_cost_advance == 'undefined') {
+                    ap_cost_advance = 0;
+                }
+
+                //得到应缴
+                var ap_cost_payable = $("#ap_cost_payable").val();
+
+                //计算
+                var ap_cost_total = (parseInt(ap_cost_payable)
+                    + parseInt(ap_cost_advance)
+                    + parseInt(ap_deposit));
+                //赋值实缴
+                $("#ap_cost_total").val(ap_cost_total);
+            }
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/admission_payment/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#id").val(),
+                        "ap_deposit": $("#ap_deposit").val(),
+                        "ap_cost_meal_package": $("#ap_cost_meal_package").val(),
+                        "ap_cost_bed": $("#ap_cost_bed").val(),
+                        "ap_cost_payable": $("#ap_cost_payable").val(),
+                        "ap_cost_advance": $("#ap_cost_advance").val(),
+                        "ap_cost_total": $("#ap_cost_total").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                        else {
+                            layer.msg(data.msg, {
+                                icon: 5,//失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+        // 获取父级数据
+        function child(data) {
+            $("#ap_deposit").val(data.ap_deposit);
+            $("#ap_cost_meal_package").val(data.ap_cost_meal_package);
+            $("#ap_cost_bed").val(data.ap_cost_bed);
+            $("#ap_cost_payable").val(data.ap_cost_payable);
+            $("#ap_cost_advance").val(data.ap_cost_advance);
+            $("#ap_cost_total").val(data.ap_cost_total);
+            $("#id").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>修改信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../js/lay-module/step-lay/step.css" media="all">
+</head>
+
+<body>
+    <!-- 分布表单-start -->
+    <div class="layui-fluid">
+        <div class="layui-card" style="height: 700px;">
+            <div class="layui-card-body" style="padding-top: 20px;">
+                <div class="layui-carousel" id="stepForm" lay-filter="stepForm" style="margin: 0 auto;height: auto;">
+                    <div carousel-item style="overflow:initial">
+
+                       
+
+                        <!-- 家属信息 -->
+                        <div>
+                            <form class="layui-form" style="margin: 0 auto;max-width: 750px;padding-top: 20px;">
+                                <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                                    <label class="layui-input-label">家属姓名：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" class="layui-input dateIcon" id="family_name"
+                                            placeholder="请输入姓名" value="" style="width: 240px;">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                                    <label class="layui-input-label required">联系电话：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" class="layui-input dateIcon" id="family_phone"
+                                            lay-verify="required|phone" placeholder="请输入联系电话" style="width: 240px;">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                                    <label class="layui-input-label required">身份证号：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" class="layui-input dateIcon" id="family_id_card"
+                                            lay-verify="identity" placeholder="请输入身份证号" style="width: 240px;">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="margin-top:10px;margin-left:40px">
+                                    <label class="layui-input-label required">联系地址：</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" class="layui-input dateIcon" id="family_contact_address"
+                                            placeholder="请输入联系地址" style="width: 240px;">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="margin-top:10px;">
+                                    <label class="layui-form-label required" style="width:100px">与客户关系：</label>
+                                    <div class="layui-input-inline">
+                                        <select id="and_relation" name="and_relation" lay-verify="required"
+                                            lay-reqtext="请选择民族" class="select_wd120">
+                                            <option value="祖孙">祖孙</option>
+                                            <option value="父子">父子</option>
+                                            <option value="母子">母子</option>
+                                            <option value="母女">母女</option>
+                                            <option value="姐妹">姐妹</option>
+                                            <option value="兄妹">兄妹</option>
+                                            <option value="姐弟">姐弟</option>
+                                            <option value="叔侄">叔侄</option>
+                                            <option value="公孙">公孙</option>
+                                            <option value="孙女">孙女</option>
+                                            <option value="孙子">孙子</option>
+                                            <option value="兄弟">兄弟</option>
+                                            <option value="侄女">侄女</option>
+                                            <option value="外孙女">外孙女</option>
+                                            <option value="妻子">妻子</option>
+                                            <option value="姊妹">姊妹</option>
+                                            <option value="配偶">配偶</option>
+                                            <option value="女婿">女婿</option>
+                                            <option value="儿媳">儿媳</option>
+                                            <option value="婆媳">婆媳</option>
+                                            <option value="夫妻">夫妻</option>
+                                            <option value="户主">户主</option>
+                                            <option value="子女">子女</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="layui-inline" style="margin-top:10px;margin-left:40px;width:300px">
+                                    <label class="layui-form-label required" style="width:100px">是否监护人：</label>
+                                    <div class="layui-input-block" id="is_guardian">
+                                        <input type="radio" name="is_guardian" lay-verify="required"
+                                            lay-reqtext="请选择是否监护人" value="是" title="是" checked="">
+                                        <input type="radio" name="is_guardian" lay-verify="required"
+                                            lay-reqtext="请选择是否监护人" value="否" title="否">
+                                    </div>
+                                </div>
+                                <input id="family_id" type="text" style="display: none" readonly="" value=''>
+                                <div class="layui-form-item" style="margin-top: 20px;margin-left: 12%;">
+                                    <div class="layui-input-block">
+                                        <button type="button" class="layui-btn layui-btn-primary pre">上一步</button>
+                                        <button class="layui-btn" lay-submit lay-filter="save2">
+                                            &emsp;保存&emsp;
+                                        </button>
+                                        <button class="layui-btn layui-btn-primary" lay-submit lay-filter="formStep2">
+                                            下一步
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- 家属列表 -->
+                            <div style="width: 80%;margin: auto;">
+                                <script type="text/html" id="toolbarDemo">
+                                    <div class="layui-btn-container">
+                                        <!-- 表头操作 -->
+                                        <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 新增 </button>
+                                            <span class="layui-btn layui-btn-primary pre" style="margin-left:42%;border:0">客户家属列表</span>
+                                    </div>
+                                </script>
+                                <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+                                <input id="family_yw_id" type="text" style="display: none;" readonly="" value=''>
+                                <!-- 列表操作 -->
+                                <script type="text/html" id="currentTableBar">
+                                    <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete"
+                                    lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+                                </script>
+                            </div>
+                        </div>
+
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 分布表单-end -->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件资源
+        layui.use(['form', 'table', 'layer'], function () {
+            var $ = layui.$;
+            form = layui.form,
+                layer = layui.layer,
+                table = layui.table; //表格格式
+            var token = Storage.get("token");
+            let qiId = $("#jbid").val();//父级id
+
+
+        
+
+            // 根据id获取相关信息
+            function getdata() {
+                $.ajax({
+                    url: '/sys_fkcy/essential_information/getWhereId?id=' + $("#jbid").val(),
+                    headers: { //通过 request 头传递
+                        token: token
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (res) {
+                        var basicinfo = res.data.essential_info;
+                        var familyinfo = res.data.family_info[0];
+                        var heainfo = res.data.healthy_info[0];
+                        var bedinfo = res.data.bed_info[0];
+
+                      
+                        //家属信息
+                        $("#family_id").val(familyinfo.id);
+                        $("#f_yw_id").val(familyinfo.yw_id);
+                        $("#family_name").val(familyinfo.full_name);
+                        $("#family_phone").val(familyinfo.phone);
+                        $("#family_id_card").val(familyinfo.id_card);
+                        $("#family_contact_address").val(familyinfo.contact_address);
+                        $("option[value='" + familyinfo.and_relation + "']").attr("selected", true);
+                        $("input[name=is_guardian][value='" + familyinfo.is_guardian + "']").attr("checked", true);
+                        //重新加载页面
+                        layui.form.render();
+                    }
+                });
+            }
+
+            // 分布表单上一步，下一步
+            form.on('submit(formStep)', function (data) {
+                step.next('#stepForm');
+                return false;
+            });
+            form.on('submit(formStep2)', function (data) {
+                step.next('#stepForm');
+                return false;
+            });
+            form.on('submit(formStep3)', function (data) {
+                step.next('#stepForm');
+                return false;
+            });
+            form.on('submit(formStep4)', function (data) {
+                location.href='../payment/payment.html';
+                // step.next('#stepForm');
+                return false;
+            });
+            $('.pre').click(function () {
+                step.pre('#stepForm');
+            });
+
+          
+
+            //家属信息数据表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/family_information/getWhereYwId.action?yw_id=' + qiId, //数据接口
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 80,
+                headers: header,
+                defaultToolbar: ['filter', 'exports', 'print', {
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [[
+                    { field: 'yw_id', width: 80, title: '业务id', align: "center" },
+                    { field: 'full_name', width: 100, title: '姓名', align: "center" },
+                    { field: 'phone', width: 120, title: '联系电话', align: "center" },
+                    { field: 'id_card', width: 180, title: '身份证号', align: "center" },
+                    { field: 'contact_address', width: 200, title: '联系地址', align: "center" },
+                    { field: 'and_relation', width: 80, title: '关系', align: "center" },
+                    { field: 'is_guardian', width: 100, title: '是否监护人', align: "center" },
+                    { title: '操作', minWidth: 80, toolbar: '#currentTableBar', align: "center", fixed: "right" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                parseData: function (res) {
+                    return {
+                        "count": res.count + 1,
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "data": res.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                size: 'lg',
+                //even:true,//隔行背景
+                page: false,
+                skin: 'rows'
+            });
+
+
+
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'add') {  // 监听添加操作
+                    var index = layer.open({
+                        title: '添加家属',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['850px', '100%'],
+                        content: './basicInfo_add.html',
+                        success: function (layero, index) {//弹出层打开后的回调函数
+                            // layer.full(index);
+                            var iframe = window['layui-layer-iframe' + index]
+                            // 向子页面的全局函数child传参
+                            iframe.child(qiId);
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                }
+            });
+
+            //监听行单击事件（双击事件为：rowDouble）
+            table.on('row(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                $("#family_id").val(data.id);
+                $("#f_yw_id").val(data.yw_id);
+                $("#family_name").val(data.full_name);
+                $("#family_phone").val(data.phone);
+                $("#family_id_card").val(data.id_card);
+                $("#family_contact_address").val(data.contact_address);
+                //获取当前窗口的name
+                var index = parent.layer.getFrameIndex(window.name);
+                if (data.is_guardian == '是') {
+                    body.find("input[name=is_guardian][value='是']").attr("checked", true);
+                } else {
+                    body.find("input[name=is_guardian][value='否']").attr("checked", true);
+                }
+                // 更新表单
+                form.render();
+                //标注选中样式
+                obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', { title: "提示", icon: 3 }, function (index) {
+                        obj.del();
+                        $.ajax({
+                            url: '/sys_fkcy/family_information/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function (data) {
+                                if (data.state != 200) {
+                                    layer.msg(data.msg, { icon: 5 });//失败的表情
+                                    return;
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 6,//成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function () {
+                                        obj.del();
+                                    });
+                                }
+                            },
+                        });
+                    });
+                }
+            });
+
+            /*
+            监听家庭信息
+            */
+            form.on('submit(save2)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/family_information/updateWhereId.action',
+                    context: document.body,
+                    headers: { //通过 request 头传递
+                        token: token
+                    },
+                    type: "POST",
+                    data: {
+                        "id": $("#family_id").val(),
+                        "full_name": $("#family_name").val(),
+                        "phone": $("#family_phone").val(),
+                        "id_card": $("#family_id_card").val(),
+                        "contact_address": $("#family_contact_address").val(),
+                        "and_relation": $("#and_relation").val(),
+                        "is_guardian": $("input[name='is_guardian']:checked").val()
+                    }, xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            });
+                            //关闭并刷新
+                            table.reload('currentTableId', {})
+                        }
+                    }
+                });
+                // step.next('#stepForm');
+                return false;
+            });
+        });
+        // 获取父级id
+        function child(data) {
+            $("#jbid").val(data.id);
+        }
+        // 获取第二个子页面传来的值并修改
+        function getDataFromSon(data) {
+            $("#bed").val(data.floor_tung_name + '-' + data.floor_layer + '-' + data.room_number + '-' + data.bed_number);
+            $("#bedid").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

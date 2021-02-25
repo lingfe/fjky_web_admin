@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<!-- 引入 echarts.js -->
+		<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+		<script src="../../../../../js/jquery.min.js"></script>
+		<script src="../../../../bcxt/login/login.js"></script>
+	</head>
+
+	<body>
+		<div id="table1" style="height: 330px;width: 700px;"></div>
+		<script type="text/javascript">
+			var $ass_totle = 0,
+				$cangku_sum = 0,
+				$pandian_sum = 0,
+				$gyshang_sum = 0;
+			$.ajax({
+				async: false, //表示请求是否异步处理
+				type: "post", //请求类型
+				headers: header,
+				url: "/sys_fkcy/jggl/assets/homeData.action", //请求的 URL地址
+				dataType: "json", //返回的数据类型
+				success: function(data) {
+					$ass_totle = data.data.ass_totle;
+					$cangku_sum = data.data.changku_sum;
+					$pandian_sum = data.data.panding_sum;
+					$gyshang_sum = data.data.gyshang_sum;
+				},
+				error: function(data) {
+					console.log(data);
+				}
+			});
+		</script>
+		<script type="text/javascript">
+			var my_echarts = echarts.init(document.getElementById('table1'));
+
+			let data = [{
+					name: '资产占比',
+					value: $ass_totle
+				},
+				{
+					name: '仓库占比',
+					value: $cangku_sum
+				},
+				{
+					name: '盘点占比',
+					value: $pandian_sum
+				},
+				{
+					name: '供应商占比',
+					value: $gyshang_sum
+				},
+			]
+			let name = data.map((item) => item.name)
+			let value = data.map((item) => item.value)
+			let sum = value.reduce((a, b) => {
+				return a + b
+			})
+			let color = [
+				[
+					"rgb(255, 198, 116)",
+					"rgb(108, 206, 255)",
+					"rgb(138, 161, 255)",
+					"rgb(225, 172, 225)"
+				],
+				["rgba(255, 198, 116,0.1)",
+					"rgba(108, 206, 255,0.1)",
+					"rgba(138, 161, 255,0.1)",
+					"rgba(225, 172, 225,0.1)"
+				]
+			]
+			let series = []
+			let yAxis = []
+			for(let i = 0; i < data.length; i++) {
+				series.push({
+					name: "",
+					type: "pie",
+					clockWise: false, //顺时加载
+					hoverAnimation: false, //鼠标移入变大
+					radius: [70 - i * 15 + "%", 60 - i * 15 + "%"],
+					center: ["40%", "50%"],
+					label: {
+						show: false
+					},
+					itemStyle: {
+						label: {
+							show: false
+						},
+						labelLine: {
+							show: false
+						},
+						borderWidth: 5
+					},
+					data: [{
+							value: data[i].value,
+							name: data[i].name,
+						},
+						{
+							value: sum - data[i].value,
+							name: "",
+							itemStyle: {
+								color: 'transparent',
+							},
+							tooltip: {
+								show: false
+							},
+							hoverAnimation: false
+						}
+					]
+				})
+				series.push({
+					name: "",
+					type: "pie",
+					silent: true,
+					z: 1,
+					clockWise: false, //顺时加载
+					hoverAnimation: false, //鼠标移入变大
+					radius: [70 - i * 15 + "%", 60 - i * 15 + "%"],
+					center: ["40%", "50%"],
+					label: {
+						show: false
+					},
+					itemStyle: {
+						label: {
+							show: false
+						},
+						labelLine: {
+							show: false
+						},
+						borderWidth: 5
+					},
+					data: [{
+							value: 7.5,
+							itemStyle: {
+								color: color[1][i],
+							},
+							tooltip: {
+								show: false
+							},
+							hoverAnimation: false
+						},
+						{
+							value: 2.5,
+							itemStyle: {
+								color: "rgba(0,0,0,0)",
+								borderWidth: 0
+							},
+							tooltip: {
+								show: false
+							},
+							hoverAnimation: false
+						}
+					]
+				})
+				yAxis.push(((data[i].value / sum) * 100).toFixed(2) + "%")
+			}
+			option = {
+				title:  {
+					text: '资产占比分布图',
+					y: '8px',
+					x: '20px'
+				},
+				backgroundColor: '#fff',
+				color: color[0],
+				legend: {
+					show: true,
+					icon: "circle",
+					top: "center",
+					left: "65%",
+					data: name,
+					orient: 'vertical',
+					formatter: (name) => {
+						return(
+							"{title|" + name + "}"
+						);
+					},
+					textStyle: {
+						rich: {
+							title: {
+								fontSize: 14,
+								lineHeight: 20,
+								color: "#000"
+							},
+							value: {
+								fontSize: 14,
+								lineHeight: 20,
+								color: "#000"
+							}
+						}
+					}
+				},
+				tooltip: {
+					show: true,
+					trigger: "item",
+					formatter: "{b}:{c}({d}%)"
+				},
+				grid: {
+					top: "14%",
+					left: "40%",
+					width: "40%",
+					height: "30%",
+					containLabel: false
+				},
+				yAxis: [{
+					type: "category",
+					inverse: true,
+					axisLine: {
+						show: false
+					},
+					axisTick: {
+						show: false
+					},
+					axisLabel: {
+						interval: 0,
+						inside: true,
+						textStyle: {
+							color: "#000",
+							fontSize: 16
+						},
+						show: true
+					},
+					data: yAxis
+				}],
+				xAxis: [{
+					show: false,
+				}],
+				series: series
+			};
+			my_echarts.setOption(option);
+		</script>
+	</body>
+
+</html>

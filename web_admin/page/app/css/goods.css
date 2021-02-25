@@ -1,0 +1,11 @@
+.input_span {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 3px;
+    font-size: 12px;
+    border: 1px solid #ECECEC;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+}

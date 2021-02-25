@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑身体参数</title>
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+</head>
+<style>
+    .layui-form-label {
+        width: 95px;
+    }
+</style>
+
+<body>
+    <form class="layui-form" action="">
+        <div class="layui-form layuimini-form" style="margin-top:40px">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label required">身高（cm）</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="ess_stature" name="ess_stature" lay-verify="required|number" placeholder="请输入身高" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label required">体重（kg）</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="ess_weight" name="ess_weight" lay-verify="required|number" placeholder="请输入体重" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label required">臀围（cm）</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="ess_hipline" name="ess_hipline" lay-verify="required|number" placeholder="请输入臀围" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label required">腰围（cm）</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="ess_waistline" name="ess_waistline" lay-verify="required|number" placeholder="请输入腰围" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <input id="esss_id" type="text" style="display: none" readonly="" value=''>
+            <div class="layui-form-item" style="float: right;">
+                <div class="layui-input-block">
+                    <button class="layui-btn layui-btn-normal" lay-submit lay-filter="btnbtn">保存</button>
+                    <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer', 'laydate'], function() {
+            var form = layui.form,
+                layer = layui.layer,
+                laydate = layui.laydate;
+            $ = layui.$;
+            var token = Storage.get("token");
+
+            //日期
+            laydate.render({
+                elem: '#birthday'
+                ,trigger: 'click'
+            });
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //监听提交
+            form.on('submit(btnbtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/essential_information/setBody_parameters.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $("#esss_id").val(),
+                        // "yw_id": $("#yw_id").val(),
+                        "ess_stature": $("#ess_stature").val(),
+                        "ess_weight": $("#ess_weight").val(),
+                        "ess_waistline": $("#ess_waistline").val(),
+                        "ess_hipline": $("#ess_hipline").val(),
+                        "ess_wh_than": $("#ess_wh_than").val(),
+                        "ess_bmi": $("#ess_bmi").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function() {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index); //关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        });
+        // 获取父级数据
+        function child(data) {
+            $("#esss_id").val(data);
+            // console.log(data.esss_id);
+            // console.log(data.ess_stature);
+            // console.log(data);
+            // $("#ess_stature").val(data.ess_stature);
+            // $("#ess_weight").val(data.ess_weight);
+            // $("#ess_waistline").val(data.ess_waistline);
+            // $("#ess_hipline").val(data.ess_hipline);
+            // $("#ess_wh_than").val(data.ess_wh_than);
+            // $("#ess_bmi").val(data.ess_bmi);
+            // layui.form.render();
+        }
+    </script>
+</body>
+
+</html>

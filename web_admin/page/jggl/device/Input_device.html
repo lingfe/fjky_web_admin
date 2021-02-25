@@ -1,0 +1,269 @@
+<!--
+创建者:qiuyuling
+时间：2021-2-4
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>录入设备</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <!-- 文件上传css -->
+    <link rel="stylesheet" href="../../../lib/jq-module/zyupload/zyupload-1.0.0.min.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../css/device.css">
+    <link rel="stylesheet" href="../css/fontB.css">
+</head>
+
+<body>
+    <!-- 按钮 --> 
+    <button type="button" id='upfile' class="layui-btn layui-btn-sm layui-btn-normal">
+        <i class="layui-icon">&#xe642;</i>
+        批量录入
+    </button> 
+    <button type="button" class="layui-btn layui-btn-sm layui-btn-warm ">
+        <i class="layui-icon">&#xe62d;</i>
+        <a style='color:white;text-decoration:none;' href="http://47.106.198.137:81/uploadFiles/publics/设备信息导入模板.xls">录入模板</a>
+    </button>
+    <!-- 表单 --> 
+    <form class="layui-form fontB" action="" style='margin-top:15px;'>
+        <div class="layui-form-item lay_item">
+            <label class="layui-form-label label_title fontB">设备类型：</label>
+            <div class="layui-input-inline lay_line" style='height: 100px;' onclick="open_child_chiceDeviceType()">
+                <input type="text" id="dtype_name" name="dtype_name" lay-verify="required" placeholder="请选择设备类型"
+                    autocomplete="off" class="layui-input fontB">
+            </div>
+            <label class="layui-form-label label_title fontB">设备名称：</label>
+            <div class="layui-input-inline lay_line" style='height: 100px;'>
+                <input type="text" id="d_name" name="d_name" lay-verify="required" placeholder="请选择设备名称"
+                    autocomplete="off" class="layui-input fontB">
+            </div>
+        </div>
+        <div class="layui-form-item lay_item" style="margin-top:0px;border-top: 0px;">
+            <label class="layui-form-label label_title fontB">设备型号：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="dmodel" name="dmodel" lay-verify="required" placeholder="请输入设备型号"
+                    autocomplete="off" class="layui-input ffontB">
+            </div>
+            <label class="layui-form-label label_title fontB">设备IMEI码：</label>
+            <div class="layui-input-inline lay_line">
+                <input type="text" id="d_IMEI" lay-verify="required" placeholder="请输入设备IMEI码" autocomplete="off"
+                    class="layui-input fontB">
+            </div>
+        </div>
+        <div class="layui-form-item lay_item" style="margin-top:0px;border-top: 0px;">
+            <label class="layui-form-label label_title fontB">设备供应商：</label>
+            <div class="layui-input-inline lay_line" style='height: 100px;' onclick="open_child_chiceDeviceSuppert()">
+                <input type="text" id="supp_name" name="supp_name" lay-verify="required" placeholder="请选择设备供应商"
+                    autocomplete="off" class="layui-input fontB">
+            </div>
+            <label class="layui-form-label label_title"></label>
+            <div class="layui-input-inline lay_line">
+            </div>
+        </div>
+  
+        <div class="layui-row" style="margin-top: 40px;">
+            <div class="layui-col-xs-offset9">
+                <div class="layui-form-item"> 
+                    <div class="layui-input-block"> 
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        <!-- 按钮 -->
+        <!-- <button class="layui-btn layui-btn-normal " lay-submit lay-filter="saveBtn">新增</button> -->
+    </form>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../js/jquery.min.js" charset="utf-8"></script> 
+    <script src="../../../lib/jq-module/zyupload/zyupload-1.0.0.min.js" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js?date"></script>
+    <script>
+        //全局变量
+        var dtype_id = '';
+        var supp_id = '';
+        // 加载组件
+        layui.use(['form', 'layarea', 'upload'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var layarea = layui.layarea;
+            var upload = layui.upload;
+            var date = new Date();
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //验证电话号码或座机号码
+            var mobile = /^1[3|4|5|7|8]\d{9}$/, phone = /^0\d{2,3}-?\d{7,8}$/;
+            form.verify({
+                tellphone: function (value) {
+                    var flag = mobile.test(value) || phone.test(value);
+                    if (!flag) { 
+                        return '请输入正确座机号码或手机号';
+                    }
+                }
+            });
+            // 图片上传
+            var uploadInst = upload.render({
+                elem: '#test1',
+                url: '/sys_fkcy/images/imageUpload.action', 
+                headers: header,
+                done: function (res, index, upload) {
+                    $("#comm_img").attr("src", res.data.imgUrl);
+                    layer.msg(res.msg, {
+                        icon: 6,//成功的表情
+                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                    }, function () {
+                        //location.reload();
+                    });
+                    console.log(res);
+                },
+                error: function (res) {
+                    console.log(res);
+                }
+            });
+            layarea.render({
+                elem: '#ins_address',
+                change: function (res) {
+                    //选择结果
+                    console.log(res);
+                }
+            });
+            //文件上传
+            var uploadFile = upload.render({
+                elem: '#upfile',
+                url: '/sys_fkcy//device/importDevice.action', 
+                headers: header,
+                accept:'file',
+                done: function (res, index, upload) {
+                    console.log(res);
+                    layer.msg(res.msg, {
+                        icon: 6,//成功的表情
+                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                    }, function () {
+                        //location.reload(); 
+                    });
+                    console.log(res);
+                },
+                error: function (res) { 
+                    console.log(res);
+                }
+            });
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/device/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "dname": $("#d_name").val(), //设备名称
+                        "dmodel": $("#dmodel").val(),   //设备型号
+                        "dtype_id": dtype_id,     // 设备类型id
+                        "dtype_name": $("#dtype_name").val(),  //设备类型名称
+                        "imei": $("#d_IMEI").val(),  //设备 imei 码
+                        "supp_id": supp_id,   //供应商id
+                        "supp_name": $("#supp_name").val(),   //供应商 名称  
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    }, 
+                    success: function (data) { 
+                        if (data.state == 200) {
+                            //提交过并且成功!
+                            is_caozuo = true;
+                            
+                            layer.msg(data.msg, { 
+                                icon: 6,//成功的表情 
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒） 
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                        else {
+                            layer.msg(data.msg, {
+                                icon: 5,//失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+
+        // 选择框
+
+        // 设备类型选择
+        function open_child_chiceDeviceType() {
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '请选择设备类型',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true, 
+                    area: ['60%', '60%'],
+                    content: './chiocePopup/chiceDeviceType.html'
+                });
+
+            }) 
+        }
+        // 设备供应商选择 
+        function open_child_chiceDeviceSuppert() {
+            layui.use(['layer', 'jquery'], function () {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '请选择供应商',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['60%', '60%'],  
+                    content: './chiocePopup/chiceDeviceSuppert.html'
+                });
+
+            })
+        }
+
+        // 获取选择项目页面传来的值
+        function getDataFromSon_supp(data) { 
+            var $ = layui.$;
+            supp_id = data.id;
+            console.log(data);  
+            $("#supp_name").val(data.supp_name);
+        }
+
+        // 获取选择项目页面传来的值
+        function getDataFromSon(data) {
+            var $ = layui.$;
+            dtype_id = data.id;
+            console.log(data);
+            $("#dtype_name").val(data.dtype_name);
+        }
+    </script>
+</body>
+
+</html>

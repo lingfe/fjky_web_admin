@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>编辑企业信息</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css"media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<form class="layui-form" style="width:96%;margin:0;margin-top:50px;">
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">企业名称</label>
+					<div class="layui-input-block">
+						<input id="qiyename" type="text" lay-verify="required"
+							autocomplete="on" name="username" lay-reqtext="企业名称不能为空"
+							placeholder="请输入企业名称" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label required">企业法人</label>
+					<div class="layui-input-block">
+						<input type="text" id="qiyefaren" name="username"
+							lay-reqtext="企业法人不能为空" lay-verify="required" placeholder="请输入企业法人"
+							value="" class="layui-input">
+					</div>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">登记机关</label>
+				<div class="layui-input-block">
+					<input id="dengjichu" type="text" autocomplete="on"
+						lay-reqtext="登记机关不能为空" placeholder="请输入登记机关" lay-verify="required"
+						class="layui-input">
+				</div>
+			</div>
+
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label required">企业行业</label>
+					<div class="layui-input-block">
+						<input id="hangye" type="text" name="" lay-verify="required"
+							lay-reqtext="企业行业不能为空" placeholder="请输入企业行业" value=""
+							class="layui-input">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label required">联系电话</label>
+					<div class="layui-input-block">
+						<input id='phone' name="phone" lay-verify="tellphone"
+							lay-reqtext="联系电话不能为空" placeholder="请输入联系电话" value=""
+							class="layui-input">
+					</div>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+
+			<!-- 并列一行 start -->
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label required">企业logo</label>
+					<div class="layui-input-block">
+						<button type="button" class="layui-btn" id="logoUpload">
+							<i class="layui-icon layui-icon-upload"></i>上传logo
+						</button>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label"><img
+						style="width:auto;height:50px;" id="ent_logo" /></label>
+				</div>
+			</div>
+			<!-- 并列一行 end -->
+
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<input id="qiId" type="text" style="display: none" readonly=""
+					value=''>
+				<div class="layui-input-block">
+					<button class="layui-btn layui-btn-normal" lay-submit
+						lay-filter="saveBtn">确认保存</button>
+					<button class="layui-btn layui-btn-primary" id="close">关闭</button>
+				</div>
+			</div>
+		</form>
+		<!-- 表单 end -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js"  charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use([ 'form', 'layer', 'upload' ], function() {
+				//定义组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+					upload = layui.upload;
+		
+				//是否操作过
+				var	is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click",function(){
+					if(!is_caozuo){
+						//只是关闭
+						var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index);		//关闭窗口
+					}else{
+						//关闭并刷新父窗体
+						window.parent.location.reload();
+					} 
+					return false;
+				});
+				
+				//验证电话号码或座机号码
+				var mobile = /^1[3|4|5|7|8]\d{9}$/,
+					phone = /^0\d{2,3} ?\-?\d{7,8}$/;//杠-7~8位数座机号码
+				form.verify({
+					tellphone : function(value) {
+						var flag = mobile.test(value) || phone.test(value);
+						if (!flag) {
+							return '请输入正确座机号码或手机号';
+						}
+					}
+				});
+		
+				//logo上传
+				var uploadInst = upload.render({
+					elem : '#logoUpload',
+					url : '/sys_fkcy/images/imageUpload.action',
+					headers : header,
+					done : function(res, index, upload) {
+						if(res.state==200){
+							$("#ent_logo").attr("src", res.data.imgUrl);
+							layer.msg(res.msg, {icon : 6, time : 1000 });
+						}else{
+							layer.msg(res.msg, {icon : 5, time : 1000 });
+						}
+						console.log(res);
+					},
+					error : function(res) {
+						console.log(res);
+					}
+				});
+		
+				//监听提交
+				form.on('submit(saveBtn)', function(data) {
+					$.ajax({
+						url : localurl + '/sys_fkcy/enterprise/updateWhereId.action',
+						context : document.body, //{'Content-Type':'application/json;charset=utf8','token':Storage.get("token")}
+						headers : header,
+						type : "POST",
+						data : {
+							"id" : $("#qiId").val(),
+							"ent_name" : $("#qiyename").val(),
+							"state" : $("#qiyestate").val(),
+							"ent_logo" : $("#ent_logo").attr("src"),
+							"ent_legal_person" : $("#qiyefaren").val(),
+							"ent_registration_authority" : $("#dengjichu").val(),
+							"ent_industry" : $("#hangye").val(),
+							"ent_phone" : $("#phone").val(),
+						},
+						xhrFields : {
+							withCredentials : true
+						},
+						success : function(data) {
+							if (data.state != 200) {
+								layer.msg(data.msg, {
+									icon : 5
+								}); //失败的表情
+							} else {
+								//提交过并且成功!
+								is_caozuo=true;
+								layer.msg(data.msg, {
+									icon : 6, //成功的表情
+									time : 1000 //1秒关闭（如果不配置，默认是3秒）
+								});
+							}
+						}
+					});
+					return false;
+				});
+			});
+		
+			//父窗体调用
+			function child(data) {
+				var $ = layui.jquery;
+				$("#qiyename").val(data.ent_name);
+				$("#qiyestate").val(data.state);
+				$("#qiyefaren").val(data.ent_legal_person);
+				$("#dengjichu").val(data.ent_registration_authority);
+				$("#creator").val(data.user_name);
+				$("#hangye").val(data.ent_industry);
+				$("#phone").val(data.ent_phone);
+				$("#ent_logo").attr("src", data.ent_logo);
+				$("#qiId").val(data.id);
+			}
+		</script>
+	</body>
+</html>

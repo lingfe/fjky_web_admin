@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>修改订单</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	</head>
+
+	<body>
+		<!-- 表单 start -->
+		<form class="layui-form" style="width:96%;margin:0;margin-top:20px;">		
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">付款金额(元)</label>
+				<div class="layui-input-block">
+					<input id="total_fee" type="text" name="fee" lay-reqtext="付款金额不能为空" placeholder="请输入付款金额" value=""
+						class="layui-input">
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<label class="layui-form-label">状态</label>
+				<div class="layui-input-block" id="state">
+					<input type="radio" name="state" value="0" title="正常"  />
+					<input type="radio" name="state" value="1" title="未支付" />
+					<input type="radio" name="state" value="2" title="已取消" />
+					<input type="radio" name="state" value="3" title="退款中" />
+					<input type="radio" name="state" value="4" title="已退款" />
+					<input type="radio" name="state" value="5" title="未退款" />
+					<input type="radio" name="state" value="6" title="未评价" />
+					<input type="radio" name="state" value="7" title="已评价" />
+				</div>
+			</div>
+			
+			<!-- 单独一行 -->
+			<div class="layui-form-item">
+				<!-- 订单id -->
+				<input id="orderId" type="text" hidden="true" />
+				<div class="layui-input-block">
+					<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+					<button class="layui-btn layui-btn-primary" id="close">关闭</button>
+				</div>
+			</div>
+		</form>
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'layer'], function () {
+				//定义layui组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+				
+				//是否操作过
+				var	is_caozuo = false;
+				//关闭或刷新
+				$("#close").on("click",function(){
+					if(!is_caozuo){
+						//只是关闭
+						var index=parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+						parent.layer.close(index);		//关闭窗口
+					}else{
+						//关闭并刷新父窗体
+						window.parent.location.reload();
+					} 
+					return false;
+				});
+					
+				//监听提交
+				form.on('submit(saveBtn)', function (data) {
+					$.ajax({
+						url: '/sys_fkcy/pay/updateWhereId.action',
+						context: document.body, 
+						headers: header,
+						type: "POST",
+						data: {
+							"id": $("#orderId").val(),
+							"ent_name": $("#total_fee").val(),
+							"state": $("input[name='state']:checked").val()
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function (data) {
+							if (data.state == 200) {
+								is_caozuo=true;
+								layer.msg(data.msg, {
+									icon : 6, //成功的表情
+									time : 1000 //1秒关闭（如果不配置，默认是3秒）
+								});
+							}else{
+								layer.msg(data.msg, {
+									icon : 5
+								}); //失败的表情
+							}
+						}
+					});
+					return false;
+				});
+			});
+
+			//父窗体调用传值
+			function child(data) {
+				$ = layui.$;
+				$("#total_fee").val(data.total_fee / 100);
+				$("#orderId").val(data.id);
+			}
+		</script>
+	</body>
+</html>

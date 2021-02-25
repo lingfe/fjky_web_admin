@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>添加床位类型</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">床位类型：</label>
+            <div class="layui-input-inline from_width">
+                <input id='bt_name' name="bt_name" type="text" class="layui-input form-control" placeholder="请输入床位类型" lay-verify="required">
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">床位月价格：</label>
+            <div class="layui-input-inline">
+                <input id='bt_cost_month' name="bt_cost_month" type="text" class="layui-input form-control" placeholder="请输入床位月价格" lay-verify="required|number">
+            </div>
+            <div class="layui-form-mid layui-word-aux">元/月</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">包房月价格：</label>
+            <div class="layui-input-inline">
+                <input id='bt_cost_month_pack' name="bt_cost_month_pack" type="text" class="layui-input form-control" placeholder="请输入包房价格" lay-verify="required|number">
+            </div>
+            <div class="layui-form-mid layui-word-aux">元/月</div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">床位描述：</label>
+            <div class="layui-input-block">
+                <textarea id='bt_describe' name='bt_describe' placeholder="请输入床位描述" class="layui-textarea" style="resize: none;"></textarea>
+            </div>
+        </div>
+
+
+
+        <div class="layui-row" style="padding-top: 20px;">
+            <div class="layui-col-xs-offset6">
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn layui-btn-primary" id="close">取消</button>
+                        <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form'], function() {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                $.ajax({
+                    url: '/sys_fkcy/jggl/bed_type/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "bt_name": $("#bt_name").val(),
+                        "bt_cost_month": $("#bt_cost_month").val(),
+                        "bt_cost_month_pack": $("#bt_cost_month_pack").val(),
+                        "bt_describe": $("#bt_describe").val(),
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return;
+
+                        }
+
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>添加主菜单</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../css/public.css?date" media="all">
+		<link rel="stylesheet" href="../../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+	</head>
+	
+	<body>
+		<!-- 表单 start -->
+		<div class="layui-form layuimini-form">
+			<div class="layui-form-item">
+				<label class="layui-form-label required">菜单名称</label>
+				<div class="layui-input-block">
+					<input id="menuname" type="text" lay-verify="required" name="username" lay-reqtext="菜单名称"
+						placeholder="菜单名称" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label for="" class="layui-form-label required">菜单icon</label>
+				<div class="layui-input-block">
+					<input type="text" id="iconPicker" name="icon" lay-filter="iconPicker" lay-reqtext="菜单icn不能为空"
+						class="hide">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">菜单url</label>
+				<div class="layui-input-block">
+					<input id="menuurl" type="text" name="" placeholder="请输入菜单url" value="" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">菜单action</label>
+				<div class="layui-input-block">
+					<input type="text" id="action" lay-filter="iconPicker" placeholder="请输入菜单action" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">状态</label>
+				<div class="layui-input-block" id="state">
+					<input type="radio" title="正常" value="0"  name="state" lay-filter="iconPicker" class="layui-input">
+					<input type="radio" title="不可分配" value="1" name="state" lay-filter="iconPicker" class="layui-input" checked="checked">
+				</div>
+			</div>
+			<input id="qiId" type="text" style="display: none" readonly="" value=''>
+			<div class="layui-form-item">
+				<div class="layui-input-block">
+					<button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认添加</button>
+				</div>
+			</div>
+		</div>
+		<!-- 表单 end -->
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['iconPickerFa', 'form'], function () {
+				//定义组件变量
+				var form = layui.form,
+					layer = layui.layer,
+					$ = layui.$;
+				var iconPickerFa = layui.iconPickerFa;
+
+				//加载图标
+				iconPickerFa.render({
+					// 选择器，推荐使用input
+					elem: '#iconPicker',
+					// fa 图标接口
+					url: "../../../lib/font-awesome-4.7.0/less/variables.less",
+					// 是否开启搜索：true/false，默认true
+					search: true,
+					// 是否开启分页：true/false，默认true
+					page: true,
+					// 每页显示数量，默认12
+					limit: 12,
+					// 点击回调
+					click: function (data) {
+						console.log(data);
+					},
+					// 渲染成功后的回调
+					success: function (d) {
+						console.log(d);
+					}
+				});
+
+				//监听提交
+				form.on('submit(saveBtn)', function (data) {
+					$.ajax({
+						url: '/sys_fkcy/main_menu/save.action'
+						,
+						headers: header,
+						context: document.body,
+						type: "POST",
+						data: {
+							"title": $("#menuname").val(),
+							"icon": "fa " + $("#iconPicker").val(),
+							"href": $("#menuurl").val(),
+							"action": $("#action").val(),
+							"superior_id": $("#qiId").val(),
+							"state": $("#state input:checked").val()
+						},
+						xhrFields: {
+							withCredentials: true
+						},
+						success: function (data) {
+							if (data.state == 200) {
+
+								layer.msg(data.msg, {
+									icon: 6,//成功的表情
+									time: 1000 //1秒关闭（如果不配置，默认是3秒）
+								}, function () {
+									//window.parent.location.reload();
+								});
+							}
+							else {
+								layer.msg(data.msg, {
+									icon: 5,//失败的表情
+									time: 1000
+								});
+								return;
+							}
+
+						}
+					});
+					return false;
+				});
+
+			});
+
+			//父窗体调用传值
+			function child(data) {
+				var $=layui.$;
+				$('#qiId').val(data.id)
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>主菜单管理</title>
+	<!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+	<link rel="stylesheet" href="../../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+	<link rel="stylesheet" href="../../../css/public.css" media="all">
+</head>
+
+<body>
+	<!-- 内容 start -->
+	<div class="layuimini-container">
+		<div class="layuimini-main">
+			<!-- table树头部全局功能  -->
+			<div class="layui-btn-group">
+				<button class="layui-btn" id="btn-expand">全部展开</button>
+				<button class="layui-btn layui-btn-normal" id="btn-fold">全部折叠</button>
+			</div>
+			<!-- 数据列表 -->
+			<table id="munu-table" class="layui-table" lay-filter="munu-table"></table>
+		</div>
+	</div>
+	<!-- 内容 end -->
+
+	<!-- 操作列 -->
+	<script type="text/html" id="auth-state">
+		<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+		<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="add"><i class="layui-icon layui-icon"></i>添加</a>
+	</script>
+	
+	<!-- 排序列 -->
+	<script id='sortTemp' type='text/html'>
+		{{# if(d){  }}
+		<i class="layui-icon layui-icon-return" style='color:green;display: inline-block;transform: rotate(90deg);' data-id='{{d.id}}' onclick='upSort()'></i>
+		&nbsp;
+		<i class="layui-icon layui-icon-return" style='color: red;display: inline-block;transform: rotate(-90deg);' data-id='{{d.id}}' onclick='downSort()'></i>
+		{{# }else }}
+	</script>
+	
+	<!-- 验证状态 -->
+	<script type="text/html" id="id_state">
+		{{#if (d.state == 0) { }}
+			<input type="checkbox" id="{{d.id}}" value="0" name="state,{{d.id}}"  lay-skin="switch" lay-text="正常|不可分配" lay-filter="saveBtn" checked />
+		{{# }else if(d.state == 1){ }}
+			<input type="checkbox"  id="{{d.id}}" value="1" name="state,{{d.id}}"  lay-skin="switch" lay-text="正常|不可分配" lay-filter="saveBtn"/>
+		{{# } }}
+	</script>
+	
+	<!-- 图标 -->
+	<script type="text/html" id="iconPicker">
+		{{# if (d.icon == 'fa ') { }}
+			<span>--</span>
+		{{# }else { }}
+			<i class="{{d.icon}}"></i>
+		{{# } }}
+	</script>
+	
+	<!-- 引入js资源 -->
+	<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+	<script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+	<script src="../../bcxt/login/login.js"></script>
+	<script>
+		//菜单向上排序
+		function upSort() {
+			var $ = layui.jquery;
+			var id = $(event.target).data('id');
+			//添加一个数据请求的loading的功能
+ 			$.ajax({
+				url: '/sys_fkcy/main_menu/sortUp',
+				type: 'post',
+				contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+				async: false,
+				headers: header,
+				data: {
+					id: id,
+				},
+				success: function (ret) {
+					layer.msg(ret.msg, function () {
+						// window.location.reload(); 
+						reloadTable();
+					});
+				},
+				error: function (xhr, textstatus, thrown) {
+					layer.msg(ret.msg);
+				}
+			});
+		}
+		//菜单向下排序
+		function downSort(d) {
+			var $ = layui.jquery;
+			var id = $(event.target).data('id');
+			$.ajax({
+				url: '/sys_fkcy/main_menu/sortDown',
+				type: 'post',
+				contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+				async: false,
+				headers: header,
+				data: {
+					id: id,
+				},
+				success: function (ret) {
+					layer.msg(ret.msg, function () {
+						// window.location.reload();
+						reloadTable();
+
+					});
+				},
+				error: function (xhr, textstatus, thrown) {
+					layer.msg(ret.msg);
+				}
+			});
+		}
+		//加载layui指定组件
+		layui.use(['table', 'form', 'treetable', 'iconPickerFa'], function () {
+			//定义layui组件变量
+			var iconPickerFa = layui.iconPickerFa;
+			var $ = layui.jquery;
+			var form = layui.form;
+			var table = layui.table;
+			var treetable = layui.treetable;
+			//请求通行证
+			var token = Storage.get("token");
+			
+			// 监听状态操作
+			form.on('switch(saveBtn)', function (obj) {
+				var da = treetable.data;
+				// 通过截取name获取id
+				var name = obj.elem.name;
+				var resu = name.split(","); //字符分割
+				var id = resu[1];
+				//修改当前父节点状态
+				var chck = $("#" + id + "").prop('checked');
+				//调用修改状态
+				getstate(chck ? 0 : 1, id);
+				//执行递归得到子节点
+				fun(id, chck ? 0 : 1, chck);
+				function fun(id, state, chck) {
+					for (var i = 0; i < da.length; i++) {
+						if (da[i].superior_id == id) {
+							//修改属性,指定表单属性重载
+							$("#" + da[i].id + "").prop('checked', chck);
+							form.render('checkbox');
+							//调用修改状态
+							getstate(state, id);
+							//同时改变上级状态，递归2
+							fun2(da[i], state, chck);
+							function fun2(data, state, chck) {
+								for (var j = 0; j < da.length; j++) {
+									if (data.superior_id == da[j].id) {
+
+										//修改属性,指定表单属性重载
+										$("#" + da[j].id + "").prop('checked', chck);
+										form.render('checkbox');
+
+										//调用修改状态
+										getstate(state, da[j].id);
+
+										//递归2
+										fun2(da[j], state, chck);
+									} else {
+										continue;
+									}
+								}
+							}
+
+							//递归
+							fun(da[i].id, state, chck);
+						} else {
+							continue;
+						}
+					}
+				}
+			});
+
+			// 状态开关请求
+			function getstate(state, id) {
+				$.ajax({
+					url: '/sys_fkcy/main_menu/updateWhereId.action',
+					context: document.body,
+					headers: { //通过 request 头传递
+						token: token
+					},
+					type: "POST",
+					data: {
+						"id": id,
+						"state": state,
+					}, xhrFields: {
+						withCredentials: true
+					},
+					success: function (data) {
+						if (data.state == 200) {
+							layer.msg(data.msg, {
+								icon: 6,//成功的表情
+								time: 1000, //1秒关闭（如果不配置，默认是3秒）
+							});
+						}
+					}
+				});
+			}
+
+			// 渲染表格
+			treetable.render({
+				treeColIndex: 1,
+				treeSpid: "admin",
+				treeIdName: 'id',
+				treePidName: 'superior_id',
+				elem: '#munu-table',
+				cellMinWidth: 180,
+				url: '/sys_fkcy/main_menu/getAll?token=' + token,
+				page: false,
+				cols: [[
+					{ type: 'numbers', title: '序号' },
+					{ field: 'title', title: '菜单名称', align: 'center' },
+					{ templet: '#sortTemp', title: '排序', align: 'center', },
+					{
+						field: 'state', width: 70, align: 'center', templet: function (d) {
+							if (d.action != 'undefined' && d.action != "" && d.action != null) {
+								return '<span class="layui-badge layui-bg-green">权限</span>';
+							}
+							if (d.superior_id == 'admin') {
+								return '<span class="layui-badge layui-bg-blue">目录</span>';
+							} else {
+								return '<span class="layui-badge-rim">菜单</span>';
+							}
+						}, title: '类型'
+					},
+					{ field: 'icon', title: '菜单图标', align: 'center' },
+					{ field: 'icon', width: 60, title: 'icon', toolbar: '#iconPicker', align: 'center' },
+					{ field: 'action', title: '权限标识', align: 'center' },
+					{ field: 'href', title: '菜单url', align: 'center' },
+					{ field: 'state', width: 120, title: '状态', toolbar: '#id_state', align: "center" },
+					{ templet: '#auth-state', minWidth: 220, align: 'center', title: '操作', fixed: "right" },
+
+				]],
+				parseData: function (res) {
+					$("#iconPicker").val(data.icon);
+				},
+				done: function () {
+					layer.closeAll('loading');
+				}
+			});
+
+			//全部展开
+			$('#btn-expand').click(function () {
+				treetable.expandAll('#munu-table');
+			});
+
+			//全部折叠
+			$('#btn-fold').click(function () {
+				treetable.foldAll('#munu-table');
+			});
+
+			//监听工具条
+			table.on('tool(munu-table)', function (obj) {
+				var data = obj.data;
+				var layEvent = obj.event;
+				//监听删除操作
+				if (layEvent === 'del') {
+					layer.confirm('确认删除吗？', { title: "删除提示", icon: 3 }, function (index) {
+						$.ajax({
+							url: '/sys_fkcy/main_menu/deleteWhereId.action?id=' + data.id,
+							type: 'post',
+							headers: header,
+							success: function (data) {
+								if (data.state == 401) {
+									window.location.href = '../../login/login.html'
+								} else if (data.state != 200) {
+									layer.msg(data.msg, { icon: 5 });//失败的表情
+									return;
+								} else {
+									layer.msg(data.msg, {
+										icon: 6,//成功的表情
+										time: 1000 //1秒关闭（如果不配置，默认是3秒）
+									}, function () {
+										obj.del();
+									});
+								}
+							},
+							complete: function () {
+								layer.close(this.layerIndex);
+							},
+						});
+						layer.close(index);
+					});
+					//监听修改操作
+				} else if (layEvent === 'edit') {
+					var index = layer.open({
+						title: '编辑菜单',
+						type: 2,
+						shade: 0.2,
+						maxmin: true,
+						shadeClose: true,
+						area: ['40%', '400px'],
+						content: './edit.html',
+						success: function (layero, index) {//弹出层打开后的回调函数
+							result = JSON.stringify(data);
+							result = $.parseJSON(result);
+							var iframe = window['layui-layer-iframe' + index];
+							var body = layer.getChildFrame("body", index);
+							if (result.state == 0) {
+								body.find("input[name=state][value=0]").attr("checked", true);
+							} else {
+								body.find("input[name=state][value=1]").attr("checked", true);
+							}
+							// 向子页面的全局函数child传参
+							iframe.child(result);
+							iframe.layui.form.render(); //更新全部 
+						}
+					});
+					$(window).on("resize", function () {
+						layer.full(index);
+					});
+					return false;
+					//监听添加操作
+				} else if (layEvent == 'add') {
+					var index = layer.open({
+						title: '添加菜单',
+						type: 2,
+						shade: 0.2,
+						maxmin: true,
+						shadeClose: true,
+						area: ['40%', '400px'],
+						content: './add.html',
+						success: function (layero, index) {//弹出层打开后的回调函数
+							result = JSON.stringify(data);
+							result = $.parseJSON(result);
+							var iframe = window['layui-layer-iframe' + index];
+							// 向子页面的全局函数child传参
+							iframe.child(result);
+						}
+					});
+					$(window).on("resize", function () {
+						layer.full(index);
+					});
+					return false;
+				}
+			});
+		});
+
+		//封装表格渲染的函数
+		function reloadTable() {
+			var treetable = layui.treetable;
+			var token = Storage.get("token");
+			// 渲染表格
+			treetable.render({
+				treeColIndex: 1,
+				treeSpid: "admin",
+				treeIdName: 'id',
+				treePidName: 'superior_id',
+				elem: '#munu-table',
+				cellMinWidth: 180,
+				url: '/sys_fkcy/main_menu/getAll?token=' + token,
+				page: false,
+				cols: [[
+					{ type: 'numbers', title: '序号' },
+					{ field: 'title', title: '菜单名称', align: 'center' },
+					{ templet: '#sortTemp', title: '排序', align: 'center', },
+					{
+						field: 'state', width: 70, align: 'center', templet: function (d) {
+							if (d.action != 'undefined' && d.action != "" && d.action != null) {
+								return '<span class="layui-badge layui-bg-green">权限</span>';
+							}
+							if (d.superior_id == 'admin') {
+								return '<span class="layui-badge layui-bg-blue">目录</span>';
+							} else {
+								return '<span class="layui-badge-rim">菜单</span>';
+							}
+						}, title: '类型'
+					},
+					{ field: 'icon', title: '菜单图标', align: 'center' },
+					{ field: 'icon', width: 60, title: 'icon', toolbar: '#iconPicker', align: 'center' },
+					{ field: 'action', title: '权限标识', align: 'center' },
+					{ field: 'href', title: '菜单url', align: 'center' },
+					{ field: 'state', width: 120, title: '状态', toolbar: '#id_state', align: "center" },
+					{ templet: '#auth-state', minWidth: 220, align: 'center', title: '操作', fixed: "right" },
+
+				]],
+				parseData: function (res) {
+					$("#iconPicker").val(data.icon);
+				},
+				done: function () {
+					layer.closeAll('loading');
+				}
+			});
+		}
+	</script>
+</body>
+
+</html>

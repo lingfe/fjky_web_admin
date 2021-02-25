@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑主页</title>
+	<!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+
+<body>
+	<!-- 表单 start -->
+    <div class="layui-form" style="width:96%;margin:0;margin-top:15px;">
+		<!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">页面名称</label>
+            <div class="layui-input-block">
+                <input id="home_title" type="text" lay-verify="required" name="logo_title" lay-reqtext="logo名称不能为空"
+                    placeholder="请输入logo名称" value="" class="layui-input">
+
+            </div>
+        </div>
+		
+		<!-- 单独一行 -->
+		<div class="layui-form-item">
+			<label class="layui-form-label required">页面描述</label>
+			<div class="layui-input-block">
+				<input id="describe_info" type="text"  name="describe_info" 
+					placeholder="请输入描述信息"  class="layui-input">
+			</div>
+		</div>
+		
+		<!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label required">跳转地址</label>
+            <div class="layui-input-block">
+                <input id="home_href" type="text" lay-verify="required" name="href" lay-reqtext="跳转地址不能为空"
+                    placeholder="请输入跳转地址" value="" class="layui-input">
+
+            </div>
+        </div>
+		
+		<!-- 单独一行 -->
+        <div class="layui-form-item">
+            <label for="" class="layui-form-label required">页面图标</label>
+            <div class="layui-input-block">
+                <input type="text" id="iconPicker" name="icon" lay-verify="required" lay-reqtext="页面图标不能为空" lay-filter="iconPicker" class="hide">
+            </div>
+        </div>
+		
+		<!-- 单独一行 -->
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+				<input id="id" hidden='true' />
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+    <!-- 表单 end -->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../bcxt/login/login.js"></script>
+    <script charset="utf-8">
+		//加载layui指定组件
+        layui.use(['form','upload','iconPickerFa'], function () {
+			//定义组件变量
+            var form = layui.form,
+                layer = layui.layer,
+                upload = layui.upload,
+                $ = layui.$;
+                var iconPickerFa = layui.iconPickerFa;
+			
+			//加载图标
+            iconPickerFa.render({
+                // 选择器，推荐使用input
+                elem: '#iconPicker',
+                // fa 图标接口
+                url: "../../../lib/font-awesome-4.7.0/less/variables.less",
+                // 是否开启搜索：true/false，默认true
+                search: true,
+                // 是否开启分页：true/false，默认true
+                page: true,
+                // 每页显示数量，默认12
+                limit: 12,
+                // 点击回调
+                click: function (data) {
+                    console.log(data);
+                },
+                // 渲染成功后的回调
+                success: function (d) {
+                    console.log(d);
+                }
+            });
+			
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/home/updateWhereId.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "id":$("#id").val(),
+                        "title": $("#home_title").val(),                        
+                        "href": $("#home_href").val(),
+                        "icon": "fa " + $("#iconPicker").val()  
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+        });
+        
+		//父窗体调用传值
+        function child(data) {
+            var $ = layui.$;
+            $("#home_title").val(data.title);
+            $("#icon").val(data.icon);
+            $("#home_href").val(data.href);
+            $("#id").val(data.id);
+			$("#describe_info").val(data.describe_info);
+        }
+    </script>
+</body>
+
+</html>

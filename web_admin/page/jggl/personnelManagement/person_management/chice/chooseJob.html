@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>部门管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 start -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table id="munu-table" class="layui-table" lay-filter="munu-table"></table>
+        </div>
+    </div>
+    <!-- 内容 end	-->
+
+    <!-- 默认logo标记 -->
+    <script type="text/html" id="id_department_name">
+        {{#if (d.yw_id.indexOf(d.id)!=-1 ) { }}
+        <div class='layui-btn layui-btn-xs layui-btn-danger'>默认</div>
+        <div class='layui-btn layui-btn-xs'>{{d.department_name}}</div>
+        {{# }else { }} {{ d.department_name }} {{# } }}
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js" charset="utf-8"></script> 
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['table'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery;
+            var table = layui.table;
+            // 渲染表格table
+            table.render({
+                elem: '#munu-table',
+                url: '/sys_fkcy/job/getPage.action', // 数据接口
+                toolbar: '#toolbarDemo', // 渲染对象
+                cellMinWidth: 100,
+                headers: header,
+                title:'test',
+                text: {
+                    none: '无数据' //数据为空时的提示文本
+                },
+                defaultToolbar: [''],
+                cols: [
+                    [{
+                        field: 'id',
+                        title: 'id',
+                        hide: 'true'
+                    }, {
+                        field: 'job_title',
+                        title: '职位名称',
+                        align: "center",
+                    }, {
+                        field: 'job_describe',
+                        title: '职位描述',
+                        align: "center",
+                    }] 
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.numCount,
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+
+            // 定义向父级页面传值函数
+            function sendToParent(data) {
+                parent.getDataFromSon(data);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+            }
+            //rowDouble双击事件(父页面传值)（单击事件为：row）
+            table.on('row(munu-table)', function (obj) {
+                console.log(obj.data);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index); //关闭当前页
+                var parent$ = window.parent.layui.jquery;
+                parent$('#job_title').val(obj.data.job_title);
+            });
+        });
+    </script>
+</body>
+
+</html>

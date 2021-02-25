@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>添加仓库</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+<body>
+	
+	<!--表单 start-->
+	<form class="layui-form" action="">
+
+			<div class="layui-form-item"  style="padding-top: 10px;">
+				<label class="layui-form-label">仓库名称<span style="color: red;">*</span></label> 
+		      	<div class="layui-input-block">
+		      		<input type="text" id="war_name" lay-verify="required" placeholder="请输入仓库名称" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+
+			<div class="layui-form-item">
+				<label class="layui-form-label">仓库管理者<span style="color: red;">*</span></label>
+			    <div class="layui-input-block">
+			    	<!--员工id-->
+		      		<input type="hidden" id="war_staff_id" lay-verify="required">
+		      		<input type="text" id="war_staff_name" readonly="readonly" lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+
+	  	<div class="layui-row"  style="padding-top: 120px;">
+        	<div class="layui-col-xs-offset4">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate;
+				table = layui.table;
+
+
+		//监听提交 搜索功能实现
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/warehouse/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	            	//供应商名称，供应商性质，负责人， 联系电话， 供应状态， 供应商联系地址
+	                "war_name": $("#war_name").val(),	// id
+	                "war_staff_id": $("#war_staff_id").val(),
+	                "war_staff_name": $("#war_staff_name").val(),
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	                }
+	            }
+	        });
+	        return false;
+	    });
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+        
+       
+	});
+   
+   	   	// 调用员工选框
+   	function open_child(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+			var index = layer.open({
+            	title: '请选择仓库管理者',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['400px', '400px'],
+                content: './person_click.html'
+           });
+			layer.full(index);
+   		})
+   	}
+   	
+    </script>
+</body>
+
+</html>

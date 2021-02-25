@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>家庭信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- tab数据列表 -->
+            <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+        </div>
+    </div>
+
+    <!-- 头部 start -->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="del">
+					<i class="layui-icon layui-icon-delete"></i>多项删除 
+				</button>
+        </div>
+    </script>
+    <!-- 头部 end -->
+
+    <!-- 列表操作 -->
+    <script type="text/html" id="currentTableBar">
+        <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    </script>
+
+    <!-- 监护人处理 -->
+    <script type="text/html" id="switchTpl">
+        {{# if (d.is_guardian == '是' && d.id != '') { }}
+        <input type="checkbox" name="is_guardian,{{d.id}}" lay-skin="switch" lay-text="是|否" lay-filter="saveBtn" checked> {{# }else { }}
+        <input type="checkbox" name="is_guardian,{{d.id}}" lay-skin="switch" lay-text="是|否" lay-filter="saveBtn"> {{# } }}
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        // 加载组件
+        layui.use(['form', 'table', 'jquery'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var token = Storage.get("token");
+
+            // 性别开关请求
+            function getgender(is_guardian) {
+                $.ajax({
+                    url: '/sys_fkcy/family_information/updateWhereId.action',
+                    context: document.body,
+                    headers: { //通过 request 头传递
+                        token: token
+                    },
+                    type: "POST",
+                    // dataType: "data",
+                    data: {
+                        "id": $.basId,
+                        "is_guardian": is_guardian,
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+                            });
+                        }
+                    }
+                });
+            }
+
+            //数据列表
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/family_information/getPage.action', //数据接口
+                toolbar: '#toolbarDemo',
+                cellMinWidth: 100, //全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+                headers: header,
+                defaultToolbar: ['filter', 'exports', 'print', {
+                    title: '提示',
+                    layEvent: 'LAYTABLE_TIPS',
+                    icon: 'layui-icon-tips'
+                }],
+                cols: [
+                    [{
+                            type: "checkbox",
+                            width: 30
+                        }, {
+                            field: 'yw_id',
+                            width: 80,
+                            title: '业务id',
+                            align: "center",
+                            hide: "true"
+                        }, {
+                            field: 'full_name',
+                            width: 150,
+                            title: '姓名',
+                            align: "center"
+                        }, {
+                            field: 'phone',
+                            width: 150,
+                            title: '联系电话',
+                            align: "center"
+                        }, {
+                            field: 'id_card',
+                            width: 200,
+                            title: '身份证号',
+                            align: "center"
+                        }, {
+                            field: 'contact_address',
+                            minWidth: 200,
+                            title: '联系地址',
+                            align: "center"
+                        }, {
+                            field: 'and_relation',
+                            width: 100,
+                            title: '关系',
+                            align: "center"
+                        }, {
+                            field: 'is_guardian',
+                            width: 100,
+                            title: '是否监护人',
+                            toolbar: '#switchTpl',
+                            align: "center"
+                        }, {
+                            title: '操作',
+                            minWidth: 150,
+                            toolbar: '#currentTableBar',
+                            align: "center",
+                            fixed: "right"
+                        }
+
+                    ]
+                ],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function(res) {
+                    return {
+                        "count": res.count + 1,
+                        "code": res.state, //解析接口状态
+                        "msg": res.data.msg, //解析提示文本
+                        "data": res.data.data //解析数据列表
+                    }
+                },
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: true,
+                skin: 'line'
+            });
+
+            // 监听性别操作
+            form.on('switch(saveBtn)', function(obj) {
+                // console.log(obj.elem.checked); //开关是否开启，true或者false
+                // console.log(obj.value); //开关value值，也可以通过data.elem.value得到
+                var name = obj.elem.name;
+                var resu = name.split(","); //字符分割
+                $.basId = resu[1];
+                if (obj.elem.checked == true) {
+                    var is_guardian = '是';
+                    getgender(is_guardian);
+                } else {
+                    var is_guardian = "否";
+                    getgender(is_guardian);
+                }
+            });
+
+            //toolbar监听事件
+            table.on('toolbar(currentTableFilter)', function(obj) {
+                if (obj.event === 'del') { // 监听删除操作
+                    var checkStatus = table.checkStatus('currentTableId'),
+                        data = checkStatus.data;
+                    if (data.length > 0) {
+                        layer.confirm('确认删除吗？该操作不可恢复!', {
+                            title: "批量删除提示",
+                            icon: 3
+                        }, function(index) {
+                            for (var i = 0; i < data.length; i++) {
+                                $.ajax({
+                                    url: '/sys_fkcy/family_information/deleteWhereId.action?id=' + data[i].id,
+                                    type: 'post',
+                                    headers: header,
+                                    success: function(data) {
+                                        if (data.state != 200) {
+                                            layer.msg(data.msg, {
+                                                icon: 5
+                                            }); //失败的表情
+                                            return;
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 6, //成功的表情
+                                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                            }, function() {
+                                                location.reload();
+                                            });
+                                        }
+                                    },
+                                    complete: function() {
+                                        layer.close(this.layerIndex);
+                                    },
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg('请先选择您要删除的数据！', {
+                            icon: 5
+                        }); //失败的表情
+                        return;
+                    }
+                }
+            });
+
+            //监听表格复选框选择
+            table.on('checkbox(currentTableFilter)', function(obj) {
+                console.log(obj)
+            });
+
+            //监听操作事件
+            table.on('tool(currentTableFilter)', function(obj) {
+                var data = obj.data;
+                if (obj.event === 'edit') {
+                    var index = layer.open({
+                        title: '编辑家属信息',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['760px', '400px'],
+                        content: './family_edit.html',
+                        success: function(layero, index) { //弹出层打开后的回调函数
+                            result = JSON.stringify(data);
+                            result = $.parseJSON(result);
+                            var iframe = window['layui-layer-iframe' + index];
+                            var body = layer.getChildFrame("body", index);
+                            if (result.is_guardian == '是') {
+                                body.find("input[name=is_guardian][value='是']").attr("checked", true);
+                            } else {
+                                body.find("input[name=is_guardian][value='否']").attr("checked", true);
+                            }
+                            // 更新表单
+                            iframe.layui.form.render();
+                            // 向子页面的全局函数child传参
+                            iframe.child(result);
+                            //自适应高度
+                            layer.iframeAuto(index);
+                            layer.style(index, {
+                                // 重新居中的样式
+                                top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                            })
+                        }
+                    });
+                    $(window).on("resize", function() {
+                        layer.full(index);
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+                    layer.confirm('确认删除吗？', {
+                        title: "提示",
+                        icon: 3
+                    }, function(index) {
+                        $.ajax({
+                            url: '/sys_fkcy/family_information/deleteWhereId.action?id=' + data.id,
+                            type: 'post',
+                            headers: header,
+                            success: function(data) {
+                                if (data.state == 401) {
+                                    window.location.href = "../login/login.html";
+                                } else if (data.state == 200) {
+                                    layer.msg(data.msg, {
+                                        icon: 6, //成功的表情
+                                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                    }, function() {
+                                        obj.del();
+                                        location.reload();
+                                    });
+                                } else {
+                                    layer.msg(data.msg, {
+                                        icon: 5
+                                    }); //失败的表情
+                                    return;
+                                }
+                            },
+                            complete: function() {
+                                layer.close(this.layerIndex);
+                            },
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

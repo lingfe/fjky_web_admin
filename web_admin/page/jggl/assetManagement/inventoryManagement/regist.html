@@ -1,0 +1,122 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>上传文件</title>
+      <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" />
+    </head>
+    <body>
+
+	<form class="layui-form" action="">
+    <div class="layui-container">  
+	  <div class="layui-row" style="padding-top: 35px;">
+	    <div class="layui-col-xs4 layui-col-xs-offset4" style="cursor: pointer;">
+			<img src="../../../../images/上传.png"/ alt="上传" align="center" id="files" style="padding-left: 18px;">
+			<span id="file_name"></span>
+	   </div>
+	  </div>
+	  <div class="layui-row">
+	    <div class="layui-col-xs5 layui-col-xs-offset4" style="padding-left: 2px;">
+	    	<input type="hidden" id='file_id' />
+	    	<p style="font-size: 16px;color: #1594FF;">上传盘点清单表格</p>
+	   </div>
+	  </div>
+	  
+	  <div class="layui-row"  style="padding-top: 50px;">
+
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" id="upload" lay-submit lay-filter="saveBtn">上传</button>
+		            </div>
+
+        </div>
+        </div>
+	 </form>
+  
+    <script src="../../../../lib/layui-v2.5.5/layui.js"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+    layui.use(['upload', 'form'], function(){
+      var upload = layui.upload;
+      var $ = layui.jquery,
+      	form = layui.form,
+      	layer = layui.layer;
+       
+      //盘点清单上传
+		var uploadInst = upload.render({
+			elem: '#files',
+	    	url: '/sys_fkcy/files/upload.action', //上传接口  
+	    	accept: 'file',
+			headers:header,
+			done: function(res, index, upload){
+				
+				if(res.state==200){
+					$("#file_id").val(res.data.id);
+					$('#file_name').text(res.data.file_old_name);
+					layer.msg(res.msg, {icon : 6, time : 1000 });
+				}else{
+					layer.msg(res.msg, {icon : 5, time : 1000 });
+				}                 
+			},
+			error:function(res){
+				console.log(res);
+			}
+		});
+
+				
+      
+      //监听提交
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/register_inventory/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	                "file_id": $('#file_id').val(),
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg('请先上传文件再提交', {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+      
+      
+      // 关闭窗口
+      var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+      
+    });
+    </script>
+    </body>
+    </html>

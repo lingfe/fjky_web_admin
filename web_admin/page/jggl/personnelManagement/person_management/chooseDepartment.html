@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>部门管理</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <!-- 内容 start -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <!-- 数据列表 -->
+            <table id="munu-table" class="layui-table" lay-filter="munu-table"></table>
+        </div>
+    </div>
+    <!-- 内容 end	-->
+
+    <!-- 默认logo标记 -->
+    <script type="text/html" id="id_department_name">
+        {{#if (d.yw_id.indexOf(d.id)!=-1 ) { }}
+        <div class='layui-btn layui-btn-xs layui-btn-danger'>默认</div>
+        <div class='layui-btn layui-btn-xs'>{{d.department_name}}</div>
+        {{# }else { }} {{ d.department_name }} {{# } }}
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['table', 'treetable'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery;
+            var table = layui.table;
+            var treetable = layui.treetable;
+
+            // 渲染表格tree
+            treetable.render({
+                treeColIndex: 1,
+                treeSpid: "admin",
+                treeIdName: 'id',
+                treePidName: 'superior_id',
+                type: 'POST',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                elem: '#munu-table',
+                url: '/sys_fkcy/department/getAll.action',
+                page: false,
+                cols: [
+                    [{
+                        type: 'numbers'
+                    }, {
+                        field: 'id',
+                        Width: 100,
+                        title: '部门ID',
+                        hide: true
+                    }, {
+                        field: 'department_name',
+                        title: '部门名称',
+                        align: 'center'
+                    }, {
+                        field: 'superior_id',
+                        title: '上级id',
+                        width: 150,
+                        hide: true
+                    }]
+                ],
+                done: function() {
+                    layer.closeAll('loading');
+                },
+                page: true,
+                skin: 'line'
+            });
+
+            // 定义向父级页面传值函数
+            function sendToParent(data) {
+                parent.getDataFromSon(data);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index);
+            }
+            //rowDouble双击事件(父页面传值)（单击事件为：row）
+            table.on('row(munu-table)', function(obj) {
+                console.log(obj);
+                var index = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(index); //关闭当前页
+                var parent$ = window.parent.layui.jquery;
+                parent$('#department_id').val(obj.data.department_name);
+                parent$('#department_name').val(obj.data.department_name);
+            });
+        });
+    </script>
+</body>
+
+</html>

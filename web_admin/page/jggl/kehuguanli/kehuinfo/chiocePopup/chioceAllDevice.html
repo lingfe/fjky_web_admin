@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>所有设备</title>
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css">
+    <link rel="stylesheet" href="../../../uncheckin/uncheckin.css" media="all">
+    <style>
+        .box-t {
+            border: 1px solid #d3d3d3;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box-t img,
+        .box-t h3,
+        .box-t div {
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-weight: bolder;
+            padding-bottom: 25px;
+        }
+
+        .tab_number {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+        .tab_number h4 {
+            font-weight: bolder;
+            text-align: center;
+        }
+
+        .box-t img {
+            width: 50px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 内容 start  -->
+    <div class="layuimini-container" style='padding:30px;'>
+        <div class="layuimini-main">
+            <div id='showItemView'></div>
+        </div>
+    </div>
+    <!-- 内容 end -->
+    <!-- table头部操作 start(搜索框，添加登记)-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <div class="layui-inline">
+            </div>
+            <form class="layui-form layui-form-pane" style="float:left">
+                <div class="layui-inline">
+                    <div class="layui-inline">
+                        <div class="layui-input-inline">
+                            <input type="text" name="searchKey" placeholder="请输入设备名称或设备ID" lay-search="" class="inputTest" maxlength="18">
+                            <!-- style="width:180px;height: 30px;line-height: 20px;padding: 0 10px;font-size: 12px;margin-bottom: 10px;display: inline-block;" -->
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="submit" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+            <!-- <div class="layui-inline">
+                <button type="submit" style="width:150px ;margin-left:50px " class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="data-search-btn" lay-event="add"><i class="layui-icon layui-icon-add-1" ></i>新增</button>
+            </div> -->
+        </div>
+    </script>
+
+    <!-- 模板引擎渲染 -->
+    <script id='showItemData' type="text/html">
+        <div class="layui-row layui-col-space30">
+        {{#  layui.each(d, function(index, item){ }}
+                <div class="layui-col-xs3 layui-col-sm3 layui-col-md3">
+                    <div class='box-t' value ='{{item.dtype_name}}'>
+                        <img src="{{item.dtype_icon}}" alt="">
+                        <h3>{{item.dtype_name}}</h3>
+                        <div class='tab_number'>  
+                            <h4>总数量：{{item.dNum}}</h4>
+                            <h4>已售：0 </h4> 
+                        </div>
+                    </div>  
+                </div>
+        {{#  }); }}
+    </div>
+    </script>
+    <!-- table头部操作 end-->
+
+    <!-- 列表操作 start(编辑， 删除) -->
+    <script type="text/html" id="currentTableBar">
+        <a class="dengjiTest" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>调整</a>
+        <a class="delTest" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+    </script>
+    <!-- 列表操作 end -->
+
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../../js/lay-config.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+        let user_id = '';
+        // 加载组件
+        layui.use(['layer', 'laytpl'], function () {
+            //定义layui模块变量
+            var $ = layui.jquery;
+            var layer = layui.layer;
+            var table = layui.table;
+            var form = layui.form;
+            var laytpl = layui.laytpl;
+            var token = Storage.get("token");
+            user_id = RequestParameter()['id'];
+            console.log(user_id);
+            function RequestParameter() {
+                var url = window.location.search; //获取url中"?"符后的字串
+                var theRequest = new Object();
+                if (url.indexOf("?") != -1) {
+                    var str = url.substr(1);
+                    var strs = str.split("&");
+                    for (var i = 0; i < strs.length; i++) {
+                        theRequest[strs[i].split("=")[0]] = (strs[i].split("=")[1]);
+                    }
+                }
+                return theRequest;
+            }
+            //发送异步，把数据交给php 
+            $.ajax({
+                type: 'post',
+                url: '/sys_fkcy/device_types/getDtypeDNum.action',
+                dataType: 'json',
+                headers: {
+                    "token": token,
+                },
+                success: function (data) {
+                    //弹层提示添加成功，并且刷新父页面 
+                    if (data.code == 0) {
+                        // layer.msg(data.msg, { icon: 6 }, function () {
+                        // parent.location.reload(true);
+                        //渲染设备类型
+                        var test = $('#showItemData').html();
+                        laytpl(test).render(data.data, function (html) {
+                            $('#showItemView').html(html);
+                        });
+                        //点击转详情页面
+                        $('.box-t').click(function () {
+                            var dtype_name = $(this).attr('value');
+                            layui.use(['layer', 'jquery'], function () {
+                                var layer = layui.layer;
+                                var index = layer.open({
+                                    title: dtype_name,
+                                    type: 2,
+                                    shade: 0.2,
+                                    maxmin: true,
+                                    shadeClose: true,
+                                    area: ['90%', '90%'],
+                                    content: './chioceAllDeviceList.html?id='+user_id,
+                                    success: function (layero, index) {
+                                        // 获取子页面的iframe
+                                        var iframe = window['layui-layer-iframe' + index];
+                                        // 向子页面的全局函数child传参
+                                        iframe.child(dtype_name);
+                                    }
+                                });
+                            })
+                        }) 
+                        // });
+                    } else {
+                        layer.msg(data.msg, { icon: 5 });
+                    }
+                },
+                error: function () {
+                    //错误信息
+                }
+            })
+
+        });
+
+        function getDataFromSon_supp(data) {
+            // var $ = layui.$;
+            // supp_id = data.id;
+            // console.log(data);  
+            // $("#supp_name").val(data.supp_name);
+            parent.reloadP(data);
+            var index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index); //关闭当前弹框
+            // console.log(data);
+        }
+
+    </script>
+</body>
+
+</html>

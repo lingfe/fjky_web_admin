@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑供应商</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+
+<body>
+	
+    <form class="layui-form" action="">
+	  	<div class="layui-form-item">
+	  		<input type="hidden" id="id"/>
+		    <label class="layui-form-label" class="layui-table-cell">供应商名称<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="supp_name" required  lay-verify="required" placeholder="请输入供应商名称" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">供应商性质<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      	<select id="supp_nature" required lay-verify="">
+			  <option value="代理性">代理性</option>
+			  <option value="批发性 ">批发性</option>
+			</select>
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">负责人<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="supp_person_in_charge" required  lay-verify="required" placeholder="请输入负责人" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">联系电话<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      	<input type="text" id="supp_phone" required  lay-verify="required|phone" maxlength="11" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label">供应状态<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      	<select id="supply_status" lay-verify="">
+			  <option value="">选择状态</option>
+			  <option value="正常供应">正常供应</option>
+			  <option value="暂停供应">暂停供应</option>
+			  <option value="停止供应">停止供应</option>
+			</select>     
+			</div>
+		</div>
+		
+		<div class="layui-form-item">
+		    <label class="layui-form-label" class="layui-table-cell1">供应商联系地址<span style="color:red">*</span></label>
+		    <div class="layui-input-block">
+	      		<textarea id="supp_address" class="layui-textarea" style="resize:none;" placeholder="供应商联系地址"></textarea>
+			</div>
+		</div>
+		
+	  	
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset4">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+    
+    
+    
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script>
+        // 加载组件
+        layui.use(['form', 'layer'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+            
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+
+                $.ajax({
+                    url: '/sys_fkcy/jggl/supplier/updateWhereId.action',
+                    context: document.body,
+                    headers: header,
+                    type: "POST",
+                    data: {
+                        "id": $("#id").val(),	// id
+		                "supp_name": $("#supp_name").val(),
+		                "supp_nature": $("#supp_nature").val(),
+		                "supp_person_in_charge": $("#supp_person_in_charge").val(),
+		                "supp_phone": $("#supp_phone").val(),
+		                "supply_status": $("#supply_status").val(),
+		                "supp_address": $("#supp_address").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state != 200) {
+                            layer.msg(data.msg, { icon: 5 });//失败的表情
+
+                            return;
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000, //1秒关闭（如果不配置，默认是3秒）
+
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+
+                    }
+                });
+                return false;
+            });
+   
+        });
+        
+        // 获取父级数据
+        function child(data) {
+        	layui.use(['form', 'jquery'], function(){
+        		var $ = layui.$,
+        			form = layui.form;
+				$('#id').val(data.id);
+				$('#supp_name').val(data.supp_name);
+	            $('#supp_nature').val(data.supp_nature);
+	            $('#supp_address').val(data.supp_address);
+	            $('#supp_person_in_charge').val(data.supp_person_in_charge);
+	            $('#supp_phone').val(data.supp_phone);
+	            $('#supply_status').val(data.supply_status);    
+	            form.render();
+	            
+        	})
+        }
+        //供应商名称,供应商性质,负责人,联系电话,供应状态,供应商联系地址
+    </script>
+</body>
+
+</html>

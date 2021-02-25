@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑床位信息</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+
+<body>
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">类&#12288;&#12288;型</label>
+            <div class="layui-input-block">
+                <input type="radio" name="bed_type" lay-verify="required" lay-reqtext="请选择床位类型" value="高级" title="高级"
+                    checked="">
+                <input type="radio" name="bed_type" lay-verify="required" lay-reqtext="请选择床位类型" value="中级" title="中级">
+                <input type="radio" name="bed_type" lay-verify="required" lay-reqtext="请选择床位类型" value="一般" title="一般">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">是否包房</label>
+            <div class="layui-input-block">
+                <input type="radio" name="bed_is_baofang" lay-verify="required" lay-reqtext="请选择是否包房" value="是"
+                    title="是" checked="">
+                <input type="radio" name="bed_is_baofang" lay-verify="required" lay-reqtext="请选择是否包房" value="否"
+                    title="否">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label required">费&#12288;&#12288;用</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" id="bed_cost" lay-verify="required" lay-reqtext="请输入费用"
+                        oninput="value=value.replace(/[^\d]/g,'')" placeholder="请输入费用" value="">
+                </div>
+                <div class="layui-form-mid layui-word-aux">元</div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">床&#12288;&#12288;位</label>
+            <div class="layui-input-block">
+                <input type="text" id="bed" lay-submit lay-filter="formStep" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">床位描述</label>
+            <div class="layui-input-block">
+                <textarea id="bed_describe" placeholder="请输入床位描述" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">备&#12288;&#12288;注</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="layui-textarea" id="bed_remark" placeholder="请输入备注" value=""></textarea>
+            </div>
+        </div>
+    </div>
+    <!-- 原始id -->
+    <input id="bed_id" type="text" style="display: none" readonly="" value=''>
+    <!-- 床位id -->
+    <input id="id" type="text" style="display: none" readonly="" value=''>
+    <input id="yw_id" type="text" style="display: none" readonly="" value=''>
+    <div class="layui-form-item" style="float: right;">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+            <button class="layui-btn layui-btn-primary" id="close">取消</button>
+        </div>
+    </div>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form', "tree", 'treetable', 'layer', 'laydate'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                laydate = layui.laydate;
+            $ = layui.$;
+            var tree = layui.tree;
+            var treetable = layui.treetable;
+            var token = Storage.get("token");
+
+            //是否操作过
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function () {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index);		//关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+
+            /* 监听基本信息*/
+            form.on('submit(formStep)', function (data) {
+                var index = layer.open({
+                    title: '床位信息',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['400px', '350px'],
+                    content: './bedInfo.html',
+                    success: function (layero, index) {//弹出层打开后的回调函数
+                        // layer.full(index);
+                        var iframe = window['layui-layer-iframe' + index];
+
+                    }
+                });
+
+            });
+
+
+            //日期
+            laydate.render({
+                elem: '#birthday'
+            });
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                //获取checkbox[name='hea_zhuyao_disease]的值
+                var arr = new Array();
+                $("input:checkbox[name='hea_zhuyao_disease']:checked").each(function (i) {
+                    arr[i] = $(this).val();
+                });
+                var hea_zhuyao_disease = arr.join(",");//将数组合并成字符串
+
+                // 校验两次密码是否一致
+                checkpassword();
+                function checkpassword() {
+                    $.ajax({
+                        url: '/sys_fkcy/bed_selection/updateWhereId.action',
+                        context: document.body,
+                        headers: header,
+                        type: "POST",
+                        data: {
+                            "bed_id": $("#bed_id").val(),
+                            "id": $("#id").val(),
+                            "yw_id": $("#yw_id").val(),
+                            "bed_type": $("input[name='bed_type']:checked").val(),
+                            "bed_is_baofang": $("input[name='bed_is_baofang']:checked").val(),
+                            "bed_cost": $("#bed_cost").val(),
+                            "bed_remark": $("#bed_remark").val(),
+                            "bed": $("#bed").val(),
+                            "bed_describe": $("#bed_describe").val()
+                        },
+                        xhrFields: {
+                            withCredentials: true
+                        },
+                        success: function (data) {
+                            if (data.state == 200) {
+                                layer.msg(data.msg, {
+                                    icon: 6,//成功的表情
+                                    time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                                }, function () {
+                                    window.parent.location.reload();
+                                });
+                            }
+                            else {
+                                layer.msg(data.msg, {
+                                    icon: 5,//失败的表情
+                                    time: 4000
+                                });
+                                return false;
+                            }
+                        }
+                    });
+                    return false;
+                }
+            });
+        });
+
+        // 获取父级数据
+        function child(data) {
+            $("#bed_cost").val(data.bed_cost);
+            $("#bed").val(data.bed);
+            $("#bed_describe").val(data.bed_describe);
+            $("#bed_remark").val(data.bed_remark);
+            $("#id").val(data.id);
+            $("#yw_id").val(data.yw_id);
+        }
+        // 获取第二个子页面传来的值并修改
+        function getDataFromSon(data) {
+            $("#bed").val(data.floor_tung_name + '-' + data.floor_layer + '-' + data.room_number + '-' + data.bed_number);
+            $("#bed_id").val(data.id);
+        }
+    </script>
+</body>
+
+</html>

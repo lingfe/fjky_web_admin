@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>血压</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../../css/public.css" media="all">
+</head>
+<style>
+    .title_fenxi {
+        color: #FFFFFF;
+        font-size: 30px;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    p {
+        color: #FFFFFF;
+    }
+</style>
+
+<body>
+    <div style="padding: 0px; background-color: #F2F2F2;">
+        <!-- 搜索栏--start -->
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <!-- 并列一行--start-->
+                    <div class="layui-inline">
+                        <button type="button" id="week" name="week" lay-submit lay-filter="data-search-week"
+                            class="layui-btn layui-btn-primary">近一周</button>
+                        <button type="button" id="month" name="month" lay-submit lay-filter="data-search-month"
+                            class="layui-btn layui-btn-primary">近一月</button>
+                        <button type="button" id="month_3" name="month_3" lay-submit lay-filter="data-search-month_3"
+                            class="layui-btn layui-btn-primary">近三月</button>
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" id="start_date" name="start_date" lay-verify="date" placeholder="yyyy-MM-dd"
+                            autocomplete="off" class="layui-input" style="width:240px;float: left;">
+                        <input type="text" style="border:0px;float: left;margin: 10px; width: 20px;" value="至">
+                        <input type="text" id="end_date" name="end_date" lay-verify="date" placeholder="yyyy-MM-dd"
+                            autocomplete="off" class="layui-input" style="width:240px;float: left;">
+                        <button type="submit" class="layui-btn layui-btn-normal data-add-btn" lay-submit
+                            lay-filter="data-search-btn" style="margin-left: 10px;float: left;"><i
+                                class="layui-icon layui-icon-search"></i>搜索</button>
+                        <button class="layui-btn layui-btn-normal data-add-btn" lay-event="add" id="add_blood_pressure"
+                            style="float:right"> <i class="layui-icon layui-icon"></i>添加</button>
+                    </div>
+                    <!-- 并列一行--end -->
+                </div>
+            </div>
+        </div>
+        <!-- 搜索栏--end -->
+
+        <div class="layui-row layui-col-space15">
+            <!-- 分析栏--start -->
+            <div class="layui-col-md6">
+                <div class="layui-card" style="min-height: 220px;background-color: #5D9CEC;">
+                    <div class="layui-card-body">
+                        <div style="min-height: 100px;">
+                            <p class="title_fenxi">血压监测分析</p>
+                        </div>
+                        <div class="layui-row" style="text-align: center;">
+                            <div class="layui-col-sm3">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>低压（<span id="xy_di" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="xy_di_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                            <div class="layui-col-sm3">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>正常（<span id="xy_zc" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="xy_zc_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                            <div class="layui-col-sm2">
+                                <div class="grid-demo grid-demo-bg1" style="width: 130px;">
+                                    <p>临界高压（<span id="xy_jjg" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="xy_jjg_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                            <div class="layui-col-sm3">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>高压（<span id="xy_gao" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="xy_gao_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card" style="min-height: 220px;background-color: #37BC9C;">
+                    <div class="layui-card-body">
+                        <div style="min-height: 100px;">
+                            <p class="title_fenxi">脉压差分析</p>
+                        </div>
+                        <div class="layui-row" style="text-align: center;">
+                            <div class="layui-col-sm4">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>脉压差小（<span id="myc_xiao" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="myc_xiao_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                            <div class="layui-col-sm4">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>脉压差正常（<span id="myc_zc" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="myc_zc_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                            <div class="layui-col-sm4">
+                                <div class="grid-demo grid-demo-bg1">
+                                    <p>脉压差大（<span id="myc_da" style="color: #FFFFFF;"></span>）</p>
+                                    <span id="myc_da_bfb" style="display: inline;color: #FFFFFF;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 分析栏--end -->
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header" style="font-size: 18px;">历史数据</div>
+                    <div class="layui-card-body">
+                        <!-- 历史数据列表 -->
+                        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+                    </div>
+                </div>
+            </div>
+            <!--存储id-->
+            <input type="hidden" id="ess_id" />
+        </div>
+    </div>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui指定组件
+        layui.use(['form', 'table', 'jquery', 'laydate'], function () {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+            var laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#start_date'
+                , trigger: 'click'
+            });
+
+            laydate.render({
+                elem: '#end_date'
+                , trigger: 'click'
+            });
+
+            // 取父级id
+            var $ess_id = $("#ess_id", parent.document).val();
+            $('#ess_id').val($ess_id);
+
+
+            //加载数据到table
+            table.render({
+                elem: '#currentTableId',
+                url: '/sys_fkcy/jggl/monitoring/bp/getPage.action',
+                cellMinWidth: 100, //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                headers: header,
+                where: {
+                    ess_id: $ess_id
+                },
+                cols: [[
+                    { field: 'measuring_time', width: 200, title: '测量时间', align: "center" },
+                    { field: 'systolic_pressure', title: '收缩压（高压）', align: "center" },
+                    { field: 'diastolic_pressure', title: '舒张压（低压）', align: "center" },
+                    { field: 'pingjun_value', title: '血压平均值', align: "center" },
+                    { field: 'heart_rate', title: '心率', align: "center" },
+                    { field: 'systolic_pressure_yz', title: '血压诊断', align: "center" },
+                    { field: 'xueyafenxi', title: '血压分析', align: "center" }
+                ]],
+                response: {
+                    statusName: 'code', //规定返回的状态码字段为code
+                    statusCode: 200 //规定成功的状态码味200
+                },
+                request: {
+                    pageName: 'pageIndex', //当前页，默认page，
+                    limitName: 'pageNum', //页容量，默认limit
+                },
+                parseData: function (res) {
+                    if (res.data.data.data.length > 0) {
+                        // 血压低
+                        document.getElementById("xy_di").innerText = res.data.xy_di + "次";
+                        document.getElementById("xy_di_bfb").innerText = res.data.xy_di_bfb;
+                        // 血压正常
+                        document.getElementById("xy_zc").innerText = res.data.xy_zc + "次";
+                        document.getElementById("xy_zc_bfb").innerText = res.data.xy_zc_bfb;
+                        // 血压中度
+                        document.getElementById("xy_jjg").innerText = res.data.xy_jjg + "次";
+                        document.getElementById("xy_jjg_bfb").innerText = res.data.xy_jjg_bfb;
+                        // 偏高
+                        document.getElementById("xy_gao").innerText = res.data.xy_gao + "次";
+                        document.getElementById("xy_gao_bfb").innerText = res.data.xy_gao_bfb;
+                        // 脉压低
+                        document.getElementById("myc_xiao").innerText = res.data.myc_xiao + "次";
+                        document.getElementById("myc_xiao_bfb").innerText = res.data.myc_xiao_bfb;
+                        // 脉压正常
+                        document.getElementById("myc_zc").innerText = res.data.myc_zc + "次";
+                        document.getElementById("myc_zc_bfb").innerText = res.data.myc_zc_bfb;
+                        // 脉压偏高
+                        document.getElementById("myc_da").innerText = res.data.myc_da + "次";
+                        document.getElementById("myc_da_bfb").innerText = res.data.myc_da_bfb;
+                    }
+                    else {
+                        // 血压低
+                        $("#xy_di").html("0次");
+                        $("#xy_di_bfb").html("--%");
+                        // document.getElementById("xy_di").innerText = "0次";
+                        // document.getElementById("xy_di_bfb").innerText = '--%';
+                        // 血压正常
+                        document.getElementById("xy_zc").innerText = "0次";
+                        document.getElementById("xy_zc_bfb").innerText = '--%';
+                        // 血压中度
+                        document.getElementById("xy_jjg").innerText = "0次";
+                        document.getElementById("xy_jjg_bfb").innerText = '--%';
+                        // 偏高
+                        document.getElementById("xy_gao").innerText = "0次";
+                        document.getElementById("xy_gao_bfb").innerText = '--%';
+                        // 脉压低
+                        document.getElementById("myc_xiao").innerText = "0次";
+                        document.getElementById("myc_xiao_bfb").innerText = '--%';
+                        // 脉压正常
+                        document.getElementById("myc_zc").innerText = "0次";
+                        document.getElementById("myc_zc_bfb").innerText = '--%';
+                        // 脉压偏高
+                        document.getElementById("myc_da").innerText = "0次";
+                        document.getElementById("myc_da_bfb").innerText = '--%';
+                    }
+
+                    return {
+                        "code": res.state, //解析接口状态
+                        "msg": res.msg, //解析提示文本
+                        "count": res.data.data.numCount,
+                        "data": res.data.data.data //解析数据列表
+                    }
+                },
+                limits: [5, 10, 15, 20, 25, 50, 100],
+                limit: 10,
+                page: true,
+                skin: 'line',
+            });
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = data.field;
+                var start_date = $("#start_date").val();
+                var end_date = $("#end_date").val();
+                if (!start_date) {
+                    layer.msg("请选择起始时间", {
+                        icon: 5, //失败的表情
+                        time: 1000
+                    });
+                    return;
+                } else if (!end_date) {
+                    layer.msg("请选择截至时间", {
+                        icon: 5, //失败的表情
+                        time: 1000
+                    });
+                    return;
+                } else {
+                    //执行搜索重载,时间段搜索
+                    table.reload('currentTableId', {
+                        where: {
+                            searchKey: 'time_slot'
+                            , start_date: start_date
+                            , end_date: end_date
+                        }
+                        , page: {
+                            curr: 1 //默认第一页
+                        }
+                    });
+                    return false;
+                }
+            });
+            // 近一周
+            form.on('submit(data-search-week)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近一周搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'week'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+            // 近一月
+            form.on('submit(data-search-month)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近一月搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'month'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+            // 近三月
+            form.on('submit(data-search-month_3)', function (data) {
+                var result = data.field;
+                //执行搜索重载,近三月搜索
+                table.reload('currentTableId', {
+                    where: {
+                        searchKey: 'month_3'
+                    }
+                    , page: {
+                        curr: 1 //默认第一页
+                    }
+                });
+                return false;
+            });
+
+            // 监听添加事件
+            $("#add_blood_pressure").click(function () {
+                var index = layer.open({
+                    title: '记录血压',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['560px', '500px'],
+                    content: './add_pressure.html',
+                    success: function (layero, index) {//弹出层打开后的回调函数
+                        layer.iframeAuto(index);
+                        layer.style(index, {
+                            // 重新居中的样式
+                            top: (layui.$(window).height() - layui.$(layero).height()) / 2
+                        })
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+
+</html>

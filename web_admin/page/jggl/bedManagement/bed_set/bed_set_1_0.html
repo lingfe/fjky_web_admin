@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>床位设置</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+</head>
+<style>
+    img {
+        display: inline-block;
+    }
+    
+    .check {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .check_btn {
+        width: 90px;
+        height: 25px;
+        border-radius: 3px;
+        color: #1594FF;
+        border-color: #1594FF!important;
+        line-height: 25px;
+    }
+    
+    .check_info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+    
+    .check_info div {
+        height: 31.5px;
+        font-size: 12px;
+    }
+</style>
+
+<body>
+    <!-- 内容 start -->
+    <div class="layuimini-container" style="border:none;">
+        <div class="layuimini-main">
+            <!-- 楼栋信息 -->
+            <div class="layui-tab layui-tab-card layui-col-md12" id="bed_div"></div>
+        </div>
+    </div>
+    <!-- 内容 end -->
+
+    <!-- 遍历床位 -->
+    <script id="bed_data" type="text/html">
+        <!-- 楼栋选项卡 end -->
+        <ul class="layui-tab-title">
+            {{# layui.each(d.bed_list, function(index, item){ }}
+            <li lay-id="{{item.id}}" class="{{ index == 0?'layui-this':''}}">{{item.floor_tung_name}}</li>
+            {{# }); }}
+        </ul>
+        <!-- 楼栋选项卡 end -->
+
+        <!-- 楼栋内容 start -->
+        <div class="layui-tab-content" style="height: 100px;">
+            {{# layui.each(d.bed_list, function(index, item){ }}
+            <!-- 楼栋内容元素 start -->
+            <div class="layui-tab-item {{ index == 0?'layui-show':''}}">
+                <!-- 层 start -->
+                <div class="layui-tab" lay-filter="demo2">
+                    <!-- 层选项卡 start -->
+                    <ul class="layui-tab-title">
+                        {{# layui.each(item.cheng_list, function(index, item2){ }}
+                        <li lay-id="{{item2.cheng}}" class="{{ index == 0?'layui-this':''}}">{{item2.floor_layer}}</li>
+                        {{# }); }}
+                    </ul>
+                    <!-- 层选项卡 end -->
+
+                    <!-- 层内容 start -->
+                    <div class="layui-tab-content" style="padding-bottom:30px;">
+                        {{# layui.each(item.cheng_list, function(index, item2){ }}
+                        <!-- 层内容元素 start -->
+                        <div class="layui-tab-item {{ index == 0?'layui-show':''}}">
+                            {{# layui.each(item2.jian_list, function(index, item3){ }}
+                            <!-- 间 start -->
+                            <div class="layui-col-sm12">
+                                <!-- 间内容 start -->
+                                <fieldset class="layui-elem-field" style="padding:20px;">
+                                    <legend>{{item3.room_number}}</legend>
+                                    <!-- 间内容元素块 start -->
+                                    <div class="layui-fluid">
+                                        <!-- 床位号 start -->
+                                        <div class="layui-row layui-col-space10">
+                                            {{# layui.each(item3.cwh_list, function(index, item4){ }}
+                                            <!-- 床位号内容 start -->
+                                            <div class="layui-col-sm2">
+                                                <!-- 床位号内容元素 start -->
+                                                <fieldset class="layui-elem-field" style="padding:20px;">
+                                                    <legend>{{item4.bed_number}}</legend>
+                                                    {{# if(item4.ess_info !=null && item4.ess_info !=undefined){ }}
+                                                    <!-- 块(已入住) start -->
+                                                    <div class="layui-col-md12 layui-col-space10">
+                                                        {{# if(item4.ess_info.img !=null && item4.ess_info.img !=undefined){ }}
+                                                        <img class="layui-col-md6" height="90px" src="{{ item4.ess_info.img }}" /> {{# }else{ }}
+                                                        <img class="layui-col-md6" height="90px" src="https://gd-filems.dancf.com/mps/mcm79j/mcm79j/90991b20-d295-4edf-9c7d-112dc727e1fa.png" /> {{# } }}
+                                                        <div class="layui-col-md6 layui-row check_info">
+                                                            <div class="layui-col-md12">{{item4.ess_info.full_name}}</div>
+                                                            <div class="layui-col-md12">{{item4.ess_info.age}}</div>
+                                                            <div class="layui-col-md12">{{item4.ess_info.phone}}</div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- 块(已入住) end -->
+                                                    {{# }else{ }}
+                                                    <!-- 块 start -->
+                                                    <div class="layui-col-md12 layui-col-space10 check">
+                                                        <!-- 头像 -->
+                                                        <img class="layui-col-md7" height="70px" src="https://gd-filems.dancf.com/mps/mcm79j/mcm79j/90991b20-d295-4edf-9c7d-112dc727e1fa.png">
+                                                        <!-- 操作 start -->
+                                                        <div class="layui-col-md8" style="text-align:center">
+                                                            <div class="layui-inline">
+                                                                <a href="javascript:;" class="layui-btn layui-btn-primary check_btn" onclick="open_child()">入住登记</a>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 操作 end -->
+                                                    </div>
+                                                    <!-- 块 end -->
+                                                    {{# } }}
+                                                </fieldset>
+                                                <!-- 床位号内容元素 end -->
+                                            </div>
+                                            <!-- 床位号内容 end -->
+                                            {{# }); }}
+                                        </div>
+                                        <!-- 床位号 end -->
+                                    </div>
+                                    <!-- 间内容元素块 end -->
+                                </fieldset>
+                                <!-- 间内容 end -->
+                            </div>
+                            <!-- 间 end -->
+                            {{# }); }}
+                        </div>
+                        <!-- 层内容元素 end -->
+                        {{# }); }}
+                    </div>
+                    <!-- 层内容 end -->
+                </div>
+                <!-- 层 end -->
+            </div>
+            <!-- 楼栋内容元素 end -->
+            {{# }); }}
+        </div>
+        <!-- 楼栋内容 end -->
+    </script>
+
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js" charset="utf-8"></script>
+    <script charset="utf-8">
+        //加载layui组件
+        layui.use(['element', 'laytpl'], function() {
+            var $ = layui.jquery;
+            var element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+            var laytpl = layui.laytpl;
+
+            //得到床位信息
+            getdata();
+
+            function getdata() {
+                $.ajax({
+                    url: '/sys_fkcy/bed_info/getAllBedSet.action',
+                    headers: header,
+                    type: 'post',
+                    dataType: 'json',
+                    success: function(res) {
+                        //得到数据
+                        var data = res.data;
+                        var bed_data = $("#bed_data").html();
+                        //设置到模板
+                        laytpl(bed_data).render(data, function(html) {
+                            $('#bed_div').html(html);
+                        });
+                    }
+                });
+            }
+
+            //触发事件
+            var active = {
+                tabChange: function() {
+                    //切换到指定Tab项
+                    element.tabChange('demo', '22'); //切换到：用户管理
+                }
+            }
+
+            $('#demo').on('click', function() {
+                var othis = $(this),
+                    type = othis.data('type');
+                active[type] ? active[type].call(this, othis) : '';
+            });
+
+        });
+        // 打开入住登记（弹窗）
+        function open_child() {
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '入住登记',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: '../../checkin/checking.html'
+                });
+
+            })
+        }
+    </script>
+</body>
+
+</html>

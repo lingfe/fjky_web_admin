@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>新增排班</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+<style>
+    .check_m,
+    .check_n,
+    .check_e {
+        text-align: center;
+        width: 80px;
+        color: #333333;
+        height: 35px;
+        line-height: 35px;
+        background-color: #fff;
+        padding: 0px;
+        border: 0px;
+        margin-right: 78px;
+    } 
+    
+    .current {
+        color: #fff;
+        background-color: #1E9FFF;
+    }
+</style>
+
+<body>
+    <div class="layui-form layuimini-form">
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">方案名称：</label>
+                <div class="layui-input-inline">
+                    <input type="tel" id="ss_scenario_name" lay-verify="required" name="ss_scenario_name" placeholder="请输入方案名称" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">设置人员：</label>
+                <div class="layui-input-inline">
+                    <input id="ename" type="text" lay-verify="required" name="ename" onclick="open_child()" placeholder="请选择人员" value="" class="layui-input"></div>
+            </div>
+        </div>
+
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">排班周期：</label>
+                <div class="layui-input-inline">
+                    <select id="ss_cycle" name="ss_cycle" class="select_wd120">
+                        <option value="全部">全部</option>
+                        <option value="月">月</option>
+                        <option value="周">周</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">班次名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="ss_shift_setting" lay-verify="required" name="ss_shift_setting" value="早班" autocomplete="off" class="layui-input ss_shift">
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-item">
+            <div class="layui-form-inline">
+                <label class="layui-form-label">班次参考：</label>
+                <div class="layui-input-block" id="ss_shift_setting">
+                    <button class="check_m current">早班</button>
+                    <button class="check_n">晚班</button>
+                    <button class="check_e">夜班</button>
+                </div>
+            </div>
+        </div>
+        <!-- 并列一行 -->
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间：</label>
+                <div class="layui-input-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="ss_start_time" lay-verify="required" placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束时间：</label>
+                <div class="layui-input-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="ss_stop_time" lay-verify="required" placeholder="yyyy-MM-dd HH:mm">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 单独一行 -->
+        <div class="layui-form-inline">
+            <label class="layui-form-label">排班说明:</label>
+            <div class="layui-input-block">
+                <textarea id="ss_explain" style="width: 87%;" name="ss_explain" placeholder="请输入排班说明" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <!-- 隐藏参数 -->
+        <input id="staff_id" type="text" style="display: none" readonly="" value=''>
+        <!-- 操作行 -->
+        <div class="layui-form-item" style="float:right;margin-top: 10px;">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">添加</button>
+                <button class="layui-btn layui-btn-primary" id="close">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 引入js资源 -->
+    <script src="../../../../lib/jquery-3.4.1/jquery-3.4.1.min.js" charset="utf-8"></script>
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <script>
+        //加载layui指定组件
+
+        layui.use(['form', 'table', 'jquery', 'laydate'], function() {
+            //定义layui组件变量
+            var $ = layui.jquery,
+                form = layui.form,
+                laydate = layui.laydate;
+            table = layui.table;
+
+            //日期时间范围选择
+            laydate.render({
+                elem: '#ss_start_time',
+                type: 'datetime',
+                trigger: 'click',
+                min: minDate(),
+                format: "yyyy-MM-dd HH:mm",
+            });
+            //日期时间范围选择
+            laydate.render({
+                elem: '#ss_stop_time',
+                type: 'datetime',
+                trigger: 'click',
+                btns: ['clear', 'confirm'],
+                format: "yyyy-MM-dd HH:mm",
+                min: minDate(),
+                done: function(value, date) {
+                    var startDate = new Date($('#ss_start_time').val()).getTime();
+                    var endTime = new Date(value).getTime();
+                    if (endTime <= startDate) {
+                        layer.msg('结束时间须大于开始时间!', {
+                            icon: 5, //失败的表情 
+                            time: 2000
+                        });
+                    }
+                }
+            });
+            // 设置最小可选的日期
+            function minDate() {
+                var now = new Date();
+                return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+            }
+            //监听提交
+            form.on('submit(saveBtn)', function(data) {
+                // 得到时间
+                var startDate = new Date($('#ss_start_time').val()).getTime();
+                var endTime = new Date($('#ss_stop_time').val()).getTime();
+                // 得到相隔时间
+                var nTime = endTime - startDate;
+                var day = Math.floor(nTime / 86400000);
+                if ($("#ss_cycle").val() == "周") {
+                    if (day < 7 || day > 31) {
+                        layer.msg('排班周期未与起止时间对应!', {
+                            icon: 5, //失败的表情
+                            time: 2000
+                        });
+                        return;
+                    }
+                };
+                if ($("#ss_cycle").val() == "月") {
+                    if (day < 30) {
+                        layer.msg('排班周期未与起止时间对应!', {
+                            icon: 5, //失败的表情
+                            time: 2000
+                        });
+                        return;
+                    }
+                };
+                // 判断开始、结束时间合法性
+                if (endTime <= startDate) {
+                    layer.msg('结束时间须大于开始时间!', {
+                        icon: 5, //失败的表情
+                        time: 2000
+                    });
+                    return;
+                };
+
+                $.ajax({
+                    url: '/sys_fkcy/jggl/setting_schedule/save.action',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "staff_name": $("#ename").val(), // 人员名字
+                        "staff_id": $("#staff_id").val(), // 人员id
+                        "ss_scenario_name": $("#ss_scenario_name").val(), // 排班方案名称
+                        "ss_cycle": $("#ss_cycle").val(), // 排班周期
+                        "ss_explain": $("#ss_explain").val(), // 排班说明
+                        "ss_shift_setting": $("#ss_shift_setting").val(), // 排班班次
+                        "ss_start_time": $("#ss_start_time").val(), // 排班开始时间
+                        "ss_stop_time": $("#ss_stop_time").val() // 排班结束时间
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6, //成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function() {
+                                window.parent.location.reload();
+                            });
+                        } else {
+                            layer.msg(data.msg, {
+                                icon: 5, //失败的表情
+                                time: 1000
+                            });
+                            return false;
+                        }
+                    }
+                });
+                return false;
+            })
+            var is_caozuo = false;
+            //关闭或刷新
+            $("#close").on("click", function() {
+                if (!is_caozuo) {
+                    //只是关闭
+                    var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                    parent.layer.close(index); //关闭窗口
+                } else {
+                    //关闭并刷新
+                    window.parent.location.reload();
+                }
+                return false;
+            });
+        });
+        // 获取选择项目页面传来的值
+        function getDataFromSon(data) {
+            var $ = layui.$;
+            $("#staff_id").val(data.id);
+            $("#ename").val(data.ename);
+        }
+        // 人员选择框
+        function open_child() {
+            layui.use(['layer', 'jquery'], function() {
+                var layer = layui.layer;
+
+                var index = layer.open({
+                    title: '请选择人员',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['90%', '90%'],
+                    content: './choosePerson.html'
+                });
+
+            })
+        }
+        // 班次名称
+        $(".check_m").click(function() {
+            $('.ss_shift').val('早班');
+            $(this).addClass('current').siblings().removeClass('current')
+        });
+        $(".check_n").click(function() {
+            $('.ss_shift').val('晚班');
+            $(this).addClass('current').siblings().removeClass('current')
+
+        });
+        $(".check_e").click(function() {
+            $('.ss_shift').val('夜班');
+            $(this).addClass('current').siblings().removeClass('current')
+        })
+    </script>
+</body>
+
+</html>

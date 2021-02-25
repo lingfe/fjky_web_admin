@@ -1,0 +1,171 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>设置我的资料</title>
+    <!-- 引入css资源 -->
+    <link rel="stylesheet" href="../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+
+</head>
+
+<body layadmin-themealias="default">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">设置我的资料</div>
+                    <div class="layui-card-body" pad15="">
+                        <div class="layui-form" lay-filter="">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">部门id</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="department_id" name="department_id" value="" readonly=""
+                                        class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">不可修改</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">角色id</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="role_id" name="role_id" value="" readonly=""
+                                        class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">不可修改</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">真实姓名</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="admin_cname" name="admin_cname" value="" readonly=""
+                                        class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">不可修改</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">英文名</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="admin_ename" name="admin_ename" value=""
+                                        lay-verify="admin_ename" autocomplete="off" placeholder="请输入英文名"
+                                        class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">登录名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="login_name" name="login_name" value=""
+                                        lay-verify="login_name" autocomplete="off" placeholder="请输入登录名称"
+                                        class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">联系电话</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" id="admin_phone" name="admin_phone" value="" lay-verify="tellphone"
+                                        autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div id="id" style="display: none;"></div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit="" lay-filter="saveBtn">确认修改</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入js资源 -->
+    <script src="../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+    <script src="bcxt/login/login.js"></script>
+    <script>
+        // 加载组件
+        layui.use(['form'], function () {
+            var form = layui.form,
+                layer = layui.layer,
+                $ = layui.$;
+            var token = Storage.get("token");
+
+            var mobile = /^1[3|4|5|7|8]\d{9}$/, phone = /^0\d{2,3}-?\d{7,8}$/;//指定座机和手机号码格式
+            form.verify({
+                tellphone: function (value) {
+                    var flag = mobile.test(value) || phone.test(value);
+                    if (!flag) {
+                        return '请输入正确座机号码或手机号';
+                    }
+                }
+            });
+
+            // 获取管理员
+            getAdmin();
+            function getAdmin() {
+
+                $.ajax({
+                    url: '/sys_fkcy/admin/getWhereId?id=' + token,
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        $("#id").val(data.data.id);
+                        $("#department_id").val(data.data.department_id);
+                        $("#role_id").val(data.data.role_id);
+                        $("#admin_cname").val(data.data.admin_cname);
+                        $("#admin_ename").val(data.data.admin_ename);
+                        $("#login_name").val(data.data.login_name);
+                        $("#admin_phone").val(data.data.admin_phone);
+                    }
+                });
+
+            }
+
+            //监听提交
+            form.on('submit(saveBtn)', function (data) {
+                $.ajax({
+                    url: '/sys_fkcy/admin/getWhereId',
+                    headers: header,
+                    context: document.body,
+                    type: "POST",
+                    data: {
+                        "id": $("#qiId").val(),
+                        "role_id": $("#role_id").val(),
+                        "admin_cname": $("#admin_cname").val(),
+                        "admin_ename": $("#admin_ename").val(),
+                        "login_name": $("#login_name").val(),
+                        "admin_phone": $("#admin_phone").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.state == 200) {
+                            layer.msg(data.msg, {
+                                icon: 6,//成功的表情
+                                time: 1000 //1秒关闭（如果不配置，默认是3秒）
+                            }, function () {
+                                window.parent.location.reload();
+                            });
+                        }
+                        else {
+                            layer.msg(data.msg, {
+                                icon: 5,//失败的表情
+                                time: 1000
+                            });
+                            return;
+                        }
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

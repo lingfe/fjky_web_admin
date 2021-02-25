@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>资产入库登记</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+    <link rel="stylesheet" href="../../uncheckin/uncheckin.css"/ media="all">
+</head>
+<body>
+	
+
+
+	<!--表单 start-->
+	<form class="layui-form" action="">
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产名称<span style="color:red">*</span></label>
+                <div class="layui-input-inline">
+                    <input type="text"  id="ass_name" class="layui-input" placeholder="请输入资产名称" lay-verify="required" autocomplete="off">
+                </div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产类型<span style="color:red">*</span></label>
+                <div class="layui-input-inline">
+                    <input type="text"  id="ass_type" class="layui-input" placeholder="请输入资产类型" lay-verify="required" autocomplete="off">
+                </div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">型号<span style="color:red">*</span></label>
+                <div class="layui-input-inline">
+                    <input type="text"  id="ass_specifications" class="layui-input" placeholder="请输入型号" lay-verify="required" autocomplete="off">
+
+                </div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产编号<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_number" lay-verify="required" placeholder="请输入资产编号" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">数量<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      	<input type="text" id="ass_num" lay-verify="required|number" placeholder="请输入数量" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">使用人<span style="color:red">*</span></label>
+                <div class="layui-input-inline">
+                    <input type="text"  id="ass_users" readonly onclick="open_child2()" class="layui-input" placeholder="请选择" lay-verify="required" value="" onkeyup="search()" autocomplete="off">
+                </div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">临界值<span style="color:red">*</span></label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_critical_value" lay-verify="required|number" placeholder="请输入临界值" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">临界时间<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_critical_date" readonly lay-verify="required|datetime" placeholder="请输入临界时间" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+		</div>
+		
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">所属部门<span style="color:red">*</span></label>
+                <div class="layui-input-inline" id="department_id_div">
+                	<input type="hidden" id="department_id" >
+		      		<input type="text" id="department_name" readonly lay-verify="required" onclick="open_child()" placeholder="请选择" autocomplete="off" class="layui-input">
+                </div>
+			</div>
+			
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">入账日期<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_entry_date" readonly lay-verify="required|datetime" placeholder="入账日期" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">存放位置<span style="color:red">*</span></label>
+                <div class="layui-input-inline">
+                	<!--仓库id-->
+                	<input type="hidden" id="warehouse_id" >
+                    <input type="text" id="warehouse_name" readonly class="layui-input" onclick="open_child1()" placeholder="请选择" lay-verify="required" autocomplete="off">
+                </div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">到期日期<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_expire_date" readonly lay-verify="required|datetime" placeholder="到期日期" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+
+
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">金额<span style="color:red">*</span></label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_aom" lay-verify="required|number" placeholder="请输入金额" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">备注:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_remarks" placeholder="请输入备注" autocomplete="off" class="layui-input">
+					
+				</div>
+			</div>
+			</div>
+		</div>
+		
+	  	
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset7">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		                <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">保存</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table', 'laydate'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate,
+				table = layui.table;
+			var department_data = [];
+			
+			laydate.render({
+				elem: "#ass_critical_date",
+				type: 'datetime',
+				trigger : 'click',
+			})
+			
+			laydate.render({
+				elem: "#ass_entry_date",
+				type: 'datetime',
+				max: 0,
+				trigger : 'click',
+			})
+			
+			laydate.render({
+				elem: "#ass_expire_date",
+				type: 'datetime',
+				trigger : 'click',
+			})
+
+	    // 表单提交事件
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/assets/save.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {
+
+	                "ass_name": $("#ass_name").val(),		// 资产名称
+	                "ass_type": $("#ass_type").val(),		 // 资产类型
+	                "ass_specifications": $("#ass_specifications").val(),		// 资产型号
+	                "ass_number": $("#ass_number").val(),		// 资产编号
+	                "ass_num": $("#ass_num").val(),		// 数量
+	                "ass_aom": $("#ass_aom").val(),		// 金额
+	                "ass_critical_value": $("#ass_critical_value").val(),		// 临界值
+	                "department_id": $("#department_id").val(),		// 所属部门
+	                "department_name": $('#department_name').val(),	// 部门名称
+	                "ass_users": $("#ass_users").val(),		// 使用人
+	                "warehouse_id": $("#warehouse_id").val(), // 仓库id
+	                "warehouse_name": $("#warehouse_name").val(), // 仓库名称
+	                "ass_entry_date": $("#ass_entry_date").val(),		// 入账时间
+	                "ass_expire_date": $("#ass_expire_date").val(),		// 到期时间
+	                "ass_remarks": $("#ass_remarks").val()		// 备注
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	                    layer.msg(data.msg, {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+	});
+   
+   // 部门选框
+   function open_child(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+   				
+			var index = layer.open({
+            	title: '请选择部门',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['700px', '500px'],
+                content: './click/department_click.html'
+          });
+   		})
+   	}
+   	
+   	// 部门选框
+   function open_child1(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+   				
+			var index = layer.open({
+            	title: '请选择存放位置',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['700px', '500px'],
+                content: './click/warehouse_click.html'
+          });
+   		})
+   	}
+   
+   // 员工选框
+   function open_child2(){
+   		layui.use(['layer', 'jquery'], function(){
+   			var layer = layui.layer;
+   				
+			var index = layer.open({
+            	title: '请选使用人',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: true,
+                area: ['700px', '500px'],
+                content: './click/person_click.html'
+          });
+   		})
+   	}
+   
+    </script>
+</body>
+
+</html>

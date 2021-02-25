@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>维修申请登记</title>
+    <!-- 引入css资源 -->
+	<link rel="stylesheet" href="../../../../lib/layui-v2.5.5/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../../../css/public.css" media="all">
+</head>
+<body>
+	
+
+	<!--表单 start-->
+	<form class="layui-form" action="">
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产名称:</label> 
+		      	<div class="layui-input-inline">
+		      		<input type="hidden" id="id" lay-verify="required">
+		      		<input type="hidden" id="ass_id" lay-verify="required">
+		      		<input type="text" id="ass_name" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+		      		
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产类型:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_type" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">型号:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_specifications" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">资产编号:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_number" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">所属部门:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="department_name" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">使用人:</label>
+			   	<div class="layui-input-inline">
+		      		<input type="text" id="ass_users" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">入账时间:</label>
+			    <div class="layui-input-inline">
+		      		<input type="text" id="ass_entry_date" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">申请人:</label>
+			   	<div class="layui-input-inline">
+		      		<input type="hidden" id="staff_id">
+		      		<input type="text" id="staff_name" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+		<div class="layui-row">
+			<div class="layui-form-item">
+			<div class="layui-col-xs6">
+				<label class="layui-form-label">审核人:</label>
+			   	<div class="layui-input-inline">
+		      		<input type="hidden" id="admin_id">
+		      		<input type="text" id="admin_name" lay-verify="required" disabled="" autocomplete="off" class="layui-input">
+				</div>
+			</div>
+			</div>
+		</div>
+
+
+		<div class="layui-row">
+			<div class="layui-col-xs11">
+			<div class="layui-form-item">
+				<label class="layui-form-label">维修说明:</label>
+			    <div class="layui-input-block">
+					<textarea class="layui-textarea" style="width: 95%;" disabled="" id="repair_explain"></textarea>
+				</div>
+			</div>
+			</div>
+		</div>
+		
+	  	
+	  	<div class="layui-row"  style="padding-top: 20px;">
+        	<div class="layui-col-xs-offset5">
+        		<div class="layui-form-item">
+		            <div class="layui-input-block">
+		            	<button class="layui-btn layui-btn-primary" id="close">取消</button>
+		            	<button class="layui-btn layui-btn-danger" lay-submit lay-filter="back_regist">驳回申请</button>
+		                <button class="layui-btn" lay-submit lay-filter="saveBtn">审核通过</button>
+		            </div>
+		        </div>
+        	</div>
+        </div>
+
+	</form>
+	<!--表单 end-->
+	
+	<!-- 引入js资源 -->
+    <script src="../../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+    <script src="../../../bcxt/login/login.js"></script>
+    <!--layui操作-->
+    <script charset="utf-8">
+    	//加载layui指定组件
+    
+		layui.use(['form', 'table'], function() {
+			//定义layui组件变量
+			var $ = layui.jquery,
+				form = layui.form,
+				laydate = layui.laydate;
+				table = layui.table;
+				form.render();
+
+        //监听提交 审核通过
+	    form.on('submit(saveBtn)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/request_repair/updateWhereId.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	                "id": $("#id").val(),
+	                "state": 2
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	                    layer.msg('审核通过', {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        //监听提交 搜索功能实现
+	    form.on('submit(back_regist)', function (data) {
+	        $.ajax({
+	            url: '/sys_fkcy/jggl/request_repair/updateWhereId.action',
+	            headers: header,
+	            context: document.body,
+	            type: "POST",
+	            data: {               	
+	                "id": $("#id").val(),
+	                "state": 3
+	            }, 
+	            xhrFields: {
+	                withCredentials: true
+	            },
+	            success: function (data) {
+	                if (data.state == 200) {
+	                    layer.msg('驳回成功', {
+	                        icon: 6,//成功的表情
+	                        time: 1000 //1秒关闭（如果不配置，默认是3秒）
+	                    }, function () {
+	                        window.parent.location.reload();
+	                    });
+	                }
+	                else {
+	                    layer.msg(data.msg, {
+	                        icon: 5,//失败的表情
+	                        time: 1000
+	                    });
+	                    return;
+	
+	                }
+	
+	            }
+	        });
+	        return false;
+	    });
+        
+        
+        var is_caozuo = false;
+        //关闭或刷新
+        $("#close").on("click", function () {
+            if (!is_caozuo) {
+                //只是关闭
+                var index = parent.layer.getFrameIndex(window.name); //获取当前窗口的name
+                parent.layer.close(index);		//关闭窗口
+            } else {
+                //关闭并刷新
+                window.parent.location.reload();
+            }
+            return false;
+        }); 
+	});
+   
+	// 获取父级数据
+    function child(data) { 
+        $ = layui.$;
+        $('#id').val(data.id);
+        $('#ass_id').val(data.ass_id);
+        $('#ass_name').val(data.ass_name);
+		$('#ass_type').val(data.ass_type);
+        $('#ass_specifications').val(data.ass_specifications);
+        $('#ass_number').val(data.ass_number);
+        $('#department_name').val(data.department_name);
+        $('#ass_users').val(data.ass_users);    
+        $('#ass_entry_date').val(data.ass_entry_date);
+        $('#staff_name').val(data.staff_name);
+        $('#admin_name').val(data.admin_name);
+        $('#repair_explain').val(data.repair_explain);
+      }
+   
+    </script>
+</body>
+
+</html>

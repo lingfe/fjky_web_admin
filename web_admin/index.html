@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>后勤管理系统</title>
+		<link rel="icon" href="images/favicon.ico">
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="lib/layui-v2.5.5/css/layui.css" media="all">
+		<link rel="stylesheet" href="css/layuimini.css?v=2.0.4.2" media="all">
+		<link rel="stylesheet" href="css/themes/default.css" media="all">
+		<link rel="stylesheet" href="lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+		<!--[if lt IE 9]>
+		<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+		<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+
+	<body class="layui-layout-body layuimini-all">
+		<!-- 内容元素 start -->
+		<div class="layui-layout layui-layout-admin">
+			<!-- logo以及头部功能 start  -->
+			<div class="layui-header header">
+				<!-- logo图标  -->
+				<div class="layui-logo layuimini-logo"></div> 
+				
+				<!-- 头部和菜单 start  -->
+				<div class="layuimini-header-content">
+					<!-- 展开或收缩 -->
+					<a>
+						<div class="layuimini-tool"><i title="展开" class="fa fa-outdent" data-side-fold="1"></i></div>
+					</a>
+
+					<!--电脑端头部菜单-->
+					<ul class="layui-nav layui-layout-left layuimini-header-menu layuimini-menu-header-pc layuimini-pc-show"></ul>
+
+					<!--手机端头部菜单-->
+					<ul class="layui-nav layui-layout-left layuimini-header-menu layuimini-mobile-show">
+						<li class="layui-nav-item">
+							<a href="javascript:;"><i class="fa fa-list-ul"></i> 选择模块</a>
+							<dl class="layui-nav-child layuimini-menu-header-mobile">
+							</dl>
+						</li>
+					</ul>
+
+					<!--小功能 start-->
+					<ul class="layui-nav layui-layout-right">
+						<!-- 局部刷新  -->
+						<li class="layui-nav-item" lay-unselect>
+							<a href="javascript:;" data-refresh="刷新"><i class="fa fa-refresh"></i></a>
+						</li>
+						
+						<!--  清理缓存  -->
+						<li class="layui-nav-item" lay-unselect>
+							<a href="javascript:;" data-clear="清理" class="layuimini-clear"><i class="fa fa-trash-o"></i></a>
+						</li>
+						<li class="layui-nav-item mobile layui-hide-xs" lay-unselect>
+							<a href="javascript:;" data-check-screen="full"><i class="fa fa-arrows-alt"></i></a>
+						</li>
+						
+						<!-- 管理员信息  -->
+						<li class="layui-nav-item layuimini-setting">
+							<a href="javascript:;" id="login_name"></a>
+							<dl class="layui-nav-child">
+								<dd>
+									<a href="javascript:;" layuimini-content-href="page/user-setting.html" data-title="基本资料"
+										data-icon="fa fa-gears">基本资料<span class="layui-badge-dot"></span></a>
+								</dd>
+								<dd>
+									<a href="javascript:;" layuimini-content-href="page/user-password.html"
+										data-title="修改密码" data-icon="fa fa-gears">修改密码</a>
+								</dd>
+								<dd>
+									<hr>
+								</dd>
+								<dd>
+									<a href="javascript:;" class="login-out">退出登录</a>
+								</dd>
+							</dl>
+						</li>
+						
+						<!--  主题  -->
+						<li class="layui-nav-item layuimini-select-bgcolor" lay-unselect>
+							<a href="javascript:;" data-bgcolor="配色方案"><i class="fa fa-ellipsis-v"></i></a>
+						</li>
+					</ul>
+					<!--小功能 end-->
+				</div>
+				<!-- 头部和菜单 end  -->
+			</div>
+			<!-- logo以及头部功能 end  -->
+
+			<!--无限极左侧菜单-->
+			<div class="layui-side layui-bg-black layuimini-menu-left"></div>
+
+			<!--初始化加载层-->
+			<div class="layuimini-loader">
+				<div class="layuimini-loader-inner"></div>
+			</div>
+
+			<!--手机端遮罩层-->
+			<div class="layuimini-make"></div>
+
+			<!-- 移动导航 -->
+			<div class="layuimini-site-mobile"><i class="layui-icon"></i></div>
+
+			<!-- 打开的页面 start  -->
+			<div class="layui-body">
+				<div class="layuimini-tab layui-tab-rollTool layui-tab" lay-filter="layuiminiTab" lay-allowclose="true">
+					<!-- 默认  -->
+					<ul class="layui-tab-title">
+						<li class="layui-this" id="layuiminiHomeTabId" lay-id=""></li>
+					</ul>
+					
+					<!-- 功能 start  -->
+					<div class="layui-tab-control">
+						<li class="layuimini-tab-roll-left layui-icon layui-icon-left"></li>
+						<li class="layuimini-tab-roll-right layui-icon layui-icon-right"></li>
+						<li class="layui-tab-tool layui-icon layui-icon-down">
+							<ul class="layui-nav close-box">
+								<li class="layui-nav-item">
+									<a href="javascript:;"><span class="layui-nav-more"></span></a>
+									<dl class="layui-nav-child">
+										<dd><a href="javascript:;" layuimini-tab-close="current">关 闭 当 前</a></dd>
+										<dd><a href="javascript:;" layuimini-tab-close="other">关 闭 其 他</a></dd>
+										<dd><a href="javascript:;" layuimini-tab-close="all">关 闭 全 部</a></dd>
+									</dl>
+								</li>
+							</ul>
+						</li>
+					</div>
+					<!-- 功能 start  -->
+
+					<!--  打开的页面通过这个div显示  -->
+					<div class="layui-tab-content">
+						<div id="layuiminiHomeTabIframe" class="layui-tab-item layui-show"></div>
+					</div>
+				</div>
+			</div>
+			<!-- 打开的页面 start  -->
+		</div>
+		<!-- 内容元素 start -->
+		
+		<!-- 引入js资源 -->
+		<script src="lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="js/lay-config.js?v=2.0.0" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui
+			layui.use(['jquery', 'layer', 'miniAdmin', 'miniTongji'], function () {
+				//定义
+				var $ = layui.jquery,
+					layer = layui.layer,
+					miniAdmin = layui.miniAdmin,
+					miniTongji = layui.miniTongji;
+				
+				//登录名称
+				var username = localStorage.getItem("username");
+				//username=JSON.parse(username);
+				$("#login_name").html(username);
+				//请求通行证
+				var token = localStorage.getItem("token");
+				//token=JSON.parse(token);
+				
+				//加载设置
+				var options = {
+					iniUrl: "/sys_fkcy/menu/getSysMenu?token=" + token,    // 初始化接口
+					clearUrl: "api/clear.json", // 缓存清理接口
+					urlHashLocation: true,      // 是否打开hash定位
+					bgColorDefault: false,      // 主题默认配置
+					multiModule: true,          // 是否开启多模块
+					menuChildOpen: false,       // 是否默认展开菜单
+					loadingTime: 0,             // 初始化加载时间
+					pageAnim: true,             // iframe窗口动画
+					maxTabNum: 20,              // 最大的tab打开数量
+				};
+				miniAdmin.render(options);
+
+				// 百度统计代码，只统计指定域名
+				miniTongji.render({
+					specific: true,
+					domains: [
+						'99php.cn',
+						'layuimini.99php.cn',
+						'layuimini-onepage.99php.cn',
+					],
+				});
+
+				//退出登录
+				$('.login-out').on("click", function () {
+					//清空token
+					localStorage.removeItem("token");
+					layer.msg('退出登录成功', function () {
+						window.location = 'page/bcxt/login/login.html';
+					});
+				});
+			});
+		</script>
+	</body>
+</html>

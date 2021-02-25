@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>企业信息</title>
+		<!-- 引入css资源 -->
+		<link rel="stylesheet" href="../../../lib/layui-v2.5.5/css/layui.css" media="all">
+		
+	</head>
+	
+	<body>
+		<!-- 搜索 start -->
+		<fieldset class="table-search-fieldset">
+			<legend>模糊搜索</legend>
+			<div style="margin: 10px;">
+				<form class="layui-form layui-form-pane">
+					<div class="layui-form-item">
+						<div class="layui-inline">
+							<label class="layui-form-label">关键字</label>
+							<div class="layui-input-inline">
+								<input type="text" name="searchKey" placeholder="请输入关键字点击搜索" class="layui-input">
+							</div>
+						</div>
+						<div class="layui-inline">
+							<button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i>搜索</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</fieldset>
+		<!-- 搜索 end -->
+		
+		<!-- table数据列表 -->
+		<table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+		
+		<!-- 图片放大 -->
+		<div id="fangda" style="position:fixed;left:10%;top:10%;z-index:999;">
+			<img style="max-width:500px;max-height:500px;" src="" alt="">
+		</div>
+		
+		<!-- 状态 -->
+		<script type="text/html" id="id_state">
+			{{# if (d.state == 0) { }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-radius">正常</button>
+			{{# }else if(d.state == 1){ }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius">审核中</button>
+			{{# }else if(d.state == 2){ }}
+				<button type="button" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius">审核不通过</button>
+			{{# } }}
+		</script>
+		
+		<!-- 表格头操作 -->
+		<script type="text/html" id="toolbarDemo">
+			<div class="layui-btn-container">
+				<button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"><i class="layui-icon layui-icon-add-1"></i>企业入驻</button>
+				<button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="deleteAll"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+				<button class="layui-btn layui-btn-sm layui-btn-danger data-distribution-btn" lay-event="distribution"><i class="layui-icon layui-icon-star"></i>初始化</button>
+			</div>
+		</script>
+		
+		<!-- 操作 -->
+		<script type="text/html" id="currentTableBar">
+			<a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs data-count-delete" lay-event="delete"><i class="layui-icon layui-icon-delete"></i>删除</a>
+			<a class="layui-btn layui-btn-xs layui-btn-xs data-count-delete" lay-event="auth"><i class="layui-icon layui-icon-auz"></i>授权</a>
+		</script>
+		
+		<!-- 验证logo图片 -->
+		<script type="text/html" id="id_logo">
+			{{# if (d.ent_logo != null) { }}
+				<div class=''><img src='{{d.ent_logo}}'/></div>
+			{{# }else { }}
+				<div class=''><img src='https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=90044954,3655393932&fm=111&gp=0.jpg'/></div>
+			{{# } }}
+		</script>
+		
+		<!-- 引入js资源 -->
+		<script src="../../../lib/layui-v2.5.5/layui.js" charset="utf-8"></script>
+		<script src="../../bcxt/login/login.js" charset="utf-8"></script>
+		<script charset="utf-8">
+			//加载layui指定组件
+			layui.use(['form', 'table','upload'], function () {
+				//定义layui组件变量
+				var $ = layui.jquery, 
+					form = layui.form,
+					table = layui.table,
+					upload = layui.upload;
+					
+				//token请求通行证
+				var token = Storage.get("token");
+				
+				//table数据列表
+				table.render({
+					elem: '#currentTableId',					//将数据通过id选择器渲染到目标div
+					url: '/sys_fkcy/enterprise/getPage.action',	//请求接口也可换成josn
+					toolbar: '#toolbarDemo',					//头部操作id
+					defaultToolbar: ['filter','exports','exports_data', {
+						title: "导入",			   //标题
+						layEvent: "imports_data",  	//事件名，用于 toolbar 事件中使用
+						icon: "layui-icon-upload-drag" //图标类名
+					},'print'],
+					cellMinWidth: 180,							//全局定义所有常规单元格的最小宽度（默认：60），优先级低于minWidth
+					headers: {token: token },					//token请求通行证
+					cols: [[ 									//table数据字段以及处理
+						{ type: "checkbox", width: 50 },
+						{ field: 'id', width: 80, title: 'ID', sort: true, align: "center" },
+						{ field: 'ent_name', width: 230, title: '企业名称', align: "center" },
+						{ field: 'state', width: 120, title: '状态', align: 'center', toolbar: '#id_state'},
+						{ field: 'ent_legal_person',  title: '企业法人', align: "center" },
+						{ field: 'ent_registration_authority', title: '企业登记机关', sort: true, align: "center" },
+						{ field: 'ent_industry', title: '企业行业', align: "center" },
+						{ field: 'ent_phone', title: '企业联系电话', sort: true, align: "center" },
+						{ field: 'ent_logo',  title: '企业logo', toolbar:'#id_logo', align: "center"},
+						{ field: 'user_name',title: '创建者', sort: true, align: "center" },
+						{ field: 'crt_date', width:240,  title: '创建时间', templet: "<div>{{layui.util.toDateString(d.crt_date, 'yyyy年-MM月-dd日 HH:mm:ss')}}</div>", align: "center" },
+						{ title: '操作', minWidth: 250, toolbar: '#currentTableBar', align: "center", fixed: "right" }
+					]],
+					response: {
+						statusName: 'code', //规定返回的状态码字段为code
+						statusCode: 200 	//规定成功的状态码味200
+					},
+					request: {
+						pageName: 'pageIndex',	//当前页，默认page，
+						limitName: 'pageNum',	//页容量，默认limit
+					},
+					parseData: function (res) {
+						//验证是否有权限
+						if (res.state != 200){
+							layer.msg(res.msg, {
+								icon:5, 
+								time:1000 },
+								function() {
+									//获取当前窗口的name
+									var index=parent.layer.getFrameIndex(window.name); 
+									//关闭窗口
+									layui.close(index);
+							});
+							return;
+						}
+						
+						//返回值字段对应处理
+						return {
+							"code": res.state, 			//解析接口状态
+							"msg": res.msg, 			//解析提示文本
+							"count": res.data.numCount,	//总数量量
+							"data": res.data.data 		//解析数据列表
+						}
+					},
+					page: true,								//开启分页
+					limits: [5,10, 15, 20, 25, 50, 100],	//分页页容量选择
+					limit: 10,								//默认页容量
+					exp:{	//导出参数
+						key:"enterprise",					//key(数据字典定义)根据key导出相应的数据
+						url:"/sys_fkcy/excel/exportExcel",	//导出接口
+						file_name:'企业信息-全部',				//导出的文件名称(导出的文件名称,也会用作exceltitle）
+					},
+					skin: 'line'
+				});
+				
+				//图片放大
+				$("#currentTableId").next().on('mouseover mouseout', 'img', function(e) {
+					let $box = $("#fangda img");
+					if (e.type == "mouseover") {
+						$box.attr('src', $(this)[0].src).show();
+					} else if (e.type == "mouseout") {
+						$box.hide();
+					}
+				})
+				
+				// 监听搜索操作
+				form.on('submit(data-search-btn)', function (data) {
+					var result = data.field;
+					//执行搜索重载
+					table.reload('currentTableId', {
+						where: {
+							searchKey: result.searchKey	//关键字
+						}
+						, page: {
+							curr: 1 //默认第一页
+						}
+					});
+					return false;
+				});
+				
+				//上传文件(数据导入)
+				upload.render({
+					elem : '.layui-icon-upload-drag',//clss选择器，对应defaultToolbar
+					url : '/sys_fkcy/excel/importExcel',
+					headers : header,
+					accept:'file',
+					exts: 'xls|xlsx',
+					field:'file',//设定文件域的字段名,默认file
+					data:{
+						key_name:'enterprise',	//key(数据字典里定义)根据key导入得到导入方向
+					},
+					done : function(res, index, upload) {
+						if(res.state==200){
+							$("#logo_image").attr("src", res.data.imgUrl);
+							layer.msg(res.msg, {icon : 6, time : 1000 });
+						}else{
+							layer.msg(res.msg, {icon : 5, time : 1000 });
+						}  
+					},
+					error : function(res) {
+						console.log(res);
+					}
+				});
+
+				//toolbar监听事件
+				table.on('toolbar(currentTableFilter)', function (obj) {
+					// 监听添加操作
+					if (obj.event === 'add') {
+						var index = layer.open({
+							title: '添加企业',	//弹窗标题
+							type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+							shade: 0.2,			//遮罩层透明度0.1~1
+							maxmin: true,		//是否开启最大化
+							shadeClose: false,	//是否点击遮罩关闭
+							area: ['100%','100%'],		//指定窗口大小
+							content: './add.html'	//内容
+						});
+					// 监听批量删除操作
+					} else if (obj.event === 'deleteAll') {  
+						var checkStatus = table.checkStatus('currentTableId')
+							, data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认删除所选的全部内容吗？注意:(本操作不可恢复!)', { 
+							title: "批量删除提示", 
+							shadeClose: true,	//是否点击遮罩关闭
+							icon: 3 }, function (index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url: '/sys_fkcy/enterprise/deleteWhereId.action?id=' + data[i].id,
+										type: 'post',
+										headers: header,
+										success: function (data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, { icon: 5 });//失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon: 6,//成功的表情
+													time: 1000 //1秒关闭（如果不配置，默认是3秒）
+												}, function () {
+													location.reload();//刷新
+												});
+											}
+										},
+										complete: function () {
+											layer.close(this.layerIndex);
+										},
+									});
+								}
+							});
+						} else {
+							layer.msg("请先选择您要删除的数据！", { icon: 5 });//失败的表情
+							return;
+						}
+					// 监听初始化操作
+					} else if (obj.event === 'distribution') {  
+						var checkStatus = table.checkStatus('currentTableId')
+							, data = checkStatus.data;
+						if (data.length > 0) {
+							layer.confirm('确认初始化吗？', function (index) {
+								for (var i = 0; i < data.length; i++) {
+									$.ajax({
+										url: '/sys_fkcy/enterprise/initialize.action?id=' + data[i].id,
+										type: 'post',
+										headers: header,
+										success: function (data) {
+											if (data.state != 200) {
+												layer.msg(data.msg, { icon: 5 });//失败的表情
+												return;
+											} else {
+												layer.msg(data.msg, {
+													icon: 6,//成功的表情
+													time: 1000,//1秒关闭（如果不配置，默认是3秒）
+												}, function () {
+													window.parent.location.reload();
+												});
+											}
+										},
+										complete: function () {
+											layer.close(this.layerIndex);
+										},
+									});
+								}
+							});
+						} else {
+							layer.msg("请先选择您要初始化的企业", { icon: 5 });//失败的表情
+						}
+						return; 
+					//自定义导入
+					}else if(obj.event == "imports_data"){
+						
+					}
+				});
+
+				//监听表格复选框选择
+				table.on('checkbox(currentTableFilter)', function (obj) {
+					console.log(obj)
+				});
+				
+				//监听行双击事件
+				table.on('rowDouble(currentTableFilter)', function(obj){
+					layer.msg("双击");
+				});
+
+				//监听操作事件
+				table.on('tool(currentTableFilter)', function (obj) {
+					let data = obj.data;
+					// 监听编辑操作
+					if (obj.event === 'edit') {
+						var index = layer.open({
+							title: '编辑企业',	//窗口标题
+							type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+							shade: 0.2,			//遮罩层透明度0.1~1
+							maxmin: true,		//是否开启最大化
+							shadeClose: false,	//是否点击遮罩关闭
+							area: ['100%','100%'],	//指定窗口大小
+							content: './edit.html',	//内容
+							//弹出层打开后的回调函数
+							success: function (layero, index) {
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+								//layer.iframeAuto(index);
+								layer.style(index, {
+									// 重新居中的样式
+									top: (layui.$(window).height() - layui.$(layero).height()) / 2
+								})
+							}
+						});
+					// 监听删除操作
+					} else if (obj.event === 'delete') {
+						layer.confirm('确认删除吗', { 
+						title: "删除提示", 
+						shadeClose: true,	//是否点击遮罩关闭
+						icon: 3 }, function (index) {
+							$.ajax({
+								url: '/sys_fkcy/enterprise/deleteWhereId.action?id=' + data.id,
+								type: 'post',
+								headers: header,
+								success: function (data) {
+									if (data.state != 200) {
+										layer.msg(data.msg, { icon: 5 });//失败的表情
+									} else {
+										obj.del();//成功后删除行
+										layer.msg(data.msg, {
+											icon: 6,//成功的表情
+											time: 1000 //1秒关闭（如果不配置，默认是3秒）
+										});
+									}
+								},
+								complete: function () {
+									layer.close(this.layerIndex);
+								},
+							});
+						});
+					// 监听授权操作
+					} else if (obj.event === 'auth') {
+						var index = layer.open({
+							area: ['500px', '100%'],
+							title: '菜单权限授权',//窗口标题
+							type: 2,			//基本层类型0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）。
+							shade: 0.2,			//遮罩层透明度0.1~1
+							maxmin: true,		//是否开启最大化
+							shadeClose: true,	//是否点击遮罩关闭
+							content: './giveAuth.html',	//内容
+							//弹出层打开后的回调函数
+							success: function (layero, index) {
+								result = JSON.stringify(data);
+								result = $.parseJSON(result);
+								var iframe = window['layui-layer-iframe' + index];
+								// 向子页面的全局函数child传参
+								iframe.child(result);
+							}
+						});
+					}
+				});
+			});
+		</script>
+	</body>
+</html>
